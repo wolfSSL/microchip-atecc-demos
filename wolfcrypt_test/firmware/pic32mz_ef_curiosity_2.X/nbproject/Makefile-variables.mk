@@ -1,0 +1,20 @@
+#
+# Generated - do not edit!
+#
+# NOCDDL
+#
+CND_BASEDIR=`pwd`
+# pic32mz_ef_curiosity_2 configuration
+CND_ARTIFACT_DIR_pic32mz_ef_curiosity_2=dist/pic32mz_ef_curiosity_2/production
+CND_ARTIFACT_NAME_pic32mz_ef_curiosity_2=pic32mz_ef_curiosity_2.X.production.hex
+CND_ARTIFACT_PATH_pic32mz_ef_curiosity_2=dist/pic32mz_ef_curiosity_2/production/pic32mz_ef_curiosity_2.X.production.hex
+CND_PACKAGE_DIR_pic32mz_ef_curiosity_2=${CND_DISTDIR}/pic32mz_ef_curiosity_2/package
+CND_PACKAGE_NAME_pic32mz_ef_curiosity_2=pic32mzefcuriosity2.x.tar
+CND_PACKAGE_PATH_pic32mz_ef_curiosity_2=${CND_DISTDIR}/pic32mz_ef_curiosity_2/package/pic32mzefcuriosity2.x.tar
+# testconfig configuration
+CND_ARTIFACT_DIR_testconfig=dist/testconfig/production
+CND_ARTIFACT_NAME_testconfig=pic32mz_ef_curiosity_2.X.production.hex
+CND_ARTIFACT_PATH_testconfig=dist/testconfig/production/pic32mz_ef_curiosity_2.X.production.hex
+CND_PACKAGE_DIR_testconfig=${CND_DISTDIR}/testconfig/package
+CND_PACKAGE_NAME_testconfig=pic32mzefcuriosity2.x.tar
+CND_PACKAGE_PATH_testconfig=${CND_DISTDIR}/testconfig/package/pic32mzefcuriosity2.x.tar
