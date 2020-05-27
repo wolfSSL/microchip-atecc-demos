@@ -91,9 +91,9 @@ can be found on the Microchip website for full module details.
 
 wolfSSL uses the following slot configuration with Trust&GO modules:
 
-Slot 0 - Device ECC private key, used for ECDSA sign/verify operations
-Slot 2 - ECDH key slot, used for ECDH shared secret generation
-Slot 6 - I/O protection key slot, used to encrypt ECDH shared secret
+* Slot 0 - Device ECC private key, used for ECDSA sign/verify operations
+* Slot 2 - ECDH key slot, used for ECDH shared secret generation
+* Slot 6 - I/O protection key slot, used to encrypt ECDH shared secret
 
 The examples in this repository use the following ATECC configuration with
 to initialize cryptoauthlib and the ATECC608A I2C module:
