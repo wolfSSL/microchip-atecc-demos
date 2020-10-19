@@ -5,6 +5,11 @@ SSL/TLS library using the Microchip ATECC608A module. wolfSSL is a lightweight,
 embedded SSL/TLS library that supports up to the most current TLS 1.3 and
 DTLS 1.2 protocols. These demos use the Microchip ATECC608A Trust&GO module configuration by deafult, but could be easily adapted to be run with either TrustFLEX or TrustCUSTOM modules.
 
+## Copyright Notice
+
+This repository is intended for demo/example purposes only. It includes
+driver and middleware code which is copyright of Microchip Technology Inc.
+
 ## Software and Hardware Demo Details
 
 The included demo applications have been created for the following development
