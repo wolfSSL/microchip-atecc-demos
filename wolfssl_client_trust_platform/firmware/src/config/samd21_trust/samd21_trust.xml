@@ -16,12 +16,7 @@
               </Values>
             </Hex>
             <KeyValueSet dnOrder="2" id="INTERFACE">
-              <Attributes dnOrder="0">
-                <Boolean dnOrder="0" id="readOnly">
-                  <Value dnOrder="0">true</Value>
-                </Boolean>
-              </Attributes>
-              <Values dnOrder="1">
+              <Values dnOrder="0">
                 <Dynamic dnOrder="0" id="atecc608_0" value="0"/>
               </Values>
             </KeyValueSet>
@@ -2530,13 +2525,6 @@
             <Dynamic dnOrder="0" id="drvWifiWinc" value="0"/>
           </Values>
         </Integer>
-        <File dnOrder="20" id="DRV_WIFI_WINC_SYS_RTOS_TASK">
-          <Attributes dnOrder="0">
-            <Boolean dnOrder="0" id="enabled">
-              <Value dnOrder="0">false</Value>
-            </Boolean>
-          </Attributes>
-        </File>
       </Symbols>
       <Attachments dnOrder="1">
         <DirectDependency dnOrder="0" id="spi">
@@ -3471,7 +3459,12 @@
           </Values>
         </String>
         <KeyValueSet dnOrder="2" id="SERCOM_MODE">
-          <Values dnOrder="0">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="readOnly">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+          <Values dnOrder="1">
             <Dynamic dnOrder="0" id="sercom1" value="1"/>
           </Values>
         </KeyValueSet>
@@ -3839,7 +3832,12 @@
           </Values>
         </String>
         <KeyValueSet dnOrder="3" id="SERCOM_MODE">
-          <Values dnOrder="0">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="readOnly">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+          <Values dnOrder="1">
             <Dynamic dnOrder="0" id="sercom3" value="0"/>
           </Values>
         </KeyValueSet>
@@ -3920,14 +3918,26 @@
             <User dnOrder="0" value="1"/>
           </Values>
         </KeyValueSet>
-        <Integer dnOrder="15" id="USART_SAMPLE_COUNT">
+        <Integer dnOrder="15" id="USART_RX_RING_BUFFER_SIZE">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="visible">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </Integer>
+        <Integer dnOrder="16" id="USART_SAMPLE_COUNT">
           <Values dnOrder="0">
             <Dynamic dnOrder="0" id="sercom3" value="16"/>
           </Values>
         </Integer>
-        <Integer dnOrder="16" id="USART_SAMPLE_RATE">
+        <Integer dnOrder="17" id="USART_SAMPLE_RATE">
           <Values dnOrder="0">
             <Dynamic dnOrder="0" id="sercom3" value="0"/>
+          </Values>
+        </Integer>
+        <Integer dnOrder="18" id="USART_TX_RING_BUFFER_SIZE">
+          <Values dnOrder="0">
+            <User dnOrder="0" value="1024"/>
           </Values>
         </Integer>
       </Symbols>
@@ -4087,19 +4097,12 @@
             <User dnOrder="0" value="25"/>
           </Values>
         </Integer>
-        <Combo dnOrder="1" id="SYS_TIME_OPERATING_MODE">
-          <Attributes dnOrder="0">
-            <Boolean dnOrder="0" id="visible">
-              <Value dnOrder="0">true</Value>
-            </Boolean>
-          </Attributes>
-        </Combo>
-        <String dnOrder="2" id="SYS_TIME_PLIB">
+        <String dnOrder="1" id="SYS_TIME_PLIB">
           <Values dnOrder="0">
             <Dynamic dnOrder="0" id="sys_time" value="TC3"/>
           </Values>
         </String>
-        <String dnOrder="3" id="SYS_TIME_REMOTE_COMPONENT_ID">
+        <String dnOrder="2" id="SYS_TIME_REMOTE_COMPONENT_ID">
           <Values dnOrder="0">
             <Dynamic dnOrder="0" id="sys_time" value="tc3"/>
           </Values>
@@ -4234,12 +4237,7 @@
           </Attributes>
         </File>
         <Boolean dnOrder="19" id="TC_TIMER_INTENSET_MC1">
-          <Attributes dnOrder="0">
-            <Boolean dnOrder="0" id="visible">
-              <Value dnOrder="0">true</Value>
-            </Boolean>
-          </Attributes>
-          <Values dnOrder="1">
+          <Values dnOrder="0">
             <Dynamic dnOrder="0" id="tc3" value="true"/>
             <User dnOrder="1" value="true"/>
           </Values>
@@ -4267,9 +4265,6 @@
             <Float dnOrder="0" id="max">
               <Value dnOrder="0">65.535</Value>
             </Float>
-            <Boolean dnOrder="1" id="visible">
-              <Value dnOrder="0">false</Value>
-            </Boolean>
           </Attributes>
         </Float>
         <String dnOrder="24" id="TIMER_PERIOD_MAX">
@@ -4298,7 +4293,8 @@
     </UniqueComponent>
   </Components>
   <UserData>
-    <ComponentGraph dnOrder="0" id="__ROOTVIEW">
+    <GraphSettings canvasHeight="500" canvasWidth="500" dnOrder="0"/>
+    <ComponentGraph dnOrder="1" id="__ROOTVIEW">
       <ElementPositions dnOrder="0">
         <ElementPosition dnOrder="0" id="HarmonyCore" x="705" y="16"/>
         <ElementPosition dnOrder="1" id="atecc608" x="370" y="528"/>
@@ -4326,6 +4322,5 @@
         <ElementPosition dnOrder="23" id="tc3" x="504" y="235"/>
       </ElementPositions>
     </ComponentGraph>
-    <GraphSettings canvasHeight="500" canvasWidth="500" dnOrder="1"/>
   </UserData>
 </Configuration>

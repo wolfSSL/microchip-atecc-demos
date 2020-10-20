@@ -517,10 +517,11 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             gAddr.sin_family = AF_INET;
             gAddr.sin_port = _htons(gPort);
             if (connect(gSock, (struct sockaddr*)&gAddr, addrlen) < 0) {
+                g_example_state = EXAMPLE_STATE_FINISHED;
                 return;
             }
             APP_DebugPrintf("connect() success, loading certs/keys\r\n");
-            g_example_state = EXAMPLE_STATE_LOAD_CERTS;
+            g_example_state = EXAMPLE_STATE_WOLFSSL_INIT;
             break;
         }
 
@@ -539,7 +540,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                      * to recompile wolfSSL with DEBUG_WOLFSSL defined. */
                     /* wolfSSL_Debugging_ON(); */
 
-                    g_example_state = EXAMPLE_STATE_DNS_RESOLVE;
+                    g_example_state = EXAMPLE_STATE_LOAD_CERTS;
                 }
             } else {
                 APP_DebugPrintf("wolfCrypt_ATECC_SetConfig() failed\r\n");
