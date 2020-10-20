@@ -139,7 +139,7 @@ extern "C" {
 #define WDRV_WINC_DEVICE_HOST_FILE_DOWNLOAD
 #define WDRV_WINC_DEVICE_SOFT_AP_EXT
 #define WDRV_WINC_DEVICE_MULTI_GAIN_TABLE
-#define WDRV_WINC_DEBUG_LEVEL               WDRV_WINC_DEBUG_TYPE_INFORM
+#define WDRV_WINC_DEBUG_LEVEL               WDRV_WINC_DEBUG_TYPE_NONE
 
 /* SPI Driver Instance 0 Configuration Options */
 #define DRV_SPI_INDEX_0                       0

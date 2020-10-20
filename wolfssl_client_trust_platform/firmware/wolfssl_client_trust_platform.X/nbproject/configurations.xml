@@ -5,182 +5,182 @@
                    displayName="Header Files"
                    projectFiles="true">
       <logicalFolder name="f1" displayName="config" projectFiles="true">
-        <logicalFolder name="f1" displayName="Cloud_Connect" projectFiles="true">
+        <logicalFolder name="f1" displayName="samd21_trust" projectFiles="true">
           <logicalFolder name="f6" displayName="crypto" projectFiles="true">
-            <itemPath>../src/config/Cloud_Connect/crypto/crypto.h</itemPath>
+            <itemPath>../src/config/samd21_trust/crypto/crypto.h</itemPath>
           </logicalFolder>
           <logicalFolder name="f4" displayName="driver" projectFiles="true">
             <logicalFolder name="f2" displayName="spi" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/driver/spi/drv_spi.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/spi/drv_spi_definitions.h</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/spi/drv_spi.h</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/spi/drv_spi_definitions.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f1" displayName="winc" projectFiles="true">
               <logicalFolder name="f1" displayName="include" projectFiles="true">
                 <logicalFolder name="f1" displayName="dev" projectFiles="true">
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/include/dev/wdrv_winc_gpio.h</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/include/dev/wdrv_winc_spi.h</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/include/dev/wdrv_winc_gpio.h</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/include/dev/wdrv_winc_spi.h</itemPath>
                 </logicalFolder>
                 <logicalFolder name="f2" displayName="drv" projectFiles="true">
                   <logicalFolder name="f1" displayName="bsp" projectFiles="true">
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/bsp/nm_bsp.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/bsp/nm_bsp.h</itemPath>
                   </logicalFolder>
                   <logicalFolder name="f2" displayName="common" projectFiles="true">
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/common/nm_common.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/common/nm_debug.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/common/nm_common.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/common/nm_debug.h</itemPath>
                   </logicalFolder>
                   <logicalFolder name="f3" displayName="driver" projectFiles="true">
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/driver/m2m_hif.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/driver/m2m_periph.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/driver/m2m_types.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/driver/m2m_wifi.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/driver/nmasic.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/driver/nmbus.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/driver/nmdrv.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/driver/nmspi.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/driver/m2m_ota.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/driver/m2m_ssl.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/driver/ecc_types.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/driver/m2m_hif.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/driver/m2m_periph.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/driver/m2m_types.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/driver/m2m_wifi.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/driver/nmasic.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/driver/nmbus.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/driver/nmdrv.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/driver/nmspi.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/driver/m2m_ota.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/driver/m2m_ssl.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/driver/ecc_types.h</itemPath>
                   </logicalFolder>
                   <logicalFolder name="f5" displayName="socket" projectFiles="true">
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/socket/m2m_socket_host_if.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/socket/socket.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/socket/netinet_in.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/socket/m2m_socket_host_if.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/socket/socket.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/socket/netinet_in.h</itemPath>
                   </logicalFolder>
                   <logicalFolder name="f4" displayName="spi_flash" projectFiles="true">
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/spi_flash/spi_flash.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/spi_flash/spi_flash_map.h</itemPath>
-                    <itemPath>../src/config/Cloud_Connect/driver/winc/include/drv/spi_flash/flexible_flash.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/spi_flash/spi_flash.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/spi_flash/spi_flash_map.h</itemPath>
+                    <itemPath>../src/config/samd21_trust/driver/winc/include/drv/spi_flash/flexible_flash.h</itemPath>
                   </logicalFolder>
                 </logicalFolder>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_api.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_assoc.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_authctx.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_bssctx.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_bssfind.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_client_api.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_common.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_custie.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_debug.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_host_file.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_httpprovctx.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_nvm.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_powersave.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_socket.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_softap.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_ssl.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_sta.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_systime.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/driver/winc/include/wdrv_winc_wps.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_api.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_assoc.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_authctx.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_bssctx.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_bssfind.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_client_api.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_common.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_custie.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_debug.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_host_file.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_httpprovctx.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_nvm.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_powersave.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_socket.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_softap.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_ssl.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_sta.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_systime.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_wps.h</itemPath>
               </logicalFolder>
             </logicalFolder>
-            <itemPath>../src/config/Cloud_Connect/driver/driver.h</itemPath>
-            <itemPath>../src/config/Cloud_Connect/driver/driver_common.h</itemPath>
+            <itemPath>../src/config/samd21_trust/driver/driver.h</itemPath>
+            <itemPath>../src/config/samd21_trust/driver/driver_common.h</itemPath>
           </logicalFolder>
           <logicalFolder name="f2" displayName="library" projectFiles="true">
             <logicalFolder name="f1" displayName="cryptoauthlib" projectFiles="true">
               <logicalFolder name="f1" displayName="tng" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tngtls_cert_def_2_device.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tngtls_cert_def_3_device.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tng_atca.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tngtls_cert_def_1_signer.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tflxtls_cert_def_4_device.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tng_atcacert_client.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tnglora_cert_def_2_device.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tnglora_cert_def_1_signer.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tnglora_cert_def_4_device.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tng_root_cert.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tngtls_cert_def_2_device.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tngtls_cert_def_3_device.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tng_atca.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tngtls_cert_def_1_signer.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tflxtls_cert_def_4_device.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tng_atcacert_client.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tnglora_cert_def_2_device.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tnglora_cert_def_1_signer.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tnglora_cert_def_4_device.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tng_root_cert.h</itemPath>
               </logicalFolder>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_config.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_config.h</itemPath>
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f5" displayName="osal" projectFiles="true">
-            <itemPath>../src/config/Cloud_Connect/osal/osal.h</itemPath>
-            <itemPath>../src/config/Cloud_Connect/osal/osal_definitions.h</itemPath>
-            <itemPath>../src/config/Cloud_Connect/osal/osal_impl_basic.h</itemPath>
+            <itemPath>../src/config/samd21_trust/osal/osal.h</itemPath>
+            <itemPath>../src/config/samd21_trust/osal/osal_definitions.h</itemPath>
+            <itemPath>../src/config/samd21_trust/osal/osal_impl_basic.h</itemPath>
           </logicalFolder>
           <logicalFolder name="f1" displayName="peripheral" projectFiles="true">
             <logicalFolder name="f7" displayName="clock" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/clock/plib_clock.h</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/clock/plib_clock.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f9" displayName="dmac" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/dmac/plib_dmac.h</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/dmac/plib_dmac.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f10" displayName="eic" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/eic/plib_eic.h</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/eic/plib_eic.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f5" displayName="evsys" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/evsys/plib_evsys.h</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/evsys/plib_evsys.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f8" displayName="nvic" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/nvic/plib_nvic.h</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/nvic/plib_nvic.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f1" displayName="nvmctrl" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/nvmctrl/plib_nvmctrl.h</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/nvmctrl/plib_nvmctrl.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f6" displayName="port" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/port/plib_port.h</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/port/plib_port.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f2" displayName="rtc" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/rtc/plib_rtc.h</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/rtc/plib_rtc.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f4" displayName="sercom" projectFiles="true">
               <logicalFolder name="f2" displayName="i2c_master" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/peripheral/sercom/i2c_master/plib_sercom_i2c_master_common.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/peripheral/sercom/i2c_master/plib_sercom2_i2c_master.h</itemPath>
+                <itemPath>../src/config/samd21_trust/peripheral/sercom/i2c_master/plib_sercom_i2c_master_common.h</itemPath>
+                <itemPath>../src/config/samd21_trust/peripheral/sercom/i2c_master/plib_sercom2_i2c_master.h</itemPath>
               </logicalFolder>
               <logicalFolder name="f3" displayName="spi_master" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/peripheral/sercom/spi_master/plib_sercom1_spi_master.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/peripheral/sercom/spi_master/plib_sercom_spi_master_common.h</itemPath>
+                <itemPath>../src/config/samd21_trust/peripheral/sercom/spi_master/plib_sercom1_spi_master.h</itemPath>
+                <itemPath>../src/config/samd21_trust/peripheral/sercom/spi_master/plib_sercom_spi_master_common.h</itemPath>
               </logicalFolder>
               <logicalFolder name="f1" displayName="usart" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/peripheral/sercom/usart/plib_sercom3_usart.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/peripheral/sercom/usart/plib_sercom_usart_common.h</itemPath>
+                <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom3_usart.h</itemPath>
+                <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom_usart_common.h</itemPath>
               </logicalFolder>
             </logicalFolder>
             <logicalFolder name="f3" displayName="tc" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/tc/plib_tc_common.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/peripheral/tc/plib_tc3.h</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/tc/plib_tc_common.h</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/tc/plib_tc3.h</itemPath>
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f3" displayName="system" projectFiles="true">
             <logicalFolder name="f6" displayName="command" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/command/sys_command.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/command/sys_command.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f7" displayName="console" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/console/sys_console.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/console/sys_console.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f5" displayName="debug" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/debug/sys_debug.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/debug/sys_debug.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f4" displayName="dma" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/dma/sys_dma.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/system/dma/sys_dma_mapping.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/dma/sys_dma.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/dma/sys_dma_mapping.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f2" displayName="int" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/int/sys_int.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/system/int/sys_int_mapping.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/int/sys_int.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/int/sys_int_mapping.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f3" displayName="ports" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/ports/sys_ports.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/system/ports/sys_ports_mapping.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/ports/sys_ports.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/ports/sys_ports_mapping.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f1" displayName="time" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/time/sys_time.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/system/time/sys_time_definitions.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/system/time/src/sys_time_local.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/time/sys_time.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/time/sys_time_definitions.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/time/src/sys_time_local.h</itemPath>
             </logicalFolder>
-            <itemPath>../src/config/Cloud_Connect/system/system.h</itemPath>
-            <itemPath>../src/config/Cloud_Connect/system/system_common.h</itemPath>
-            <itemPath>../src/config/Cloud_Connect/system/system_module.h</itemPath>
+            <itemPath>../src/config/samd21_trust/system/system.h</itemPath>
+            <itemPath>../src/config/samd21_trust/system/system_common.h</itemPath>
+            <itemPath>../src/config/samd21_trust/system/system_module.h</itemPath>
           </logicalFolder>
-          <itemPath>../src/config/Cloud_Connect/device.h</itemPath>
-          <itemPath>../src/config/Cloud_Connect/user.h</itemPath>
-          <itemPath>../src/config/Cloud_Connect/configuration.h</itemPath>
-          <itemPath>../src/config/Cloud_Connect/device_cache.h</itemPath>
-          <itemPath>../src/config/Cloud_Connect/toolchain_specifics.h</itemPath>
-          <itemPath>../src/config/Cloud_Connect/definitions.h</itemPath>
-          <itemPath>../src/config/Cloud_Connect/config.h</itemPath>
+          <itemPath>../src/config/samd21_trust/device.h</itemPath>
+          <itemPath>../src/config/samd21_trust/user.h</itemPath>
+          <itemPath>../src/config/samd21_trust/configuration.h</itemPath>
+          <itemPath>../src/config/samd21_trust/device_cache.h</itemPath>
+          <itemPath>../src/config/samd21_trust/toolchain_specifics.h</itemPath>
+          <itemPath>../src/config/samd21_trust/definitions.h</itemPath>
+          <itemPath>../src/config/samd21_trust/config.h</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f4" displayName="packs" projectFiles="true">
@@ -390,8 +390,8 @@
                    displayName="Linker Files"
                    projectFiles="true">
       <logicalFolder name="f1" displayName="config" projectFiles="true">
-        <logicalFolder name="f1" displayName="Cloud_Connect" projectFiles="true">
-          <itemPath>../src/config/Cloud_Connect/ATSAMD21E18A.ld</itemPath>
+        <logicalFolder name="f1" displayName="samd21_trust" projectFiles="true">
+          <itemPath>../src/config/samd21_trust/ATSAMD21E18A.ld</itemPath>
         </logicalFolder>
       </logicalFolder>
     </logicalFolder>
@@ -402,273 +402,273 @@
         <itemPath>../src/common/wolf_tls_task.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="config" projectFiles="true">
-        <logicalFolder name="f1" displayName="Cloud_Connect" projectFiles="true">
+        <logicalFolder name="f1" displayName="samd21_trust" projectFiles="true">
           <logicalFolder name="f6" displayName="crypto" projectFiles="true">
-            <itemPath>../src/config/Cloud_Connect/crypto/src/crypto.c</itemPath>
+            <itemPath>../src/config/samd21_trust/crypto/src/crypto.c</itemPath>
           </logicalFolder>
           <logicalFolder name="f4" displayName="driver" projectFiles="true">
             <logicalFolder name="f1" displayName="spi" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/driver/spi/src/drv_spi.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/spi/src/drv_spi_local.h</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/spi/src/drv_spi.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/spi/src/drv_spi_local.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f2" displayName="winc" projectFiles="true">
               <logicalFolder name="f1" displayName="dev" projectFiles="true">
                 <logicalFolder name="f1" displayName="gpio" projectFiles="true">
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/dev/gpio/wdrv_winc_eint.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/dev/gpio/wdrv_winc_gpio.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/dev/gpio/wdrv_winc_eint.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/dev/gpio/wdrv_winc_gpio.c</itemPath>
                 </logicalFolder>
                 <logicalFolder name="f2" displayName="spi" projectFiles="true">
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/dev/spi/wdrv_winc_spi.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/dev/spi/wdrv_winc_spi.c</itemPath>
                 </logicalFolder>
               </logicalFolder>
               <logicalFolder name="f3" displayName="drv" projectFiles="true">
                 <logicalFolder name="f1" displayName="common" projectFiles="true">
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/common/nm_common.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/common/nm_common.c</itemPath>
                 </logicalFolder>
                 <logicalFolder name="f2" displayName="driver" projectFiles="true">
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/driver/m2m_hif.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/driver/m2m_periph.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/driver/m2m_wifi.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/driver/nmasic.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/driver/nmbus.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/driver/nmdrv.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/driver/nmspi.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/driver/m2m_ota.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/driver/m2m_ssl.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/driver/m2m_hif.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/driver/m2m_periph.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/driver/m2m_wifi.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/driver/nmasic.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/driver/nmbus.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/driver/nmdrv.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/driver/nmspi.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/driver/m2m_ota.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/driver/m2m_ssl.c</itemPath>
                 </logicalFolder>
                 <logicalFolder name="f4" displayName="socket" projectFiles="true">
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/socket/socket.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/socket/inet_ntop.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/socket/inet_addr.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/socket/socket.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/socket/inet_ntop.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/socket/inet_addr.c</itemPath>
                 </logicalFolder>
                 <logicalFolder name="f3" displayName="spi_flash" projectFiles="true">
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/spi_flash/spi_flash.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/driver/winc/drv/spi_flash/flexible_flash.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/spi_flash/spi_flash.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/driver/winc/drv/spi_flash/flexible_flash.c</itemPath>
                 </logicalFolder>
               </logicalFolder>
               <logicalFolder name="f2" displayName="osal" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/driver/winc/osal/wdrv_winc_osal.c</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/osal/wdrv_winc_osal.c</itemPath>
               </logicalFolder>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_assoc.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_authctx.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_bssctx.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_bssfind.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_custie.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_host_file.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_httpprovctx.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_nvm.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_powersave.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_socket.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_softap.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_ssl.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_sta.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_systime.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/driver/winc/wdrv_winc_wps.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_assoc.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_authctx.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_bssctx.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_bssfind.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_custie.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_host_file.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_httpprovctx.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_nvm.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_powersave.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_socket.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_softap.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_ssl.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_sta.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_systime.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_wps.c</itemPath>
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f2" displayName="library" projectFiles="true">
             <logicalFolder name="f1" displayName="cryptoauthlib" projectFiles="true">
               <logicalFolder name="f5" displayName="atcacert" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_client.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_hw.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_date.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_pem.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_der.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_def.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_sw.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_hw.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_client.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_pem.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_date.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_der.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_sw.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_def.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_client.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_host_hw.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_date.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_pem.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_der.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_def.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_host_sw.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_host_hw.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_client.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_pem.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_date.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_der.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_host_sw.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_def.h</itemPath>
               </logicalFolder>
               <logicalFolder name="f6" displayName="calib" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_info.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_random.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_verify.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_privwrite.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_execution.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_read.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_sign.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_selftest.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_nonce.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_hmac.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_command.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes_gcm.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_sha.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_ecdh.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_basic.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_kdf.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_gendig.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_secureboot.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_lock.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_write.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_genkey.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_execution.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_counter.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_derivekey.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_mac.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_checkmac.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_updateextra.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_command.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes_gcm.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_basic.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_info.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_random.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_verify.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_privwrite.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_execution.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_read.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_sign.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_selftest.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_nonce.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_hmac.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_command.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_aes_gcm.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_sha.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_ecdh.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_basic.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_kdf.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_gendig.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_secureboot.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_lock.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_write.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_genkey.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_execution.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_counter.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_derivekey.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_mac.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_checkmac.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_updateextra.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_command.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_aes_gcm.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_aes.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_basic.h</itemPath>
               </logicalFolder>
               <logicalFolder name="f3" displayName="crypto" projectFiles="true">
                 <logicalFolder name="f1" displayName="hashes" projectFiles="true">
-                  <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/hashes/sha2_routines.h</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/hashes/sha1_routines.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/hashes/sha2_routines.c</itemPath>
-                  <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/hashes/sha1_routines.h</itemPath>
+                  <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/hashes/sha2_routines.h</itemPath>
+                  <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/hashes/sha1_routines.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/hashes/sha2_routines.c</itemPath>
+                  <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/hashes/sha1_routines.h</itemPath>
                 </logicalFolder>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_sw_sha1.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_hw_aes.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_sw_sha2.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_sw_ecdsa.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_sw_rand.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_sw_sha1.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_hw_aes_cbc.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_hw_aes_ctr.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_hw_aes_cmac.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_sw_sha2.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_sw_ecdsa.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_sw_rand.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_sw.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_sw_sha1.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_hw_aes.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_sw_sha2.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_sw_ecdsa.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_sw_rand.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_sw_sha1.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_hw_aes_cbc.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_hw_aes_ctr.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_hw_aes_cmac.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_sw_sha2.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_sw_ecdsa.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_sw_rand.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_sw.h</itemPath>
               </logicalFolder>
               <logicalFolder name="f2" displayName="hal" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/ATECC608_0.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/atca_hal.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/atca_hal.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/atca_start_config.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/atca_start_iface.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_i2c_harmony.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_harmony_init.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_cortex_m_delay.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/ATECC608_0.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/atca_hal.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/atca_hal.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/atca_start_config.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/atca_start_iface.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/hal_i2c_harmony.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/hal_harmony_init.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/hal_cortex_m_delay.c</itemPath>
               </logicalFolder>
               <logicalFolder name="f7" displayName="host" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/host/atca_host.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/host/atca_host.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/host/atca_host.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/host/atca_host.h</itemPath>
               </logicalFolder>
               <logicalFolder name="f4" displayName="jwt" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/jwt/atca_jwt.h</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/jwt/atca_jwt.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/jwt/atca_jwt.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/jwt/atca_jwt.c</itemPath>
               </logicalFolder>
               <logicalFolder name="f1" displayName="tng" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tnglora_cert_def_2_device.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tnglora_cert_def_1_signer.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tnglora_cert_def_4_device.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tng_root_cert.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tng_atca.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tngtls_cert_def_2_device.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tngtls_cert_def_3_device.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tflxtls_cert_def_4_device.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tng_atcacert_client.c</itemPath>
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tngtls_cert_def_1_signer.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tnglora_cert_def_2_device.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tnglora_cert_def_1_signer.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tnglora_cert_def_4_device.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tng_root_cert.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tng_atca.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tngtls_cert_def_2_device.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tngtls_cert_def_3_device.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tflxtls_cert_def_4_device.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tng_atcacert_client.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tngtls_cert_def_1_signer.c</itemPath>
               </logicalFolder>
               <logicalFolder name="f8" displayName="wolfssl" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/wolfssl/atca_wolfssl_interface.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/wolfssl/atca_wolfssl_interface.c</itemPath>
               </logicalFolder>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_cfgs.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_helpers.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_debug.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_basic.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_compiler.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_iface.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_devtypes.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_command.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_status.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_device.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_helpers.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_cfgs.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/cryptoauthlib.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_bool.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_command.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_basic.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_debug.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_iface.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_device.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_version.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_cfgs.c</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_helpers.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_debug.c</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_basic.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_compiler.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_iface.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_devtypes.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_command.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_status.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_device.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_helpers.c</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_cfgs.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/cryptoauthlib.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_bool.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_command.c</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_basic.c</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_debug.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_iface.c</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_device.c</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_version.h</itemPath>
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f1" displayName="peripheral" projectFiles="true">
             <logicalFolder name="f7" displayName="clock" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/clock/plib_clock.c</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/clock/plib_clock.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f9" displayName="dmac" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/dmac/plib_dmac.c</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/dmac/plib_dmac.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f10" displayName="eic" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/eic/plib_eic.c</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/eic/plib_eic.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f5" displayName="evsys" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/evsys/plib_evsys.c</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/evsys/plib_evsys.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f8" displayName="nvic" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/nvic/plib_nvic.c</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/nvic/plib_nvic.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f1" displayName="nvmctrl" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/nvmctrl/plib_nvmctrl.c</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/nvmctrl/plib_nvmctrl.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f6" displayName="port" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/port/plib_port.c</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/port/plib_port.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f2" displayName="rtc" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/rtc/plib_rtc_timer.c</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/rtc/plib_rtc_timer.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f4" displayName="sercom" projectFiles="true">
               <logicalFolder name="f2" displayName="i2c_master" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/peripheral/sercom/i2c_master/plib_sercom2_i2c_master.c</itemPath>
+                <itemPath>../src/config/samd21_trust/peripheral/sercom/i2c_master/plib_sercom2_i2c_master.c</itemPath>
               </logicalFolder>
               <logicalFolder name="f3" displayName="spi_master" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/peripheral/sercom/spi_master/plib_sercom1_spi_master.c</itemPath>
+                <itemPath>../src/config/samd21_trust/peripheral/sercom/spi_master/plib_sercom1_spi_master.c</itemPath>
               </logicalFolder>
               <logicalFolder name="f1" displayName="usart" projectFiles="true">
-                <itemPath>../src/config/Cloud_Connect/peripheral/sercom/usart/plib_sercom3_usart.c</itemPath>
+                <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom3_usart.c</itemPath>
               </logicalFolder>
             </logicalFolder>
             <logicalFolder name="f3" displayName="tc" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/peripheral/tc/plib_tc3.c</itemPath>
+              <itemPath>../src/config/samd21_trust/peripheral/tc/plib_tc3.c</itemPath>
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f5" displayName="stdio" projectFiles="true">
-            <itemPath>../src/config/Cloud_Connect/stdio/xc32_monitor.c</itemPath>
+            <itemPath>../src/config/samd21_trust/stdio/xc32_monitor.c</itemPath>
           </logicalFolder>
           <logicalFolder name="f3" displayName="system" projectFiles="true">
             <logicalFolder name="f5" displayName="command" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/command/src/sys_command.c</itemPath>
+              <itemPath>../src/config/samd21_trust/system/command/src/sys_command.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f2" displayName="console" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/console/src/sys_console_uart.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/system/console/src/sys_console_uart_definitions.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/system/console/src/sys_console_uart.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/system/console/src/sys_console.c</itemPath>
-              <itemPath>../src/config/Cloud_Connect/system/console/src/sys_console_local.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/console/src/sys_console_uart.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/console/src/sys_console_uart_definitions.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/console/src/sys_console_uart.c</itemPath>
+              <itemPath>../src/config/samd21_trust/system/console/src/sys_console.c</itemPath>
+              <itemPath>../src/config/samd21_trust/system/console/src/sys_console_local.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f6" displayName="debug" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/debug/src/sys_debug_local.h</itemPath>
-              <itemPath>../src/config/Cloud_Connect/system/debug/src/sys_debug.c</itemPath>
+              <itemPath>../src/config/samd21_trust/system/debug/src/sys_debug_local.h</itemPath>
+              <itemPath>../src/config/samd21_trust/system/debug/src/sys_debug.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f4" displayName="dma" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/dma/sys_dma.c</itemPath>
+              <itemPath>../src/config/samd21_trust/system/dma/sys_dma.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f3" displayName="int" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/int/src/sys_int.c</itemPath>
+              <itemPath>../src/config/samd21_trust/system/int/src/sys_int.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f1" displayName="time" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/time/src/sys_time.c</itemPath>
+              <itemPath>../src/config/samd21_trust/system/time/src/sys_time.c</itemPath>
             </logicalFolder>
           </logicalFolder>
-          <itemPath>../src/config/Cloud_Connect/tasks.c</itemPath>
-          <itemPath>../src/config/Cloud_Connect/initialization.c</itemPath>
-          <itemPath>../src/config/Cloud_Connect/interrupts.c</itemPath>
-          <itemPath>../src/config/Cloud_Connect/exceptions.c</itemPath>
-          <itemPath>../src/config/Cloud_Connect/startup_xc32.c</itemPath>
-          <itemPath>../src/config/Cloud_Connect/libc_syscalls.c</itemPath>
+          <itemPath>../src/config/samd21_trust/tasks.c</itemPath>
+          <itemPath>../src/config/samd21_trust/initialization.c</itemPath>
+          <itemPath>../src/config/samd21_trust/interrupts.c</itemPath>
+          <itemPath>../src/config/samd21_trust/exceptions.c</itemPath>
+          <itemPath>../src/config/samd21_trust/startup_xc32.c</itemPath>
+          <itemPath>../src/config/samd21_trust/libc_syscalls.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f3" displayName="wolfcrypt" projectFiles="true">
@@ -788,9 +788,10 @@
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/evp.c</itemPath>
       </logicalFolder>
       <itemPath>Makefile</itemPath>
-      <itemPath>../src/config/Cloud_Connect/harmony.prj</itemPath>
-      <itemPath>../src/config/Cloud_Connect/Cloud_Connect.xml</itemPath>
-      <itemPath>../src/config/Cloud_Connect/harmony-manifest-success.yml</itemPath>
+      <itemPath>../src/config/samd21_trust/harmony.prj</itemPath>
+      <itemPath>../src/config/samd21_trust/samd21_trust.xml</itemPath>
+      <itemPath>../src/config/samd21_trust/harmony-manifest-success.yml</itemPath>
+      <itemPath>../src/config/samd21_trust/harmony-manifest-failure.yml</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
@@ -799,7 +800,7 @@
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="Debug" type="2">
+    <conf name="samd21_trust" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <targetDevice>ATSAMD21E18A</targetDevice>
@@ -811,8 +812,8 @@
         <platform>4</platform>
       </toolsSet>
       <packs>
-        <pack name="SAMD21_DFP" vendor="Microchip" version="3.3.98"/>
         <pack name="CMSIS" vendor="ARM" version="5.4.0"/>
+        <pack name="SAMD21_DFP" vendor="Microchip" version="3.3.98"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -873,7 +874,7 @@
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src/config/Cloud_Connect/library/cryptoauthlib;../src/config/Cloud_Connect/library/cryptoauthlib/crypto;../src/config/Cloud_Connect/library/cryptoauthlib/pkcs11;../src/third_party/wolfssl/wolfssl;../src/third_party/wolfssl;../src;../src/config/Cloud_Connect;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/;../src/config/Cloud_Connect/driver/winc/include/drv/spi_flash;../src/config/Cloud_Connect/driver/winc/include/drv/socket;../src/config/Cloud_Connect/driver/winc/include/drv/driver;../src/config/Cloud_Connect/driver/winc/include/drv/common;../src/config/Cloud_Connect/driver/winc/include/drv/bsp/include;../src/config/Cloud_Connect/driver/winc/include/drv/bsp;../src/config/Cloud_Connect/driver/winc/include/dev;../src/config/Cloud_Connect/driver/winc/include/;../src/common;../src/common/paho_mqtt_embedded_c;../src/common/parson_json;../src/common/utilities;../src/common/paho_mqtt_embedded_c/MQTTClient-C;../src/common/paho_mqtt_embedded_c/MQTTPacket;../src/common/paho_mqtt_embedded_c/platform;../../../common"/>
+                  value="../src/config/samd21_trust/library/cryptoauthlib;../src/config/samd21_trust/library/cryptoauthlib/crypto;../src/config/samd21_trust/library/cryptoauthlib/pkcs11;../src/third_party/wolfssl/wolfssl;../src/third_party/wolfssl;../src;../src/config/samd21_trust;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/;../src/config/samd21_trust/driver/winc/include/drv/spi_flash;../src/config/samd21_trust/driver/winc/include/drv/socket;../src/config/samd21_trust/driver/winc/include/drv/driver;../src/config/samd21_trust/driver/winc/include/drv/common;../src/config/samd21_trust/driver/winc/include/drv/bsp/include;../src/config/samd21_trust/driver/winc/include/drv/bsp;../src/config/samd21_trust/driver/winc/include/dev;../src/config/samd21_trust/driver/winc/include/;../src/common;../src/common/paho_mqtt_embedded_c;../src/common/parson_json;../src/common/utilities;../src/common/paho_mqtt_embedded_c/MQTTClient-C;../src/common/paho_mqtt_embedded_c/MQTTPacket;../src/common/paho_mqtt_embedded_c/platform;../../../common"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="true"/>
@@ -970,7 +971,7 @@
         <property key="exceptions" value="true"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src;../src/config/Cloud_Connect;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/"/>
+                  value="../src;../src/config/samd21_trust;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/;"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="true"/>
@@ -1549,6 +1550,8 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-3ffff"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="/Users/davidgarske/GitHub/microchip-atecc-demos/wolfssl_client_trust_platform/firmware/wolfssl_client_trust_platform.X/debug/samd21_trust/wolfssl_client_trust_platform_ptg"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges"

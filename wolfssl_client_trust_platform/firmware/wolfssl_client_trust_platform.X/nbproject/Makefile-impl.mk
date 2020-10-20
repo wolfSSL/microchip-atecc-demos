@@ -27,11 +27,11 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 PROJECTNAME=wolfssl_client_trust_platform.X
 
 # Active Configuration
-DEFAULTCONF=Debug
+DEFAULTCONF=samd21_trust
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=Debug 
+ALLCONFS=samd21_trust 
 
 
 # build
@@ -45,13 +45,13 @@ ALLCONFS=Debug
 
 # clobber
 .clobber-impl: .clobber-pre .depcheck-impl
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Debug clean
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=samd21_trust clean
 
 
 
 # all
 .all-impl: .all-pre .depcheck-impl
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Debug build
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=samd21_trust build
 
 
 

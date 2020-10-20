@@ -17,7 +17,7 @@
 
 Harmony v3 code generation needs the following changes:
 
-1. `src/config/Cloud_Connect/configuration.h`:
+1. `src/config/samd21_trust/configuration.h`:
 
 ```c
 /* Because WINC1500 is being used */
@@ -35,7 +35,7 @@ Harmony v3 code generation needs the following changes:
 
 2. Copy the `wolfcrypt/src/port/atmel/atmel.c` and `wolfssl/wolfcrypt/port/atmel/atmel.h` files from wolfSSL.
 
-3. `src/config/Cloud_Connect/library/cryptoauthlib/crypto/hashes/sha2_routines.h`
+3. `src/config/samd21_trust/library/cryptoauthlib/crypto/hashes/sha2_routines.h`
 
 ```c
 #ifndef SHA256_DIGEST_SIZE
