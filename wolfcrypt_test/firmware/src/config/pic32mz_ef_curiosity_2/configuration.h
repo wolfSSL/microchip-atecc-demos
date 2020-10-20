@@ -228,7 +228,7 @@ extern "C" {
 
 /* ----- wolfSSL ATECC configuration ----- */
 #define WOLFSSL_ATECC608A
-#define WOLFSSL_ATECC_TNGTLS      /* use Trust&Go module configuruation */
+#define WOLFSSL_ATECC_TNGTLS      /* use Trust&Go module configuration */
 #define WOLFSSL_ATECC_ECDH_IOENC  /* use encrypted ECDH with protection I/O key */
 //#define WOLFSSL_ATECC_DEBUG
 #define ECC_USER_CURVES

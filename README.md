@@ -1,4 +1,4 @@
-# wolfSSL ATECC608A Demo Applications
+# wolfSSL ATECC608 Demo Applications
 
 This repository contains a set of demo applications for the [wolfSSL](https://www.wolfssl.com/products/wolfssl/) embedded
 SSL/TLS library using the Microchip ATECC608A module. wolfSSL is a lightweight,

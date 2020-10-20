@@ -50,3 +50,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+/wolfssl_client_trust_platform/firmware/wolfssl_client_trust_platform.X/build/
