@@ -31,6 +31,7 @@ Harmony v3 code generation needs the following changes:
 /* for ATECC public key callbacks */
 #define HAVE_PK_CALLBACKS
 #define WOLFSSL_ATECC608A
+#define WOLFSSL_ATECC_TNGTLS
 ```
 
 2. Copy the `wolfcrypt/src/port/atmel/atmel.c` and `wolfssl/wolfcrypt/port/atmel/atmel.h` files from wolfSSL.
@@ -49,7 +50,8 @@ Harmony v3 code generation needs the following changes:
 
 ## Running the example
 
-1. Choose the TLS server.
+1) Choose the TLS server:
+
 For testing mutual authentication you can use the wolfSSL example server:
 
 ```
@@ -61,5 +63,12 @@ cd wolfssl
 ./examples/server/server -b -d -i
 ```
 
-To 
-Or use a public website like www.google.com
+Or use a public website like `www.google.com`.
+
+2) Run the TLS client example:
+
+Modify the common/wolf_tls_task.c `SERVER_HOST` and `SERVER_PORT`.
+
+## Support
+
+For questions please email support@wolfssl.com

@@ -144,10 +144,7 @@
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f3" displayName="system" projectFiles="true">
-            <logicalFolder name="f6" displayName="command" projectFiles="true">
-              <itemPath>../src/config/samd21_trust/system/command/sys_command.h</itemPath>
-            </logicalFolder>
-            <logicalFolder name="f7" displayName="console" projectFiles="true">
+            <logicalFolder name="f6" displayName="console" projectFiles="true">
               <itemPath>../src/config/samd21_trust/system/console/sys_console.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f5" displayName="debug" projectFiles="true">
@@ -639,19 +636,12 @@
             <itemPath>../src/config/samd21_trust/stdio/xc32_monitor.c</itemPath>
           </logicalFolder>
           <logicalFolder name="f3" displayName="system" projectFiles="true">
-            <logicalFolder name="f5" displayName="command" projectFiles="true">
-              <itemPath>../src/config/samd21_trust/system/command/src/sys_command.c</itemPath>
-            </logicalFolder>
             <logicalFolder name="f2" displayName="console" projectFiles="true">
               <itemPath>../src/config/samd21_trust/system/console/src/sys_console_uart.h</itemPath>
               <itemPath>../src/config/samd21_trust/system/console/src/sys_console_uart_definitions.h</itemPath>
               <itemPath>../src/config/samd21_trust/system/console/src/sys_console_uart.c</itemPath>
               <itemPath>../src/config/samd21_trust/system/console/src/sys_console.c</itemPath>
               <itemPath>../src/config/samd21_trust/system/console/src/sys_console_local.h</itemPath>
-            </logicalFolder>
-            <logicalFolder name="f6" displayName="debug" projectFiles="true">
-              <itemPath>../src/config/samd21_trust/system/debug/src/sys_debug_local.h</itemPath>
-              <itemPath>../src/config/samd21_trust/system/debug/src/sys_debug.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f4" displayName="dma" projectFiles="true">
               <itemPath>../src/config/samd21_trust/system/dma/sys_dma.c</itemPath>

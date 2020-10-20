@@ -74,10 +74,6 @@ void SYS_Tasks ( void )
     /* Maintain system services */
     
 
-SYS_CMD_Tasks();
-
-
-
 
     /* Maintain Device Drivers */
     WDRV_WINC_Tasks(sysObj.drvWifiWinc); 

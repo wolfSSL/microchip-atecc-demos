@@ -64,7 +64,6 @@
 #include "peripheral/sercom/spi_master/plib_sercom1_spi_master.h"
 #include "peripheral/evsys/plib_evsys.h"
 #include "driver/winc/include/wdrv_winc_api.h"
-#include "system/command/sys_command.h"
 #include "peripheral/port/plib_port.h"
 #include "peripheral/clock/plib_clock.h"
 #include "peripheral/nvic/plib_nvic.h"
@@ -201,8 +200,6 @@ typedef struct
     SYS_MODULE_OBJ  drvWifiWinc;
     /* SPI0 Driver Object */
     SYS_MODULE_OBJ drvSPI0;
-
-    SYS_MODULE_OBJ  sysDebug;
 
 
 } SYSTEM_OBJECTS;

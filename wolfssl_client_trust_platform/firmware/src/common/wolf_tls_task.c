@@ -47,6 +47,14 @@ t_atcert atcert = {
     .end_user_pubkey = { 0 }
 };
 
+/* I/O protection key used with examples */
+static uint8_t io_protection_key[ATECC_KEY_SIZE] = {
+    0x37, 0x80, 0xe6, 0x3d, 0x49, 0x68, 0xad, 0xe5,
+    0xd8, 0x22, 0xc0, 0x13, 0xfc, 0xc3, 0x23, 0x84,
+    0x5d, 0x1b, 0x56, 0x9f, 0xe7, 0x05, 0xb6, 0x00,
+    0x06, 0xfe, 0xec, 0x14, 0x5a, 0x0d, 0xb1, 0xe3
+};
+
 /* application states */
 typedef enum
 {
@@ -54,6 +62,7 @@ typedef enum
     EXAMPLE_STATE_608_INIT,
     EXAMPLE_STATE_608_CHECK_LOCK,
     EXAMPLE_STATE_608_INFO,
+    EXAMPLE_STATE_608_SETUP_IO_PROTECTION_KEY,
     EXAMPLE_STATE_NET_INIT,
     EXAMPLE_STATE_CONNECT,
     EXAMPLE_STATE_CONNECTING,
@@ -140,17 +149,20 @@ static void dns_resolve_handler(uint8_t *pu8DomainName, uint32_t u32ServerIP)
         host_ip_address[2] = (u32ServerIP >> 16) & 0xFF;
         host_ip_address[3] = (u32ServerIP >> 24) & 0xFF;
 
-        APP_DebugPrintf("WINC1500 WIFI: DNS lookup:\r\n  Host:       %s\r\n  IP Address: %u.%u.%u.%u",
-                (char*)pu8DomainName, host_ip_address[0], host_ip_address[1],
+        APP_DebugPrintf("WINC1500 WIFI: DNS lookup:\r\n"
+                        "  Host:       %s\r\n"
+                        "  IP Address: %u.%u.%u.%u\r\n",
+                (char*)pu8DomainName, 
+                host_ip_address[0], host_ip_address[1],
                 host_ip_address[2], host_ip_address[3]);
 
-        gAddr.sin_addr.s_addr = _htonl(u32ServerIP);
+        gAddr.sin_addr.s_addr = u32ServerIP;
                                                         
         g_example_state = EXAMPLE_STATE_BSD_SOCKET;
     }
     else {
         /* An error has occurred */
-        APP_DebugPrintf("WINC1500 DNS lookup failed.");
+        APP_DebugPrintf("WINC1500 DNS lookup failed.\r\n");
         g_example_state = EXAMPLE_STATE_FINISHED;
     }
 }
@@ -191,7 +203,7 @@ static void wifi_callback_handler(DRV_HANDLE handle, WDRV_WINC_CONN_STATE curren
         }
     }
     else {
-        APP_DebugPrintf("WINC1500 WIFI: Unknown connection status: %d",
+        APP_DebugPrintf("WINC1500 WIFI: Unknown connection status: %d\r\n",
                 currentState);
     }
 }
@@ -206,7 +218,8 @@ static void socket_callback_handler(SOCKET socket, uint8_t messageType, void *pM
         if (socket_connect_message) {
             if (socket_connect_message->s8Error != SOCK_ERR_NO_ERROR) {
                 /* An error has occurred */
-                APP_DebugPrintf("SOCKET_MSG_CONNECT error %d\r\n", socket_connect_message->s8Error);
+                APP_DebugPrintf("SOCKET_MSG_CONNECT error %d\r\n", 
+                    socket_connect_message->s8Error);
                 g_example_state = EXAMPLE_STATE_SHUTDOWN;
             }
         }
@@ -303,23 +316,27 @@ int tls_build_signer_ca_cert_tlstng(void)
     ret = tng_atcacert_read_signer_cert(atcert.signer_ca,
             (size_t*)&atcert.signer_ca_size);
     if (ret != ATCACERT_E_SUCCESS) {
-        APP_DebugPrintf("Failed to read signer cert!\r\n");
-        return ret;
+        APP_DebugPrintf("Failed to read signer cert! %x\r\n", ret);
+        //return ret;
     }
-    APP_DebugPrintf("Successfully read signer cert\r\n");
-    //atcab_printbin_label("\r\nSigner Certificate\r\n",
-    //        atcert.signer_ca, atcert.signer_ca_size);
+    else {
+        APP_DebugPrintf("Successfully read signer cert\r\n");
+        //atcab_printbin_label("\r\nSigner Certificate\r\n",
+        //        atcert.signer_ca, atcert.signer_ca_size);
+    }
 
     /* read signer public key from ATECC module */
     ret = tng_atcacert_signer_public_key(atcert.signer_ca_pubkey,
             atcert.signer_ca);
     if (ret != ATCACERT_E_SUCCESS) {
-        APP_DebugPrintf("Failed to read signer public key!\r\n");
-        return ret;
+        APP_DebugPrintf("Failed to read signer public key! %d\r\n", ret);
+        //return ret;
     }
-    APP_DebugPrintf("Successfully read signer pub key\r\n");
-    //atcab_printbin_label("\r\nSigner Public Key\r\n",
-    //        atcert.signer_ca_pubkey, sizeof(atcert.signer_ca_pubkey));
+    else {
+        APP_DebugPrintf("Successfully read signer pub key\r\n");
+        //atcab_printbin_label("\r\nSigner Public Key\r\n",
+        //        atcert.signer_ca_pubkey, sizeof(atcert.signer_ca_pubkey));
+    }
 
     return ret;
 }
@@ -346,21 +363,25 @@ int tls_build_end_user_cert_tlstng(void)
             (size_t*)&atcert.end_user_size, NULL);
     if (ret != ATCACERT_E_SUCCESS) {
         APP_DebugPrintf("Failed to read device cert!\r\n");
-        return ret;
+        //return ret;
     }
-    APP_DebugPrintf("Successfully read device cert\r\n");
-    //atcab_printbin_label("\r\nEnd User Certificate\r\n",
-    //        atcert.end_user, atcert.end_user_size);
+    else {
+        APP_DebugPrintf("Successfully read device cert\r\n");
+        //atcab_printbin_label("\r\nEnd User Certificate\r\n",
+        //        atcert.end_user, atcert.end_user_size);
+    }
 
     ret = tng_atcacert_device_public_key(atcert.end_user_pubkey,
             atcert.end_user);
     if (ret != ATCACERT_E_SUCCESS) {
         APP_DebugPrintf("Failed to end user public key!\r\n");
-        return ret;
+        //return ret;
     }
-    APP_DebugPrintf("Successfully read device pub key\r\n");
-    //atcab_printbin_label("\r\nEnd User Public Key\r\n",
-    //        atcert.end_user_pubkey, sizeof(atcert.end_user_pubkey));
+    else {
+        APP_DebugPrintf("Successfully read device pub key\r\n");
+        //atcab_printbin_label("\r\nEnd User Public Key\r\n",
+        //        atcert.end_user_pubkey, sizeof(atcert.end_user_pubkey));
+    }
 
     return ret;
 }
@@ -412,11 +433,49 @@ void APP_ExampleTasks(DRV_HANDLE handle)
         {
             status = atca_print_info();
             if (status != 0) {
-                APP_DebugPrintf("Failed to print ATECC608A module info\r\n");
+                APP_DebugPrintf("Failed to print ATECC608 module info\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
             } else {
-                g_example_state = EXAMPLE_STATE_NET_INIT;
+                g_example_state = EXAMPLE_STATE_608_SETUP_IO_PROTECTION_KEY;
             }
+            break;
+        }
+
+        case EXAMPLE_STATE_608_SETUP_IO_PROTECTION_KEY:
+        {
+            bool is_locked;
+
+            /* check if IO protection key slot is already locked */
+            status = atcab_is_slot_locked(6, &is_locked);
+            if (status != ATCA_SUCCESS) {
+                APP_DebugPrintf("Failed check if IO protection key slot locked\r\n");
+                g_example_state = EXAMPLE_STATE_FINISHED;
+                break;
+            }
+            if (is_locked) {
+                APP_DebugPrintf("IO protection key slot already locked, skipping setup\r\n");
+                g_example_state = EXAMPLE_STATE_NET_INIT;
+                break;
+            }
+
+            /* write IO protection key to slot */
+            status = atcab_write_zone(ATCA_ZONE_DATA, 6, 0, 0,
+                        io_protection_key, ATCA_KEY_SIZE);
+            if (status != ATCA_SUCCESS) {
+                APP_DebugPrintf("Failed to write IO protection key to slot\r\n");
+                g_example_state = EXAMPLE_STATE_FINISHED;
+                break;
+            }
+
+            /* lock IO protection key slot */
+            /*status = atcab_lock_data_slot(6);
+            if (status != ATCA_SUCCESS) {
+                APP_DebugPrintf("Failed to lock IO protection key slot\r\n");
+                appData.state = APP_STATE_FINISHED;
+                break;
+            }*/
+
+            g_example_state = EXAMPLE_STATE_NET_INIT;
             break;
         }
 
@@ -516,11 +575,12 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             int addrlen = sizeof(struct sockaddr);
             gAddr.sin_family = AF_INET;
             gAddr.sin_port = _htons(gPort);
-            if (connect(gSock, (struct sockaddr*)&gAddr, addrlen) < 0) {
+            if (connect(gSock, (struct sockaddr*)&gAddr, addrlen) != SOCK_ERR_NO_ERROR) {
+                APP_DebugPrintf("WINC1500 WIFI: Failed to connect to %s:%d\r\n", gHost, gPort);
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 return;
             }
-            APP_DebugPrintf("connect() success, loading certs/keys\r\n");
+            APP_DebugPrintf("connect() success\r\n");
             g_example_state = EXAMPLE_STATE_WOLFSSL_INIT;
             break;
         }
@@ -551,21 +611,26 @@ void APP_ExampleTasks(DRV_HANDLE handle)
 
         case EXAMPLE_STATE_LOAD_CERTS:
         {
+            APP_DebugPrintf("Loading certs/keys\r\n");
             status = tls_build_signer_ca_cert_tlstng();
             if (status != ATCACERT_E_SUCCESS) {
                 APP_DebugPrintf("Failed to build server's signer certificate\r\n");
-                g_example_state = EXAMPLE_STATE_FINISHED;
-                break;
+                //g_example_state = EXAMPLE_STATE_FINISHED;
+                //break;
             }
-            APP_DebugPrintf("\r\nBuilt server's signer certificate\r\n");
+            else {
+                APP_DebugPrintf("\r\nBuilt server's signer certificate\r\n");
+            }
 
             status = tls_build_end_user_cert_tlstng();
             if (status != ATCACERT_E_SUCCESS) {
                 APP_DebugPrintf("Failed to build client certificate\r\n");
-                g_example_state = EXAMPLE_STATE_FINISHED;
-                break;
+                //g_example_state = EXAMPLE_STATE_FINISHED;
+                //break;
             }
-            APP_DebugPrintf("\r\nBuilt client certificate\r\n");
+            else {
+                APP_DebugPrintf("\r\nBuilt client certificate\r\n");
+            }
 
             status = tls_setup_client_ctx();
             if (status != SSL_SUCCESS) {
@@ -695,7 +760,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             if (atecc_initialized == 1) {
                 atcab_release();
                 atecc_initialized = 0;
-                APP_DebugPrintf("Released ECC608A\r\n");
+                APP_DebugPrintf("Released ECC608\r\n");
             }
             wolfSSL_Cleanup();
 
