@@ -384,8 +384,6 @@
         <itemPath>../src/third_party/wolfssl/wolfssl/sniffer_error.h</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/error-ssl.h</itemPath>
       </logicalFolder>
-      <itemPath>../../../common/atecc_common.h</itemPath>
-      <itemPath>../../../common/tls_common.h</itemPath>
       <itemPath>../src/app.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -779,8 +777,6 @@
         <itemPath>../src/third_party/wolfssl/src/wolfio.c</itemPath>
         <itemPath>../src/third_party/wolfssl/src/internal.c</itemPath>
       </logicalFolder>
-      <itemPath>../../../common/atecc_common.c</itemPath>
-      <itemPath>../../../common/tls_common.c</itemPath>
       <itemPath>../src/app.c</itemPath>
       <itemPath>../src/main.c</itemPath>
     </logicalFolder>
@@ -877,7 +873,7 @@
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src/config/Cloud_Connect/library/cryptoauthlib;../src/config/Cloud_Connect/library/cryptoauthlib/crypto;../src/config/Cloud_Connect/library/cryptoauthlib/pkcs11;../src/third_party/wolfssl/wolfssl;../src/third_party/wolfssl;../src;../src/config/Cloud_Connect;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/;../src/config/Cloud_Connect/driver/winc/include/drv/spi_flash;../src/config/Cloud_Connect/driver/winc/include/drv/socket;../src/config/Cloud_Connect/driver/winc/include/drv/driver;../src/config/Cloud_Connect/driver/winc/include/drv/common;../src/config/Cloud_Connect/driver/winc/include/drv/bsp/include;../src/config/Cloud_Connect/driver/winc/include/drv/bsp;../src/config/Cloud_Connect/driver/winc/include/dev;../src/config/Cloud_Connect/driver/winc/include/;../src/common;../src/common/paho_mqtt_embedded_c;../src/common/parson_json;../src/common/utilities;../src/common/paho_mqtt_embedded_c/MQTTClient-C;../src/common/paho_mqtt_embedded_c/MQTTPacket;../src/common/paho_mqtt_embedded_c/platform;../../../common;../../../common/tng"/>
+                  value="../src/config/Cloud_Connect/library/cryptoauthlib;../src/config/Cloud_Connect/library/cryptoauthlib/crypto;../src/config/Cloud_Connect/library/cryptoauthlib/pkcs11;../src/third_party/wolfssl/wolfssl;../src/third_party/wolfssl;../src;../src/config/Cloud_Connect;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/;../src/config/Cloud_Connect/driver/winc/include/drv/spi_flash;../src/config/Cloud_Connect/driver/winc/include/drv/socket;../src/config/Cloud_Connect/driver/winc/include/drv/driver;../src/config/Cloud_Connect/driver/winc/include/drv/common;../src/config/Cloud_Connect/driver/winc/include/drv/bsp/include;../src/config/Cloud_Connect/driver/winc/include/drv/bsp;../src/config/Cloud_Connect/driver/winc/include/dev;../src/config/Cloud_Connect/driver/winc/include/;../src/common;../src/common/paho_mqtt_embedded_c;../src/common/parson_json;../src/common/utilities;../src/common/paho_mqtt_embedded_c/MQTTClient-C;../src/common/paho_mqtt_embedded_c/MQTTPacket;../src/common/paho_mqtt_embedded_c/platform;../../../common"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="true"/>
@@ -974,7 +970,7 @@
         <property key="exceptions" value="true"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src;../src/config/Cloud_Connect;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/;"/>
+                  value="../src;../src/config/Cloud_Connect;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="true"/>

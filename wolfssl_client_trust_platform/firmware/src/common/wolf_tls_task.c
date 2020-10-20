@@ -1,8 +1,8 @@
 #include "app.h"
 #include "wdrv_winc_client_api.h"
 #include "cryptoauthlib.h"
+#include "tng/tng_atcacert_client.h"
 #include <wolfssl/ssl.h>
-#include "tls_common.h"
 #include <wolfssl/wolfcrypt/port/atmel/atmel.h>
 
 /* force inclusion of 256-bit test certs and keys */
@@ -14,24 +14,37 @@
 #define WLAN_SSID           "BLADE"
 #define WLAN_PSK            "thegarskes"
 
-#define SERVER_HOST         "192.168.0.251"
-#define SERVER_PORT         11111
+static SOCKET gSock;
+static struct sockaddr_in gAddr;
+static char* gHost = "192.168.0.251";
+static uint16_t gPort = 11111;
 
 static WOLFSSL*        ssl_client = NULL;
 static WOLFSSL_CTX*    ctx_client = NULL;
 static WOLFSSL_METHOD* method_client = NULL;
 static const char httpGET[] = "GET /index.html HTTP/1.0\r\n\r\n";
-static byte reply[80];
 
-static ATCAIfaceCfg atecc608a_0_init_data_TNGTLS = {
-       .iface_type            = ATCA_I2C_IFACE,
-       .devtype               = ATECC608A,
-       .atcai2c.slave_address = 0x6A,
-       .atcai2c.bus           = 0,
-       .atcai2c.baud          = 400000,
-       .wake_delay            = 1500,
-       .rx_retries            = 20,
-       .cfg_data              = &sercom2_plib_i2c_api
+static WDRV_WINC_AUTH_CONTEXT authCtx;
+static WDRV_WINC_BSS_CONTEXT bssCtx;
+
+extern ATCAIfaceCfg atecc608_0_init_data;
+
+typedef struct t_atcert {
+    uint32_t signer_ca_size;
+    uint8_t  signer_ca[521];
+    uint8_t  signer_ca_pubkey[64];
+    uint32_t end_user_size;
+    uint8_t  end_user[552];
+    uint8_t  end_user_pubkey[64];
+} t_atcert;
+
+t_atcert atcert = {
+    .signer_ca_size = 521,
+    .signer_ca = { 0 },
+    .signer_ca_pubkey = { 0 },
+    .end_user_size = 552,
+    .end_user = { 0 },
+    .end_user_pubkey = { 0 }
 };
 
 /* application states */
@@ -45,10 +58,11 @@ typedef enum
     EXAMPLE_STATE_CONNECT,
     EXAMPLE_STATE_CONNECTING,
     EXAMPLE_STATE_CONNECTED,
-    EXAMPLE_STATE_WOLFSSL_INIT,
+    EXAMPLE_STATE_GOT_IP,
     EXAMPLE_STATE_DNS_RESOLVE,
     EXAMPLE_STATE_BSD_SOCKET,
     EXAMPLE_STATE_BSD_CONNECT,
+    EXAMPLE_STATE_WOLFSSL_INIT,
     EXAMPLE_STATE_LOAD_CERTS,
     EXAMPLE_STATE_DO_HANDSHAKE,
     EXAMPLE_STATE_SEND_HTTP_GET,
@@ -129,6 +143,10 @@ static void dns_resolve_handler(uint8_t *pu8DomainName, uint32_t u32ServerIP)
         APP_DebugPrintf("WINC1500 WIFI: DNS lookup:\r\n  Host:       %s\r\n  IP Address: %u.%u.%u.%u",
                 (char*)pu8DomainName, host_ip_address[0], host_ip_address[1],
                 host_ip_address[2], host_ip_address[3]);
+
+        gAddr.sin_addr.s_addr = _htonl(u32ServerIP);
+                                                        
+        g_example_state = EXAMPLE_STATE_BSD_SOCKET;
     }
     else {
         /* An error has occurred */
@@ -142,6 +160,7 @@ static void APP_ExampleDHCPAddressEventCallback(DRV_HANDLE handle, uint32_t ipAd
     char s[20];
 
     APP_DebugPrintf("IP address is %s\r\n", inet_ntop(AF_INET, &ipAddress, s, sizeof(s)));
+    g_example_state = EXAMPLE_STATE_GOT_IP;
 }
 
 static void APP_ExampleGetSystemTimeEventCallback(DRV_HANDLE handle, uint32_t time)
@@ -158,7 +177,7 @@ static void wifi_callback_handler(DRV_HANDLE handle, WDRV_WINC_CONN_STATE curren
 {
     if (currentState == WDRV_WINC_CONN_STATE_CONNECTED) {
         APP_DebugPrintf("Wifi Connected\r\n");
-
+        g_example_state = EXAMPLE_STATE_CONNECTED;
     }
     else if (currentState == WDRV_WINC_CONN_STATE_DISCONNECTED) {
         if (g_example_state == EXAMPLE_STATE_CONNECTED) {
@@ -179,22 +198,16 @@ static void wifi_callback_handler(DRV_HANDLE handle, WDRV_WINC_CONN_STATE curren
 
 static void socket_callback_handler(SOCKET socket, uint8_t messageType, void *pMessage)
 {
-    tstrSocketConnectMsg *socket_connect_message = NULL;
-    tstrSocketRecvMsg *socket_receive_message = NULL;
-
     switch (messageType) {
     case SOCKET_MSG_CONNECT:
     {
-        socket_connect_message = (tstrSocketConnectMsg*)pMessage;
+        tstrSocketConnectMsg *socket_connect_message = (tstrSocketConnectMsg*)pMessage;
 
-        if (NULL != socket_connect_message) {
-            if (socket_connect_message->s8Error == SOCK_ERR_NO_ERROR) {
-                g_example_state = EXAMPLE_STATE_CONNECTED;
-            }
-            else {
+        if (socket_connect_message) {
+            if (socket_connect_message->s8Error != SOCK_ERR_NO_ERROR) {
                 /* An error has occurred */
-                APP_DebugPrintf("SOCKET_MSG_CONNECT error %s(%d)\r\n", get_socket_error_name(socket_connect_message->s8Error), socket_connect_message->s8Error);
-                g_example_state = EXAMPLE_STATE_DISCONNECT;
+                APP_DebugPrintf("SOCKET_MSG_CONNECT error %d\r\n", socket_connect_message->s8Error);
+                g_example_state = EXAMPLE_STATE_SHUTDOWN;
             }
         }
         break;
@@ -202,7 +215,8 @@ static void socket_callback_handler(SOCKET socket, uint8_t messageType, void *pM
     case SOCKET_MSG_RECV:
     case SOCKET_MSG_RECVFROM:
     {
-        
+        tstrSocketRecvMsg *socket_receive_message = (tstrSocketRecvMsg*)pMessage;;
+        (void)socket_receive_message;
         break;
     }
     case SOCKET_MSG_SEND:
@@ -216,18 +230,145 @@ static void socket_callback_handler(SOCKET socket, uint8_t messageType, void *pM
 }
 
 
+static int atca_check_lock_status(void)
+{
+    ATCA_STATUS status;
+    bool isLocked = false;
+
+    status = atcab_is_locked(LOCK_ZONE_CONFIG, &isLocked);
+    if (status != ATCA_SUCCESS) {
+        APP_DebugPrintf("Error reading CONFIG zone lock\r\n");
+    } else {
+        APP_DebugPrintf("CONFIG zone locked: %s\r\n", isLocked == true ? "yes" : "no");
+    }
+
+    status = atcab_is_locked(LOCK_ZONE_DATA, &isLocked);
+    if (status != ATCA_SUCCESS) {
+        APP_DebugPrintf("Error reading DATA zone lock\r\n");
+    } else {
+        APP_DebugPrintf("DATA zone locked: %s\r\n", isLocked == true ? "yes" : "no");
+    }
+
+    return 0;
+}
+
+static int atca_print_info(void)
+{
+    uint8_t revision[4];
+    uint8_t serialnum[ATCA_SERIAL_NUM_SIZE];
+    char displaystr[ATCA_SERIAL_NUM_SIZE * 3];
+    size_t displaylen = sizeof(displaystr);
+    ATCA_STATUS status;
+
+    /* revision info */
+    status = atcab_info(revision);
+    if (status != ATCA_SUCCESS) {
+        APP_DebugPrintf("Failed to get revision information\r\n");
+    } else {
+        atcab_bin2hex(revision, 4, displaystr, &displaylen);
+        APP_DebugPrintf("revision:\r\n%s\r\n", displaystr);
+    }
+
+    memset(displaystr, 0, sizeof(displaystr));
+    displaylen = sizeof(displaystr);
+
+    status = atcab_read_serial_number(serialnum);
+    if (status != ATCA_SUCCESS) {
+        APP_DebugPrintf("Failed to get serial number\r\n");
+    } else {
+        atcab_bin2hex(serialnum, ATCA_SERIAL_NUM_SIZE, displaystr, &displaylen);
+        APP_DebugPrintf("serial number:\r\n%s\r\n\n", displaystr);
+    }
+
+    return 0;
+}
+
+int tls_build_signer_ca_cert_tlstng(void)
+{
+    int ret = 0;
+    size_t maxCertSz = 0;
+
+    /* read signer certificate from ATECC module */
+    ret = tng_atcacert_max_signer_cert_size(&maxCertSz);
+    if (ret != ATCACERT_E_SUCCESS) {
+        APP_DebugPrintf("Failed to get max signer cert size\r\n");
+        return ret;
+    }
+
+    if (maxCertSz > atcert.signer_ca_size) {
+        APP_DebugPrintf("Signer CA cert buffer too small, need to increase: max = %d\r\n", maxCertSz);
+        return -1;
+    }
+
+    ret = tng_atcacert_read_signer_cert(atcert.signer_ca,
+            (size_t*)&atcert.signer_ca_size);
+    if (ret != ATCACERT_E_SUCCESS) {
+        APP_DebugPrintf("Failed to read signer cert!\r\n");
+        return ret;
+    }
+    APP_DebugPrintf("Successfully read signer cert\r\n");
+    //atcab_printbin_label("\r\nSigner Certificate\r\n",
+    //        atcert.signer_ca, atcert.signer_ca_size);
+
+    /* read signer public key from ATECC module */
+    ret = tng_atcacert_signer_public_key(atcert.signer_ca_pubkey,
+            atcert.signer_ca);
+    if (ret != ATCACERT_E_SUCCESS) {
+        APP_DebugPrintf("Failed to read signer public key!\r\n");
+        return ret;
+    }
+    APP_DebugPrintf("Successfully read signer pub key\r\n");
+    //atcab_printbin_label("\r\nSigner Public Key\r\n",
+    //        atcert.signer_ca_pubkey, sizeof(atcert.signer_ca_pubkey));
+
+    return ret;
+}
+
+int tls_build_end_user_cert_tlstng(void)
+{
+    int ret = 0;
+    size_t maxCertSz = 0;
+
+    /* read device certificate from ATECC module */
+    ret = tng_atcacert_max_device_cert_size(&maxCertSz);
+    if (ret != ATCACERT_E_SUCCESS) {
+        APP_DebugPrintf("Failed to get max device cert size\r\n");
+        return ret;
+    }
+
+    if (maxCertSz > atcert.end_user_size) {
+        APP_DebugPrintf("Device cert buffer too small, please increase, max = %d\r\n",
+                  maxCertSz);
+        return -1;
+    }
+
+    ret = tng_atcacert_read_device_cert(atcert.end_user,
+            (size_t*)&atcert.end_user_size, NULL);
+    if (ret != ATCACERT_E_SUCCESS) {
+        APP_DebugPrintf("Failed to read device cert!\r\n");
+        return ret;
+    }
+    APP_DebugPrintf("Successfully read device cert\r\n");
+    //atcab_printbin_label("\r\nEnd User Certificate\r\n",
+    //        atcert.end_user, atcert.end_user_size);
+
+    ret = tng_atcacert_device_public_key(atcert.end_user_pubkey,
+            atcert.end_user);
+    if (ret != ATCACERT_E_SUCCESS) {
+        APP_DebugPrintf("Failed to end user public key!\r\n");
+        return ret;
+    }
+    APP_DebugPrintf("Successfully read device pub key\r\n");
+    //atcab_printbin_label("\r\nEnd User Public Key\r\n",
+    //        atcert.end_user_pubkey, sizeof(atcert.end_user_pubkey));
+
+    return ret;
+}
+
 void APP_ExampleTasks(DRV_HANDLE handle)
 {
-    SYS_STATUS tcpStatus;
-    const char* netName;
-    const char* netBiosName;
-    struct hostent* hostInfo;
-    int i, nNets, ret;
-    int atecc_initialized = 0;
-    TCPIP_NET_HANDLE netH;
-    uint32_t sec = 0;
-    ATCA_STATUS status;
-    TCPIP_SNTP_RESULT sntpRet;
+    int8_t status = !0;
+    static int atecc_initialized = 0;
 
     switch ( g_example_state )
     {
@@ -244,7 +385,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
 
         case EXAMPLE_STATE_608_INIT:
         {
-            status = atcab_init(&atecc608a_0_init_data_TNGTLS);
+            status = atcab_init(&atecc608_0_init_data);
             if (status != ATCA_SUCCESS) {
                 APP_DebugPrintf("atcab_init() failed, ret = %d\r\n", status);
                 g_example_state = EXAMPLE_STATE_FINISHED;
@@ -259,8 +400,8 @@ void APP_ExampleTasks(DRV_HANDLE handle)
 
         case EXAMPLE_STATE_608_CHECK_LOCK:
         {
-            ret = check_lock_status();
-            if (ret != 0) {
+            status = atca_check_lock_status();
+            if (status != 0) {
                 APP_DebugPrintf("Failed to check lock zone status\r\n");
             }
             g_example_state = EXAMPLE_STATE_608_INFO;
@@ -269,8 +410,8 @@ void APP_ExampleTasks(DRV_HANDLE handle)
 
         case EXAMPLE_STATE_608_INFO:
         {
-            ret = print_info();
-            if (ret != 0) {
+            status = atca_print_info();
+            if (status != 0) {
                 APP_DebugPrintf("Failed to print ATECC608A module info\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
             } else {
@@ -339,20 +480,61 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             break;
 
         case EXAMPLE_STATE_CONNECTED:
-            g_example_state = EXAMPLE_STATE_WOLFSSL_INIT;
+            /* Waiting for IP */
             break;
+
+        case EXAMPLE_STATE_GOT_IP:
+            g_example_state = EXAMPLE_STATE_DNS_RESOLVE;
+            break;
+
+        case EXAMPLE_STATE_DNS_RESOLVE:
+        {
+            /* resolution calls dns_resolve_handler */
+            memset(&gAddr, 0, sizeof(gAddr));
+            gethostbyname(gHost);
+            break;
+        }
+
+        case EXAMPLE_STATE_BSD_SOCKET:
+        {
+            int tcpSocket;
+            APP_DebugPrintf("Creating socket\r\n");
+            tcpSocket = socket(AF_INET, SOCK_STREAM, 1);
+            if (tcpSocket < 0) {
+                g_example_state = EXAMPLE_STATE_FINISHED;
+                return;
+            }
+            gSock = (SOCKET)tcpSocket;
+            APP_DebugPrintf("BSD TCP client: connecting...\r\n");
+
+            g_example_state = EXAMPLE_STATE_BSD_CONNECT;
+            break;
+        }
+
+        case EXAMPLE_STATE_BSD_CONNECT:
+        {
+            int addrlen = sizeof(struct sockaddr);
+            gAddr.sin_family = AF_INET;
+            gAddr.sin_port = _htons(gPort);
+            if (connect(gSock, (struct sockaddr*)&gAddr, addrlen) < 0) {
+                return;
+            }
+            APP_DebugPrintf("connect() success, loading certs/keys\r\n");
+            g_example_state = EXAMPLE_STATE_LOAD_CERTS;
+            break;
+        }
 
         case EXAMPLE_STATE_WOLFSSL_INIT:
         {
             APP_DebugPrintf("Initializing wolfSSL\r\n");
-            ret = wolfCrypt_ATECC_SetConfig(&atecc608a_0_init_data_TNGTLS);
-            if (ret == 0) {
-                ret = wolfSSL_Init();
-                if (ret != WOLFSSL_SUCCESS) {
-                    APP_DebugPrintf("wolfSSL_Init() failed, ret = %d\r\n", ret);
+            status = wolfCrypt_ATECC_SetConfig(&atecc608_0_init_data);
+            if (status == 0) {
+                status = wolfSSL_Init();
+                if (status != WOLFSSL_SUCCESS) {
+                    APP_DebugPrintf("wolfSSL_Init() failed, ret = %d\r\n", status);
                     g_example_state = EXAMPLE_STATE_FINISHED;
-                } else {
-
+                }
+                else {
                     /* Uncomment next line to enable debug messages, also need
                      * to recompile wolfSSL with DEBUG_WOLFSSL defined. */
                     /* wolfSSL_Debugging_ON(); */
@@ -366,72 +548,26 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             break;
         }
 
-        case EXAMPLE_STATE_DNS_RESOLVE:
-        {
-            appData.host = SERVER_HOST;
-            appData.port = SERVER_PORT;
-
-            hostInfo = gethostbyname(appData.host);
-            if (hostInfo != NULL) {
-                APP_DebugPrintf("gethostbyname(%s) passed\r\n", appData.host);
-                memcpy(&appData.addr.sin_addr.S_un.S_addr,
-                        *(hostInfo->h_addr_list), sizeof(IPV4_ADDR));
-                g_example_state = EXAMPLE_STATE_BSD_SOCKET;
-            } else {
-                break;
-            }
-        }
-
-        case EXAMPLE_STATE_BSD_SOCKET:
-        {
-            int tcpSocket;
-            APP_DebugPrintf("Creating socket\r\n");
-            if ((tcpSocket = socket(AF_INET, SOCK_STREAM,
-                                    IPPROTO_TCP)) == SOCKET_ERROR) {
-                return;
-            } else {
-                appData.socket = (SOCKET)tcpSocket;
-            }
-            APP_DebugPrintf("BSD TCP client: connecting...\r\n");
-
-            g_example_state = EXAMPLE_STATE_BSD_CONNECT;
-            break;
-        }
-
-        case EXAMPLE_STATE_BSD_CONNECT:
-        {
-            int addrlen;
-            appData.addr.sin_port = appData.port;
-            addrlen = sizeof(struct sockaddr);
-            if (connect(appData.socket, (struct sockaddr*) &appData.addr,
-                        addrlen) < 0) {
-                return;
-            }
-            APP_DebugPrintf("connect() success, loading certs/keys\r\n");
-            g_example_state = EXAMPLE_STATE_LOAD_CERTS;
-            break;
-        }
-
         case EXAMPLE_STATE_LOAD_CERTS:
         {
-            ret = tls_build_signer_ca_cert_tlstng();
-            if (ret != ATCACERT_E_SUCCESS) {
+            status = tls_build_signer_ca_cert_tlstng();
+            if (status != ATCACERT_E_SUCCESS) {
                 APP_DebugPrintf("Failed to build server's signer certificate\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 break;
             }
             APP_DebugPrintf("\r\nBuilt server's signer certificate\r\n");
 
-            ret = tls_build_end_user_cert_tlstng();
-            if (ret != ATCACERT_E_SUCCESS) {
+            status = tls_build_end_user_cert_tlstng();
+            if (status != ATCACERT_E_SUCCESS) {
                 APP_DebugPrintf("Failed to build client certificate\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 break;
             }
             APP_DebugPrintf("\r\nBuilt client certificate\r\n");
 
-            ret = tls_setup_client_ctx();
-            if (ret != SSL_SUCCESS) {
+            status = tls_setup_client_ctx();
+            if (status != SSL_SUCCESS) {
                 APP_DebugPrintf("Failed to load wolfSSL!\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 break;
@@ -447,7 +583,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             }
 
             /* Pass socket descriptor to wolfSSL for I/O */
-            wolfSSL_set_fd(ssl_client, appData.socket);
+            wolfSSL_set_fd(ssl_client, gSock);
             APP_DebugPrintf("Registered SOCKET with wolfSSL\r\n");
 
             g_example_state = EXAMPLE_STATE_DO_HANDSHAKE;
@@ -456,13 +592,15 @@ void APP_ExampleTasks(DRV_HANDLE handle)
 
         case EXAMPLE_STATE_DO_HANDSHAKE:
         {
-            if (wolfSSL_connect(ssl_client) != SSL_SUCCESS) {
+            status = wolfSSL_connect(ssl_client);
+            if (status != WOLFSSL_SUCCESS) {
                 int err = wolfSSL_get_error(ssl_client, 0);
                 if (err == WOLFSSL_ERROR_WANT_READ ||
                     err == WOLFSSL_ERROR_WANT_WRITE) {
                     /* try again */
                     break;
-                } else {
+                }
+                else {
                     char buffer[80];
                     APP_DebugPrintf("wolfSSL_connect() failed, error = %d: %s\r\n",
                             err, wolfSSL_ERR_error_string(err, buffer));
@@ -478,14 +616,15 @@ void APP_ExampleTasks(DRV_HANDLE handle)
 
         case EXAMPLE_STATE_SEND_HTTP_GET:
         {
-            ret = wolfSSL_write(ssl_client, httpGET, sizeof(httpGET));
-            if (ret <= 0) {
+            status = wolfSSL_write(ssl_client, httpGET, sizeof(httpGET));
+            if (status <= 0) {
                 int err = wolfSSL_get_error(ssl_client, 0);
                 if (err == WOLFSSL_ERROR_WANT_READ ||
                     err == WOLFSSL_ERROR_WANT_WRITE) {
                     /* try again */
                     break;
-                } else {
+                }
+                else {
                     char buffer[80];
                     APP_DebugPrintf("wolfSSL_write() failed, error = %d: %s\r\n",
                             err, wolfSSL_ERR_error_string(err, buffer));
@@ -501,16 +640,18 @@ void APP_ExampleTasks(DRV_HANDLE handle)
 
         case EXAMPLE_STATE_RECV_RESPONSE:
         {
+            byte reply[80];
             memset(reply, 0, sizeof(reply));
 
-            ret = wolfSSL_read(ssl_client, reply, sizeof(reply)-1);
-            if (ret <= 0) {
+            status = wolfSSL_read(ssl_client, reply, sizeof(reply)-1);
+            if (status <= 0) {
                 int err = wolfSSL_get_error(ssl_client, 0);
                 if (err == WOLFSSL_ERROR_WANT_READ ||
                     err == WOLFSSL_ERROR_WANT_WRITE) {
                     /* try again */
                     break;
-                } else {
+                }
+                else {
                     char buffer[80];
                     APP_DebugPrintf("wolfSSL_read() failed, error = %d: %s\r\n",
                             err, wolfSSL_ERR_error_string(err, buffer));
@@ -532,20 +673,17 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             if (ssl_client != NULL) {
                 wolfSSL_shutdown(ssl_client);
                 wolfSSL_free(ssl_client);
+                ssl_client = NULL;
                 APP_DebugPrintf("Shutdown and freed WOLFSSL session\r\n");
             }
             if (ctx_client != NULL) {
                 wolfSSL_CTX_free(ctx_client);
+                ctx_client = NULL;
                 APP_DebugPrintf("Freed WOLFSSL_CTX\r\n");
             }
-            closesocket(appData.socket);
+            shutdown(gSock);
+            gSock = -1;
             APP_DebugPrintf("\r\nConnection Closed\r\n");
-
-            if (atecc_initialized == 1) {
-                atcab_release();
-                atecc_initialized = 0;
-                APP_DebugPrintf("Released ECC608A\r\n");
-            }
 
             g_example_state = EXAMPLE_STATE_FINISHED;
             break;
@@ -556,8 +694,8 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             if (atecc_initialized == 1) {
                 atcab_release();
                 atecc_initialized = 0;
+                APP_DebugPrintf("Released ECC608A\r\n");
             }
-
             wolfSSL_Cleanup();
 
             g_example_state = EXAMPLE_STATE_DISCONNECT;

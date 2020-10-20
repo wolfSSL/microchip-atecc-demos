@@ -10,56 +10,56 @@
 * MPLAB X v5.40
 * Microchip XC32 v2.50 compiler
 * Microchip Harmony 3
-* cryptoauthlib: v3.1.0
+* cryptoauthlib: v3.2.3
 * wolfSSL: v4.5.0
 
 ## Building
 
-Harmony v3 code generation alters files and needs the following changes:
+Harmony v3 code generation needs the following changes:
 
-`configuration.h`:
+1. `src/config/Cloud_Connect/configuration.h`:
 
 ```c
+/* Because WINC1500 is being used */
 -//#define MICROCHIP_TCPIP
 +#define MICROCHIP_TCPIP
+#define NO_OLD_WC_NAMES
 
+/* for TLS v1.3 */
 #define HAVE_HKDF
-#define HAVE_PK_CALLBACKS
 
-`atca_config.h`:
+/* for ATECC public key callbacks */
+#define HAVE_PK_CALLBACKS
+#define WOLFSSL_ATECC608A
+```
+
+2. Copy the `wolfcrypt/src/port/atmel/atmel.c` and `wolfssl/wolfcrypt/port/atmel/atmel.h` files from wolfSSL.
+
+3. `src/config/Cloud_Connect/library/cryptoauthlib/crypto/hashes/sha2_routines.h`
 
 ```c
-/* Enable HAL I2C */
-#ifndef ATCA_HAL_I2C
-#define ATCA_HAL_I2C
+#ifndef SHA256_DIGEST_SIZE
+#define SHA256_DIGEST_SIZE (32)
 #endif
-
-/** Include Device Support Options */
-#define ATCA_ATECC608A_SUPPORT
-
-/* Define generic interfaces to the processor libraries */
-#define PLIB_I2C_ERROR          SERCOM_I2C_ERROR
-#define PLIB_I2C_ERROR_NONE     SERCOM_I2C_ERROR_NONE
-#define PLIB_I2C_TRANSFER_SETUP SERCOM_I2C_TRANSFER_SETUP
-
-typedef bool (*atca_i2c_plib_read)( uint16_t, uint8_t *, uint32_t );
-typedef bool (*atca_i2c_plib_write)( uint16_t, uint8_t *, uint32_t );
-typedef bool (*atca_i2c_plib_is_busy)( void );
-typedef PLIB_I2C_ERROR (* atca_i2c_error_get)( void );
-typedef bool (*atca_i2c_plib_transfer_setup)(PLIB_I2C_TRANSFER_SETUP* setup, uint32_t srcClkFreq);
-
-typedef struct atca_plib_api
-{
-    atca_i2c_plib_read              read;
-    atca_i2c_plib_write             write;
-    atca_i2c_plib_is_busy           is_busy;
-    atca_i2c_error_get              error_get;
-    atca_i2c_plib_transfer_setup    transfer_setup;
-} atca_plib_i2c_api_t;
-
-extern atca_plib_i2c_api_t sercom2_plib_i2c_api;
-
-/** Define certificate templates to be supported. */
-#define ATCA_TNGTLS_SUPPORT
-#define ATCA_TNG_LEGACY_SUPPORT
+#ifndef SHA256_BLOCK_SIZE
+#define SHA256_BLOCK_SIZE  (64)
+#endif
 ```
+
+
+## Running the example
+
+1. Choose the TLS server.
+For testing mutual authentication you can use the wolfSSL example server:
+
+```
+git clone https://github.com/wolfssl/wolfssl.git
+cd wolfssl
+./autogen.sh
+./configure --enable-debug --disable-shared && make
+# Start start, bind to any network interface, disable peer cert checking and accept multiple connections
+./examples/server/server -b -d -i
+```
+
+To 
+Or use a public website like www.google.com

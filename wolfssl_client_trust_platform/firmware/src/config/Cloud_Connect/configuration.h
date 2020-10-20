@@ -199,6 +199,7 @@ extern "C" {
     
 #define NO_WOLFSSL_SERVER
 #define HAVE_PK_CALLBACKS
+#define WOLFSSL_ATECC608A
     
     
    
