@@ -54,20 +54,32 @@ Harmony v3 code generation needs the following changes:
 
 For testing mutual authentication you can use the wolfSSL example server:
 
-```
+```sh
 git clone https://github.com/wolfssl/wolfssl.git
 cd wolfssl
 ./autogen.sh
-./configure --enable-debug --disable-shared && make
-# Start start, bind to any network interface, disable peer cert checking and accept multiple connections
-./examples/server/server -b -d -i
+./configure
+make
+# Start server with ECC long term test key
+./examples/server/server -b -d -i -g -x -l ECDHE-ECDSA-AES128-GCM-SHA256 -k ./certs/ecc-key.pem -c ./certs/server-ecc.pem
 ```
 
 Or use a public website like `www.google.com`.
 
 2) Run the TLS client example:
 
-Modify the common/wolf_tls_task.c `SERVER_HOST` and `SERVER_PORT`.
+Modify the `common/wolf_tls_task.c` or specify as build pre-processor macros:
+
+* `WLAN_SSID`
+* `WLAN_PSK`
+* `SERVER_HOST`
+* `SERVER_PORT`
+
+3) Example Console Output:
+
+```
+
+```
 
 ## Support
 

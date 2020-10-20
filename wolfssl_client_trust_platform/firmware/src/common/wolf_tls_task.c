@@ -10,14 +10,26 @@
 #define USE_CERT_BUFFERS_256
 #include <wolfssl/certs_test.h>
 
+/* Configuration */
+/* TODO: Use your AP and TLS server */
 #define WLAN_AUTH_WPA_PSK
-#define WLAN_SSID           "BLADE"
-#define WLAN_PSK            "thegarskes"
+#ifndef WLAN_SSID
+#define WLAN_SSID           "YOUR_SSID"
+#endif
+#ifndef WLAN_PSK
+#define WLAN_PSK            "YOUR_PSK"
+#endif
+#ifndef SERVER_HOST
+#define SERVER_HOST         "192.168.0.251"
+#endif
+#ifndef SERVER_PORT
+#define SERVER_PORT         11111
+#endif
 
 static SOCKET gSock;
 static struct sockaddr_in gAddr;
-static char* gHost = "192.168.0.251";
-static uint16_t gPort = 11111;
+static char* gHost = SERVER_HOST;
+static uint16_t gPort = SERVER_PORT;
 
 static WOLFSSL*        ssl_client = NULL;
 static WOLFSSL_CTX*    ctx_client = NULL;
@@ -38,7 +50,7 @@ typedef struct t_atcert {
     uint8_t  end_user_pubkey[64];
 } t_atcert;
 
-t_atcert atcert = {
+static t_atcert atcert = {
     .signer_ca_size = 521,
     .signer_ca = { 0 },
     .signer_ca_pubkey = { 0 },
@@ -52,15 +64,17 @@ typedef enum
 {
     EXAMPLE_STATE_EXAMPLE_INIT=0,
     EXAMPLE_STATE_NET_INIT,
-    EXAMPLE_STATE_CONNECT,
-    EXAMPLE_STATE_CONNECTING,
-    EXAMPLE_STATE_CONNECTED,
+    EXAMPLE_STATE_WIFI_CONNECT,
+    EXAMPLE_STATE_WIFI_CONNECTING,
+    EXAMPLE_STATE_WIFI_CONNECTED,
     EXAMPLE_STATE_GOT_IP,
     EXAMPLE_STATE_DNS_RESOLVE,
     EXAMPLE_STATE_DNS_RESOLVING,
     EXAMPLE_STATE_DNS_RESOLVED,
     EXAMPLE_STATE_BSD_SOCKET,
     EXAMPLE_STATE_BSD_CONNECT,
+    EXAMPLE_STATE_BSD_CONNECTING,
+    EXAMPLE_STATE_BSD_CONNECTED,
     EXAMPLE_STATE_WOLFSSL_INIT,
     EXAMPLE_STATE_LOAD_CERTS,
     EXAMPLE_STATE_DO_HANDSHAKE,
@@ -83,14 +97,14 @@ int tls_setup_client_ctx(void)
     method_client = wolfTLSv1_2_client_method();
     if (method_client == NULL) {
         APP_DebugPrintf("Failed to alloc dynamic buffer\r\n");
-        return SSL_FAILURE;
+        return WOLFSSL_FAILURE;
     }
     APP_DebugPrintf("Created wolfTLSv1_2_client_method()\r\n");
 
     ctx_client = wolfSSL_CTX_new(method_client);
     if (ctx_client == NULL) {
         APP_DebugPrintf("Failed to create wolfSSL context\r\n");
-        return SSL_FAILURE;
+        return WOLFSSL_FAILURE;
     }
     APP_DebugPrintf("Created new WOLFSSL_CTX\r\n");
 
@@ -99,9 +113,9 @@ int tls_setup_client_ctx(void)
      * using the <wolfssl_root>/certs/server-ecc.pem certificate and
      * <wolfssl_root>/certs/ecc-key.pem private key. */
     if (wolfSSL_CTX_load_verify_buffer(ctx_client, ca_ecc_cert_der_256,
-            sizeof_ca_ecc_cert_der_256, SSL_FILETYPE_ASN1) != SSL_SUCCESS) {
+            sizeof_ca_ecc_cert_der_256, SSL_FILETYPE_ASN1) != WOLFSSL_SUCCESS) {
         APP_DebugPrintf("Failed to load verification certificate!\r\n");
-        return SSL_FAILURE;
+        return WOLFSSL_FAILURE;
     }
     APP_DebugPrintf("Loaded verify cert buffer into WOLFSSL_CTX\r\n");
 
@@ -115,19 +129,24 @@ int tls_setup_client_ctx(void)
 
     if (wolfSSL_CTX_use_certificate_chain_buffer_format(ctx_client,
             clientCertChainDer, clientCertChainDerSz,
-            WOLFSSL_FILETYPE_ASN1) != SSL_SUCCESS) {
+            WOLFSSL_FILETYPE_ASN1) != WOLFSSL_SUCCESS) {
         APP_DebugPrintf("Failed to load client certificate chain\r\n");
         free(clientCertChainDer);
-        return SSL_FAILURE;
+        return WOLFSSL_FAILURE;
     }
     free(clientCertChainDer);
     APP_DebugPrintf("Loaded client certificate chain in to WOLFSSL_CTX\r\n");
 
     /* Enable peer verification */
-    wolfSSL_CTX_set_verify(ctx_client, SSL_VERIFY_PEER, NULL);
+    wolfSSL_CTX_set_verify(ctx_client, WOLFSSL_VERIFY_PEER, NULL);
     atcatls_set_callbacks(ctx_client);
 
-    return SSL_SUCCESS;
+    /* Use ECDHE-ECDSA cipher suite */
+    if (wolfSSL_CTX_set_cipher_list(ctx_client, "ECDHE-ECDSA-AES128-GCM-SHA256") != WOLFSSL_SUCCESS) {
+        return WOLFSSL_FAILURE;
+    }
+
+    return WOLFSSL_SUCCESS;
 }
 
 static void dns_resolve_handler(uint8_t *pu8DomainName, uint32_t u32ServerIP)
@@ -185,16 +204,16 @@ static void wifi_callback_handler(DRV_HANDLE handle, WDRV_WINC_CONN_STATE curren
 {
     if (currentState == WDRV_WINC_CONN_STATE_CONNECTED) {
         APP_DebugPrintf("Wifi Connected\r\n");
-        g_example_state = EXAMPLE_STATE_CONNECTED;
+        g_example_state = EXAMPLE_STATE_WIFI_CONNECTED;
     }
     else if (currentState == WDRV_WINC_CONN_STATE_DISCONNECTED) {
-        if (g_example_state == EXAMPLE_STATE_CONNECTED) {
+        if (g_example_state == EXAMPLE_STATE_WIFI_CONNECTING) {
             APP_DebugPrintf("Failed to connect\r\n");
             g_example_state = EXAMPLE_STATE_DISCONNECT;
         }
         else {
             APP_DebugPrintf("Wifi Disconnected\r\n");
-            g_example_state = EXAMPLE_STATE_CONNECT;
+            g_example_state = EXAMPLE_STATE_WIFI_CONNECTED;
 
         }
     }
@@ -214,11 +233,15 @@ static void socket_callback_handler(SOCKET socket, uint8_t messageType, void *pM
         if (socket_connect_message) {
             if (socket_connect_message->s8Error != SOCK_ERR_NO_ERROR) {
                 /* An error has occurred */
+                APP_DebugPrintf("WINC1500 WIFI: Failed to connect to %s:%d\r\n", gHost, gPort);
                 APP_DebugPrintf("SOCKET_MSG_CONNECT error %d\r\n", 
                     socket_connect_message->s8Error);
+                
                 g_example_state = EXAMPLE_STATE_SHUTDOWN;
+                break;
             }
         }
+        g_example_state = EXAMPLE_STATE_BSD_CONNECTED;
         break;
     }
     case SOCKET_MSG_RECV:
@@ -259,7 +282,7 @@ int tls_build_signer_ca_cert_tlstng(void)
             (size_t*)&atcert.signer_ca_size);
     if (ret != ATCACERT_E_SUCCESS) {
         APP_DebugPrintf("Failed to read signer cert! %x\r\n", ret);
-        //return ret;
+        return ret;
     }
     else {
         APP_DebugPrintf("Successfully read signer cert\r\n");
@@ -272,7 +295,7 @@ int tls_build_signer_ca_cert_tlstng(void)
             atcert.signer_ca);
     if (ret != ATCACERT_E_SUCCESS) {
         APP_DebugPrintf("Failed to read signer public key! %d\r\n", ret);
-        //return ret;
+        return ret;
     }
     else {
         APP_DebugPrintf("Successfully read signer pub key\r\n");
@@ -305,7 +328,7 @@ int tls_build_end_user_cert_tlstng(void)
             (size_t*)&atcert.end_user_size, NULL);
     if (ret != ATCACERT_E_SUCCESS) {
         APP_DebugPrintf("Failed to read device cert!\r\n");
-        //return ret;
+        return ret;
     }
     else {
         APP_DebugPrintf("Successfully read device cert\r\n");
@@ -317,7 +340,7 @@ int tls_build_end_user_cert_tlstng(void)
             atcert.end_user);
     if (ret != ATCACERT_E_SUCCESS) {
         APP_DebugPrintf("Failed to end user public key!\r\n");
-        //return ret;
+        return ret;
     }
     else {
         APP_DebugPrintf("Successfully read device pub key\r\n");
@@ -391,22 +414,21 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                 break;
             }
 
-            g_example_state = EXAMPLE_STATE_CONNECT;
+            g_example_state = EXAMPLE_STATE_WIFI_CONNECT;
             break;
         }
-        case EXAMPLE_STATE_CONNECT:
+        case EXAMPLE_STATE_WIFI_CONNECT:
             /* Connect to the target BSS with the chosen authentication. */
             if (WDRV_WINC_STATUS_OK == WDRV_WINC_BSSConnect(handle, &bssCtx, &authCtx, &wifi_callback_handler)) {
-                g_example_state = EXAMPLE_STATE_CONNECTING;
+                g_example_state = EXAMPLE_STATE_WIFI_CONNECTING;
             }
             break;
-
-        case EXAMPLE_STATE_CONNECTING:
+        case EXAMPLE_STATE_WIFI_CONNECTING:
             /* Waiting for AP connect */
             break;
-
-        case EXAMPLE_STATE_CONNECTED:
+        case EXAMPLE_STATE_WIFI_CONNECTED:
             /* Waiting for IP */
+            /* Triggered via APP_ExampleDHCPAddressEventCallback */
             break;
 
         case EXAMPLE_STATE_GOT_IP:
@@ -414,54 +436,52 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             break;
 
         case EXAMPLE_STATE_DNS_RESOLVE:
-        {
             /* resolution calls dns_resolve_handler */
             memset(&gAddr, 0, sizeof(gAddr));
             APP_DebugPrintf("DNS Lookup %s\r\n", gHost);
             gethostbyname(gHost);
             g_example_state = EXAMPLE_STATE_DNS_RESOLVING;
             break;
-        }
         case EXAMPLE_STATE_DNS_RESOLVING:
-        {
             /* Waiting for DNS resolution */
             break;
-        }
         case EXAMPLE_STATE_DNS_RESOLVED:
-        {
             g_example_state = EXAMPLE_STATE_BSD_SOCKET;
             break;
-        }
         case EXAMPLE_STATE_BSD_SOCKET:
         {
             int tcpSocket;
             APP_DebugPrintf("Creating socket\r\n");
             tcpSocket = socket(AF_INET, SOCK_STREAM, 1);
             if (tcpSocket < 0) {
+                APP_DebugPrintf("Error creating socket! %d\r\n", status);
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 return;
             }
             gSock = (SOCKET)tcpSocket;
-            APP_DebugPrintf("BSD TCP client: connecting...\r\n");
-
             g_example_state = EXAMPLE_STATE_BSD_CONNECT;
             break;
         }
-
         case EXAMPLE_STATE_BSD_CONNECT:
         {
             int addrlen = sizeof(struct sockaddr);
+            APP_DebugPrintf("TCP client: connecting...\r\n");
             gAddr.sin_family = AF_INET;
             gAddr.sin_port = _htons(gPort);
             if (connect(gSock, (struct sockaddr*)&gAddr, addrlen) != SOCK_ERR_NO_ERROR) {
-                APP_DebugPrintf("WINC1500 WIFI: Failed to connect to %s:%d\r\n", gHost, gPort);
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 return;
             }
+            g_example_state = EXAMPLE_STATE_BSD_CONNECTING;
+            break;
+        }
+        case EXAMPLE_STATE_BSD_CONNECTING:
+            /* waiting for TCP connect */
+            break;
+        case EXAMPLE_STATE_BSD_CONNECTED:
             APP_DebugPrintf("connect() success\r\n");
             g_example_state = EXAMPLE_STATE_WOLFSSL_INIT;
             break;
-        }
 
         case EXAMPLE_STATE_WOLFSSL_INIT:
         {
@@ -494,8 +514,8 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             status = tls_build_signer_ca_cert_tlstng();
             if (status != ATCACERT_E_SUCCESS) {
                 APP_DebugPrintf("Failed to build server's signer certificate\r\n");
-                //g_example_state = EXAMPLE_STATE_FINISHED;
-                //break;
+                g_example_state = EXAMPLE_STATE_FINISHED;
+                break;
             }
             else {
                 APP_DebugPrintf("\r\nBuilt server's signer certificate\r\n");
@@ -504,8 +524,8 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             status = tls_build_end_user_cert_tlstng();
             if (status != ATCACERT_E_SUCCESS) {
                 APP_DebugPrintf("Failed to build client certificate\r\n");
-                //g_example_state = EXAMPLE_STATE_FINISHED;
-                //break;
+                g_example_state = EXAMPLE_STATE_FINISHED;
+                break;
             }
             else {
                 APP_DebugPrintf("\r\nBuilt client certificate\r\n");
