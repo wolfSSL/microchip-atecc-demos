@@ -18,19 +18,7 @@
             </sourceRootList>
             <confList>
                 <confElem>
-                    <name>Cloud_Connect</name>
-                    <type>2</type>
-                </confElem>
-                <confElem>
-                    <name>Google_Cloud</name>
-                    <type>2</type>
-                </confElem>
-                <confElem>
-                    <name>AWS_Cloud</name>
-                    <type>2</type>
-                </confElem>
-                <confElem>
-                    <name>Azure_Cloud</name>
+                    <name>Debug</name>
                     <type>2</type>
                 </confElem>
             </confList>

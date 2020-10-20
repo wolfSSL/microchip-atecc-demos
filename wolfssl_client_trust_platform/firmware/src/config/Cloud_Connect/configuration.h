@@ -172,30 +172,31 @@ extern "C" {
 #define WOLFSSL_USER_IO
 #define NO_WRITEV
 //#define MICROCHIP_TCPIP
+#define NO_ASN_TIME
 
     
     
 
 #define NO_PWDBASED
 
-#define WOLFSSL_TLS13
-#define HAVE_HKDF
 #define HAVE_TLS_EXTENSIONS
 #define HAVE_SUPPORTED_CURVES
+#define HAVE_SNI
 
     
 
 
+#define WOLFSSL_SMALL_STACK
      
     
     
     
     
 
+#define NO_ERROR_STRINGS
     
 #define NO_OLD_TLS
     
-#define USE_FAST_MATH
     
 #define NO_WOLFSSL_SERVER
 #define HAVE_PK_CALLBACKS
@@ -219,6 +220,7 @@ extern "C" {
 #define HAVE_MCAPI
 #define WOLF_CRYPTO_CB  // provide call-back support
 #define NO_MD4
+#define NO_MD5
 #define WOLFSSL_SHA224
 #define NO_DES3
 #define WOLFSSL_AES_128
@@ -246,9 +248,9 @@ extern "C" {
 #define ECC_TIMING_RESISTANT
 #define WC_RSA_BLINDING
 #define SINGLE_THREADED
+#define NO_SIG_WRAPPER
+#define NO_ERROR_STRINGS
 #define NO_WOLFSSL_MEMORY
-#define DEBUG
-#define DEBUG_WOLFSSL
 
 
 

@@ -4,31 +4,10 @@
 # NOCDDL
 #
 CND_BASEDIR=`pwd`
-# Cloud_Connect configuration
-CND_ARTIFACT_DIR_Cloud_Connect=dist/Cloud_Connect/production
-CND_ARTIFACT_NAME_Cloud_Connect=wolfssl_client_trust_platform.X.production.hex
-CND_ARTIFACT_PATH_Cloud_Connect=dist/Cloud_Connect/production/wolfssl_client_trust_platform.X.production.hex
-CND_PACKAGE_DIR_Cloud_Connect=${CND_DISTDIR}/Cloud_Connect/package
-CND_PACKAGE_NAME_Cloud_Connect=wolfsslclienttrustplatform.x.tar
-CND_PACKAGE_PATH_Cloud_Connect=${CND_DISTDIR}/Cloud_Connect/package/wolfsslclienttrustplatform.x.tar
-# Google_Cloud configuration
-CND_ARTIFACT_DIR_Google_Cloud=dist/Google_Cloud/production
-CND_ARTIFACT_NAME_Google_Cloud=wolfssl_client_trust_platform.X.production.hex
-CND_ARTIFACT_PATH_Google_Cloud=dist/Google_Cloud/production/wolfssl_client_trust_platform.X.production.hex
-CND_PACKAGE_DIR_Google_Cloud=${CND_DISTDIR}/Google_Cloud/package
-CND_PACKAGE_NAME_Google_Cloud=wolfsslclienttrustplatform.x.tar
-CND_PACKAGE_PATH_Google_Cloud=${CND_DISTDIR}/Google_Cloud/package/wolfsslclienttrustplatform.x.tar
-# AWS_Cloud configuration
-CND_ARTIFACT_DIR_AWS_Cloud=dist/AWS_Cloud/production
-CND_ARTIFACT_NAME_AWS_Cloud=wolfssl_client_trust_platform.X.production.hex
-CND_ARTIFACT_PATH_AWS_Cloud=dist/AWS_Cloud/production/wolfssl_client_trust_platform.X.production.hex
-CND_PACKAGE_DIR_AWS_Cloud=${CND_DISTDIR}/AWS_Cloud/package
-CND_PACKAGE_NAME_AWS_Cloud=wolfsslclienttrustplatform.x.tar
-CND_PACKAGE_PATH_AWS_Cloud=${CND_DISTDIR}/AWS_Cloud/package/wolfsslclienttrustplatform.x.tar
-# Azure_Cloud configuration
-CND_ARTIFACT_DIR_Azure_Cloud=dist/Azure_Cloud/production
-CND_ARTIFACT_NAME_Azure_Cloud=wolfssl_client_trust_platform.X.production.hex
-CND_ARTIFACT_PATH_Azure_Cloud=dist/Azure_Cloud/production/wolfssl_client_trust_platform.X.production.hex
-CND_PACKAGE_DIR_Azure_Cloud=${CND_DISTDIR}/Azure_Cloud/package
-CND_PACKAGE_NAME_Azure_Cloud=wolfsslclienttrustplatform.x.tar
-CND_PACKAGE_PATH_Azure_Cloud=${CND_DISTDIR}/Azure_Cloud/package/wolfsslclienttrustplatform.x.tar
+# Debug configuration
+CND_ARTIFACT_DIR_Debug=dist/Debug/production
+CND_ARTIFACT_NAME_Debug=wolfssl_client_trust_platform.X.production.hex
+CND_ARTIFACT_PATH_Debug=dist/Debug/production/wolfssl_client_trust_platform.X.production.hex
+CND_PACKAGE_DIR_Debug=${CND_DISTDIR}/Debug/package
+CND_PACKAGE_NAME_Debug=wolfsslclienttrustplatform.x.tar
+CND_PACKAGE_PATH_Debug=${CND_DISTDIR}/Debug/package/wolfsslclienttrustplatform.x.tar

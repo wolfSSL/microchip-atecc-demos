@@ -27,11 +27,11 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 PROJECTNAME=wolfssl_client_trust_platform.X
 
 # Active Configuration
-DEFAULTCONF=Cloud_Connect
+DEFAULTCONF=Debug
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=Cloud_Connect Google_Cloud AWS_Cloud Azure_Cloud 
+ALLCONFS=Debug 
 
 
 # build
@@ -45,19 +45,13 @@ ALLCONFS=Cloud_Connect Google_Cloud AWS_Cloud Azure_Cloud
 
 # clobber
 .clobber-impl: .clobber-pre .depcheck-impl
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Cloud_Connect clean
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Google_Cloud clean
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=AWS_Cloud clean
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Azure_Cloud clean
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Debug clean
 
 
 
 # all
 .all-impl: .all-pre .depcheck-impl
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Cloud_Connect build
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Google_Cloud build
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=AWS_Cloud build
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Azure_Cloud build
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Debug build
 
 
 
