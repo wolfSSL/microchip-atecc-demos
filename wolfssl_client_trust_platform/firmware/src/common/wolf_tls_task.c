@@ -47,28 +47,18 @@ t_atcert atcert = {
     .end_user_pubkey = { 0 }
 };
 
-/* I/O protection key used with examples */
-static uint8_t io_protection_key[ATECC_KEY_SIZE] = {
-    0x37, 0x80, 0xe6, 0x3d, 0x49, 0x68, 0xad, 0xe5,
-    0xd8, 0x22, 0xc0, 0x13, 0xfc, 0xc3, 0x23, 0x84,
-    0x5d, 0x1b, 0x56, 0x9f, 0xe7, 0x05, 0xb6, 0x00,
-    0x06, 0xfe, 0xec, 0x14, 0x5a, 0x0d, 0xb1, 0xe3
-};
-
 /* application states */
 typedef enum
 {
     EXAMPLE_STATE_EXAMPLE_INIT=0,
-    EXAMPLE_STATE_608_INIT,
-    EXAMPLE_STATE_608_CHECK_LOCK,
-    EXAMPLE_STATE_608_INFO,
-    EXAMPLE_STATE_608_SETUP_IO_PROTECTION_KEY,
     EXAMPLE_STATE_NET_INIT,
     EXAMPLE_STATE_CONNECT,
     EXAMPLE_STATE_CONNECTING,
     EXAMPLE_STATE_CONNECTED,
     EXAMPLE_STATE_GOT_IP,
     EXAMPLE_STATE_DNS_RESOLVE,
+    EXAMPLE_STATE_DNS_RESOLVING,
+    EXAMPLE_STATE_DNS_RESOLVED,
     EXAMPLE_STATE_BSD_SOCKET,
     EXAMPLE_STATE_BSD_CONNECT,
     EXAMPLE_STATE_WOLFSSL_INIT,
@@ -143,22 +133,28 @@ int tls_setup_client_ctx(void)
 static void dns_resolve_handler(uint8_t *pu8DomainName, uint32_t u32ServerIP)
 {
     if (u32ServerIP != 0) {
+        uint32_t newIP;
         uint8_t host_ip_address[4];
         host_ip_address[0] = u32ServerIP & 0xFF;
         host_ip_address[1] = (u32ServerIP >> 8) & 0xFF;
         host_ip_address[2] = (u32ServerIP >> 16) & 0xFF;
         host_ip_address[3] = (u32ServerIP >> 24) & 0xFF;
 
-        APP_DebugPrintf("WINC1500 WIFI: DNS lookup:\r\n"
-                        "  Host:       %s\r\n"
-                        "  IP Address: %u.%u.%u.%u\r\n",
-                (char*)pu8DomainName, 
-                host_ip_address[0], host_ip_address[1],
-                host_ip_address[2], host_ip_address[3]);
+        newIP = _htonl((uint32_t)((host_ip_address[0] << 24) |
+                                  (host_ip_address[1] << 16) |
+                                  (host_ip_address[2] << 8)  |
+                                   host_ip_address[3]));
 
-        gAddr.sin_addr.s_addr = u32ServerIP;
-                                                        
-        g_example_state = EXAMPLE_STATE_BSD_SOCKET;
+        if (newIP != gAddr.sin_addr.s_addr) {
+            APP_DebugPrintf("WINC1500 WIFI: DNS lookup:\r\n"
+                            "  Host:       %s\r\n"
+                            "  IP Address: %u.%u.%u.%u\r\n",
+                    (char*)pu8DomainName, 
+                    host_ip_address[0], host_ip_address[1],
+                    host_ip_address[2], host_ip_address[3]);
+        }
+        gAddr.sin_addr.s_addr = newIP;
+        g_example_state = EXAMPLE_STATE_DNS_RESOLVED;
     }
     else {
         /* An error has occurred */
@@ -240,60 +236,6 @@ static void socket_callback_handler(SOCKET socket, uint8_t messageType, void *pM
         APP_DebugPrintf("%s: unhandled message %d\r\n", __FUNCTION__, (int)messageType);
         break;
     }
-}
-
-
-static int atca_check_lock_status(void)
-{
-    ATCA_STATUS status;
-    bool isLocked = false;
-
-    status = atcab_is_locked(LOCK_ZONE_CONFIG, &isLocked);
-    if (status != ATCA_SUCCESS) {
-        APP_DebugPrintf("Error reading CONFIG zone lock\r\n");
-    } else {
-        APP_DebugPrintf("CONFIG zone locked: %s\r\n", isLocked == true ? "yes" : "no");
-    }
-
-    status = atcab_is_locked(LOCK_ZONE_DATA, &isLocked);
-    if (status != ATCA_SUCCESS) {
-        APP_DebugPrintf("Error reading DATA zone lock\r\n");
-    } else {
-        APP_DebugPrintf("DATA zone locked: %s\r\n", isLocked == true ? "yes" : "no");
-    }
-
-    return 0;
-}
-
-static int atca_print_info(void)
-{
-    uint8_t revision[4];
-    uint8_t serialnum[ATCA_SERIAL_NUM_SIZE];
-    char displaystr[ATCA_SERIAL_NUM_SIZE * 3];
-    size_t displaylen = sizeof(displaystr);
-    ATCA_STATUS status;
-
-    /* revision info */
-    status = atcab_info(revision);
-    if (status != ATCA_SUCCESS) {
-        APP_DebugPrintf("Failed to get revision information\r\n");
-    } else {
-        atcab_bin2hex(revision, 4, displaystr, &displaylen);
-        APP_DebugPrintf("revision:\r\n%s\r\n", displaystr);
-    }
-
-    memset(displaystr, 0, sizeof(displaystr));
-    displaylen = sizeof(displaystr);
-
-    status = atcab_read_serial_number(serialnum);
-    if (status != ATCA_SUCCESS) {
-        APP_DebugPrintf("Failed to get serial number\r\n");
-    } else {
-        atcab_bin2hex(serialnum, ATCA_SERIAL_NUM_SIZE, displaystr, &displaylen);
-        APP_DebugPrintf("serial number:\r\n%s\r\n\n", displaystr);
-    }
-
-    return 0;
 }
 
 int tls_build_signer_ca_cert_tlstng(void)
@@ -400,81 +342,6 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             APP_DebugPrintf("wolfSSL Client Example\r\n");
             APP_DebugPrintf("===========================\r\n");
 
-            g_example_state = EXAMPLE_STATE_608_INIT;
-            break;
-        }
-
-        case EXAMPLE_STATE_608_INIT:
-        {
-            status = atcab_init(&atecc608_0_init_data);
-            if (status != ATCA_SUCCESS) {
-                APP_DebugPrintf("atcab_init() failed, ret = %d\r\n", status);
-                g_example_state = EXAMPLE_STATE_FINISHED;
-
-            } else {
-                APP_DebugPrintf("atcab_init() success\r\n");
-                atecc_initialized = 1;
-                g_example_state = EXAMPLE_STATE_608_CHECK_LOCK;
-            }
-            break;
-        }
-
-        case EXAMPLE_STATE_608_CHECK_LOCK:
-        {
-            status = atca_check_lock_status();
-            if (status != 0) {
-                APP_DebugPrintf("Failed to check lock zone status\r\n");
-            }
-            g_example_state = EXAMPLE_STATE_608_INFO;
-            break;
-        }
-
-        case EXAMPLE_STATE_608_INFO:
-        {
-            status = atca_print_info();
-            if (status != 0) {
-                APP_DebugPrintf("Failed to print ATECC608 module info\r\n");
-                g_example_state = EXAMPLE_STATE_FINISHED;
-            } else {
-                g_example_state = EXAMPLE_STATE_608_SETUP_IO_PROTECTION_KEY;
-            }
-            break;
-        }
-
-        case EXAMPLE_STATE_608_SETUP_IO_PROTECTION_KEY:
-        {
-            bool is_locked;
-
-            /* check if IO protection key slot is already locked */
-            status = atcab_is_slot_locked(6, &is_locked);
-            if (status != ATCA_SUCCESS) {
-                APP_DebugPrintf("Failed check if IO protection key slot locked\r\n");
-                g_example_state = EXAMPLE_STATE_FINISHED;
-                break;
-            }
-            if (is_locked) {
-                APP_DebugPrintf("IO protection key slot already locked, skipping setup\r\n");
-                g_example_state = EXAMPLE_STATE_NET_INIT;
-                break;
-            }
-
-            /* write IO protection key to slot */
-            status = atcab_write_zone(ATCA_ZONE_DATA, 6, 0, 0,
-                        io_protection_key, ATCA_KEY_SIZE);
-            if (status != ATCA_SUCCESS) {
-                APP_DebugPrintf("Failed to write IO protection key to slot\r\n");
-                g_example_state = EXAMPLE_STATE_FINISHED;
-                break;
-            }
-
-            /* lock IO protection key slot */
-            /*status = atcab_lock_data_slot(6);
-            if (status != ATCA_SUCCESS) {
-                APP_DebugPrintf("Failed to lock IO protection key slot\r\n");
-                appData.state = APP_STATE_FINISHED;
-                break;
-            }*/
-
             g_example_state = EXAMPLE_STATE_NET_INIT;
             break;
         }
@@ -550,10 +417,21 @@ void APP_ExampleTasks(DRV_HANDLE handle)
         {
             /* resolution calls dns_resolve_handler */
             memset(&gAddr, 0, sizeof(gAddr));
+            APP_DebugPrintf("DNS Lookup %s\r\n", gHost);
             gethostbyname(gHost);
+            g_example_state = EXAMPLE_STATE_DNS_RESOLVING;
             break;
         }
-
+        case EXAMPLE_STATE_DNS_RESOLVING:
+        {
+            /* Waiting for DNS resolution */
+            break;
+        }
+        case EXAMPLE_STATE_DNS_RESOLVED:
+        {
+            g_example_state = EXAMPLE_STATE_BSD_SOCKET;
+            break;
+        }
         case EXAMPLE_STATE_BSD_SOCKET:
         {
             int tcpSocket;
@@ -590,6 +468,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             APP_DebugPrintf("Initializing wolfSSL\r\n");
             status = wolfCrypt_ATECC_SetConfig(&atecc608_0_init_data);
             if (status == 0) {
+                /* this calls atmel_init(), which handles setting up the atca device above */
                 status = wolfSSL_Init();
                 if (status != WOLFSSL_SUCCESS) {
                     APP_DebugPrintf("wolfSSL_Init() failed, ret = %d\r\n", status);
