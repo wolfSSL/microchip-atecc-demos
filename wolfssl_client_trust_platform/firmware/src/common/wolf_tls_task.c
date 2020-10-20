@@ -1,10 +1,13 @@
-
-#include "app.h"
 #include "app.h"
 #include "wdrv_winc_client_api.h"
 #include "cryptoauthlib.h"
 #include <wolfssl/ssl.h>
-//#include <wolfssl/wolfcrypt/port/atmel/atmel.h>
+#include "tls_common.h"
+#include <wolfssl/wolfcrypt/port/atmel/atmel.h>
+
+/* force inclusion of 256-bit test certs and keys */
+#undef  USE_CERT_BUFFERS_256
+#define USE_CERT_BUFFERS_256
 #include <wolfssl/certs_test.h>
 
 #define WLAN_AUTH_WPA_PSK
@@ -66,17 +69,17 @@ int tls_setup_client_ctx(void)
 
     method_client = wolfTLSv1_2_client_method();
     if (method_client == NULL) {
-        SYS_PRINT("Failed to alloc dynamic buffer\r\n");
+        APP_DebugPrintf("Failed to alloc dynamic buffer\r\n");
         return SSL_FAILURE;
     }
-    SYS_PRINT("Created wolfTLSv1_2_client_method()\r\n");
+    APP_DebugPrintf("Created wolfTLSv1_2_client_method()\r\n");
 
     ctx_client = wolfSSL_CTX_new(method_client);
     if (ctx_client == NULL) {
-        SYS_PRINT("Failed to create wolfSSL context\r\n");
+        APP_DebugPrintf("Failed to create wolfSSL context\r\n");
         return SSL_FAILURE;
     }
-    SYS_PRINT("Created new WOLFSSL_CTX\r\n");
+    APP_DebugPrintf("Created new WOLFSSL_CTX\r\n");
 
     /* Load root CA certificate used to verify peer. This buffer is set up to
      * verify the wolfSSL example server. The example server should be started
@@ -84,10 +87,10 @@ int tls_setup_client_ctx(void)
      * <wolfssl_root>/certs/ecc-key.pem private key. */
     if (wolfSSL_CTX_load_verify_buffer(ctx_client, ca_ecc_cert_der_256,
             sizeof_ca_ecc_cert_der_256, SSL_FILETYPE_ASN1) != SSL_SUCCESS) {
-        SYS_PRINT("Failed to load verification certificate!\r\n");
+        APP_DebugPrintf("Failed to load verification certificate!\r\n");
         return SSL_FAILURE;
     }
-    SYS_PRINT("Loaded verify cert buffer into WOLFSSL_CTX\r\n");
+    APP_DebugPrintf("Loaded verify cert buffer into WOLFSSL_CTX\r\n");
 
     /* Concatenate client cert with intermediate signer cert to send chain,
      * peer will have root CA loaded to verify chain */
@@ -100,12 +103,12 @@ int tls_setup_client_ctx(void)
     if (wolfSSL_CTX_use_certificate_chain_buffer_format(ctx_client,
             clientCertChainDer, clientCertChainDerSz,
             WOLFSSL_FILETYPE_ASN1) != SSL_SUCCESS) {
-        SYS_PRINT("Failed to load client certificate chain\r\n");
+        APP_DebugPrintf("Failed to load client certificate chain\r\n");
         free(clientCertChainDer);
         return SSL_FAILURE;
     }
     free(clientCertChainDer);
-    SYS_PRINT("Loaded client certificate chain in to WOLFSSL_CTX\r\n");
+    APP_DebugPrintf("Loaded client certificate chain in to WOLFSSL_CTX\r\n");
 
     /* Enable peer verification */
     wolfSSL_CTX_set_verify(ctx_client, SSL_VERIFY_PEER, NULL);
@@ -116,8 +119,6 @@ int tls_setup_client_ctx(void)
 
 static void dns_resolve_handler(uint8_t *pu8DomainName, uint32_t u32ServerIP)
 {
-    char message[128];
-
     if (u32ServerIP != 0) {
         uint8_t host_ip_address[4];
         host_ip_address[0] = u32ServerIP & 0xFF;
@@ -125,14 +126,13 @@ static void dns_resolve_handler(uint8_t *pu8DomainName, uint32_t u32ServerIP)
         host_ip_address[2] = (u32ServerIP >> 16) & 0xFF;
         host_ip_address[3] = (u32ServerIP >> 24) & 0xFF;
 
-        sprintf(&message[0], "WINC1500 WIFI: DNS lookup:\r\n  Host:       %s\r\n  IP Address: %u.%u.%u.%u",
+        APP_DebugPrintf("WINC1500 WIFI: DNS lookup:\r\n  Host:       %s\r\n  IP Address: %u.%u.%u.%u",
                 (char*)pu8DomainName, host_ip_address[0], host_ip_address[1],
                 host_ip_address[2], host_ip_address[3]);
-        console_print_message(message);
     }
     else {
         /* An error has occurred */
-        console_print_error_message("WINC1500 DNS lookup failed.");
+        APP_DebugPrintf("WINC1500 DNS lookup failed.");
         g_example_state = EXAMPLE_STATE_FINISHED;
     }
 }
@@ -156,14 +156,12 @@ static void APP_ExampleGetSystemTimeEventCallback(DRV_HANDLE handle, uint32_t ti
 
 static void wifi_callback_handler(DRV_HANDLE handle, WDRV_WINC_CONN_STATE currentState, WDRV_WINC_CONN_ERROR errorCode)
 {
-    char message[256];
-
     if (currentState == WDRV_WINC_CONN_STATE_CONNECTED) {
         APP_DebugPrintf("Wifi Connected\r\n");
 
     }
     else if (currentState == WDRV_WINC_CONN_STATE_DISCONNECTED) {
-        if (g_example_state == CLOUD_STATE_CLOUD_CONNECTED) {
+        if (g_example_state == EXAMPLE_STATE_CONNECTED) {
             APP_DebugPrintf("Failed to connect\r\n");
             g_example_state = EXAMPLE_STATE_DISCONNECT;
         }
@@ -174,10 +172,8 @@ static void wifi_callback_handler(DRV_HANDLE handle, WDRV_WINC_CONN_STATE curren
         }
     }
     else {
-        memset(&message[0], 0, sizeof(message));
-        sprintf(&message[0], "WINC1500 WIFI: Unknown connection status: %d",
+        APP_DebugPrintf("WINC1500 WIFI: Unknown connection status: %d",
                 currentState);
-        console_print_error_message(message);
     }
 }
 
@@ -250,11 +246,11 @@ void APP_ExampleTasks(DRV_HANDLE handle)
         {
             status = atcab_init(&atecc608a_0_init_data_TNGTLS);
             if (status != ATCA_SUCCESS) {
-                SYS_PRINT("atcab_init() failed, ret = %d\r\n", status);
+                APP_DebugPrintf("atcab_init() failed, ret = %d\r\n", status);
                 g_example_state = EXAMPLE_STATE_FINISHED;
 
             } else {
-                SYS_PRINT("atcab_init() success\r\n");
+                APP_DebugPrintf("atcab_init() success\r\n");
                 atecc_initialized = 1;
                 g_example_state = EXAMPLE_STATE_608_CHECK_LOCK;
             }
@@ -265,7 +261,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
         {
             ret = check_lock_status();
             if (ret != 0) {
-                SYS_PRINT("Failed to check lock zone status\r\n");
+                APP_DebugPrintf("Failed to check lock zone status\r\n");
             }
             g_example_state = EXAMPLE_STATE_608_INFO;
             break;
@@ -275,7 +271,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
         {
             ret = print_info();
             if (ret != 0) {
-                SYS_PRINT("Failed to print ATECC608A module info\r\n");
+                APP_DebugPrintf("Failed to print ATECC608A module info\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
             } else {
                 g_example_state = EXAMPLE_STATE_NET_INIT;
@@ -348,12 +344,12 @@ void APP_ExampleTasks(DRV_HANDLE handle)
 
         case EXAMPLE_STATE_WOLFSSL_INIT:
         {
-            SYS_PRINT("Initializing wolfSSL\r\n");
+            APP_DebugPrintf("Initializing wolfSSL\r\n");
             ret = wolfCrypt_ATECC_SetConfig(&atecc608a_0_init_data_TNGTLS);
             if (ret == 0) {
                 ret = wolfSSL_Init();
                 if (ret != WOLFSSL_SUCCESS) {
-                    SYS_PRINT("wolfSSL_Init() failed, ret = %d\r\n", ret);
+                    APP_DebugPrintf("wolfSSL_Init() failed, ret = %d\r\n", ret);
                     g_example_state = EXAMPLE_STATE_FINISHED;
                 } else {
 
@@ -364,7 +360,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                     g_example_state = EXAMPLE_STATE_DNS_RESOLVE;
                 }
             } else {
-                SYS_PRINT("wolfCrypt_ATECC_SetConfig() failed\r\n");
+                APP_DebugPrintf("wolfCrypt_ATECC_SetConfig() failed\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
             }
             break;
@@ -377,7 +373,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
 
             hostInfo = gethostbyname(appData.host);
             if (hostInfo != NULL) {
-                SYS_PRINT("gethostbyname(%s) passed\r\n", appData.host);
+                APP_DebugPrintf("gethostbyname(%s) passed\r\n", appData.host);
                 memcpy(&appData.addr.sin_addr.S_un.S_addr,
                         *(hostInfo->h_addr_list), sizeof(IPV4_ADDR));
                 g_example_state = EXAMPLE_STATE_BSD_SOCKET;
@@ -389,14 +385,14 @@ void APP_ExampleTasks(DRV_HANDLE handle)
         case EXAMPLE_STATE_BSD_SOCKET:
         {
             int tcpSocket;
-            SYS_PRINT("Creating socket\r\n");
+            APP_DebugPrintf("Creating socket\r\n");
             if ((tcpSocket = socket(AF_INET, SOCK_STREAM,
                                     IPPROTO_TCP)) == SOCKET_ERROR) {
                 return;
             } else {
                 appData.socket = (SOCKET)tcpSocket;
             }
-            SYS_PRINT("BSD TCP client: connecting...\r\n");
+            APP_DebugPrintf("BSD TCP client: connecting...\r\n");
 
             g_example_state = EXAMPLE_STATE_BSD_CONNECT;
             break;
@@ -411,7 +407,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                         addrlen) < 0) {
                 return;
             }
-            SYS_PRINT("connect() success, loading certs/keys\r\n");
+            APP_DebugPrintf("connect() success, loading certs/keys\r\n");
             g_example_state = EXAMPLE_STATE_LOAD_CERTS;
             break;
         }
@@ -420,39 +416,39 @@ void APP_ExampleTasks(DRV_HANDLE handle)
         {
             ret = tls_build_signer_ca_cert_tlstng();
             if (ret != ATCACERT_E_SUCCESS) {
-                SYS_PRINT("Failed to build server's signer certificate\r\n");
+                APP_DebugPrintf("Failed to build server's signer certificate\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 break;
             }
-            SYS_PRINT("\r\nBuilt server's signer certificate\r\n");
+            APP_DebugPrintf("\r\nBuilt server's signer certificate\r\n");
 
             ret = tls_build_end_user_cert_tlstng();
             if (ret != ATCACERT_E_SUCCESS) {
-                SYS_PRINT("Failed to build client certificate\r\n");
+                APP_DebugPrintf("Failed to build client certificate\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 break;
             }
-            SYS_PRINT("\r\nBuilt client certificate\r\n");
+            APP_DebugPrintf("\r\nBuilt client certificate\r\n");
 
             ret = tls_setup_client_ctx();
             if (ret != SSL_SUCCESS) {
-                SYS_PRINT("Failed to load wolfSSL!\r\n");
+                APP_DebugPrintf("Failed to load wolfSSL!\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 break;
             }
-            SYS_PRINT("\r\nLoaded certs into wolfSSL\r\n");
+            APP_DebugPrintf("\r\nLoaded certs into wolfSSL\r\n");
 
             /* Create new WOLFSSL session */
             ssl_client = wolfSSL_new(ctx_client);
             if (ssl_client == NULL) {
-                SYS_PRINT("Unable to create wolfSSL session\r\n");
+                APP_DebugPrintf("Unable to create wolfSSL session\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 break;
             }
 
             /* Pass socket descriptor to wolfSSL for I/O */
             wolfSSL_set_fd(ssl_client, appData.socket);
-            SYS_PRINT("Registered SOCKET with wolfSSL\r\n");
+            APP_DebugPrintf("Registered SOCKET with wolfSSL\r\n");
 
             g_example_state = EXAMPLE_STATE_DO_HANDSHAKE;
             break;
@@ -468,13 +464,13 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                     break;
                 } else {
                     char buffer[80];
-                    SYS_PRINT("wolfSSL_connect() failed, error = %d: %s\r\n",
+                    APP_DebugPrintf("wolfSSL_connect() failed, error = %d: %s\r\n",
                             err, wolfSSL_ERR_error_string(err, buffer));
                     g_example_state = EXAMPLE_STATE_FINISHED;
                     break;
                 }
             }
-            SYS_PRINT("wolfSSL_connect() success!\r\n");
+            APP_DebugPrintf("wolfSSL_connect() success!\r\n");
 
             g_example_state = EXAMPLE_STATE_SEND_HTTP_GET;
             break;
@@ -491,13 +487,13 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                     break;
                 } else {
                     char buffer[80];
-                    SYS_PRINT("wolfSSL_write() failed, error = %d: %s\r\n",
+                    APP_DebugPrintf("wolfSSL_write() failed, error = %d: %s\r\n",
                             err, wolfSSL_ERR_error_string(err, buffer));
                     g_example_state = EXAMPLE_STATE_FINISHED;
                     break;
                 }
             }
-            SYS_PRINT("Sent HTTP GET to peer\r\n");
+            APP_DebugPrintf("Sent HTTP GET to peer\r\n");
 
             g_example_state = EXAMPLE_STATE_RECV_RESPONSE;
             break;
@@ -516,16 +512,16 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                     break;
                 } else {
                     char buffer[80];
-                    SYS_PRINT("wolfSSL_read() failed, error = %d: %s\r\n",
+                    APP_DebugPrintf("wolfSSL_read() failed, error = %d: %s\r\n",
                             err, wolfSSL_ERR_error_string(err, buffer));
                     g_example_state = EXAMPLE_STATE_FINISHED;
                     break;
                 }
             }
-            SYS_PRINT("Response from server:\r\n");
-            SYS_PRINT("----------\r\n");
-            SYS_PRINT("%s\r\n", reply);
-            SYS_PRINT("----------\r\n");
+            APP_DebugPrintf("Response from server:\r\n");
+            APP_DebugPrintf("----------\r\n");
+            APP_DebugPrintf("%s\r\n", reply);
+            APP_DebugPrintf("----------\r\n");
 
             g_example_state = EXAMPLE_STATE_SHUTDOWN;
             break;
@@ -536,19 +532,19 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             if (ssl_client != NULL) {
                 wolfSSL_shutdown(ssl_client);
                 wolfSSL_free(ssl_client);
-                SYS_PRINT("Shutdown and freed WOLFSSL session\r\n");
+                APP_DebugPrintf("Shutdown and freed WOLFSSL session\r\n");
             }
             if (ctx_client != NULL) {
                 wolfSSL_CTX_free(ctx_client);
-                SYS_PRINT("Freed WOLFSSL_CTX\r\n");
+                APP_DebugPrintf("Freed WOLFSSL_CTX\r\n");
             }
             closesocket(appData.socket);
-            SYS_PRINT("\r\nConnection Closed\r\n");
+            APP_DebugPrintf("\r\nConnection Closed\r\n");
 
             if (atecc_initialized == 1) {
                 atcab_release();
                 atecc_initialized = 0;
-                SYS_PRINT("Released ECC608A\r\n");
+                APP_DebugPrintf("Released ECC608A\r\n");
             }
 
             g_example_state = EXAMPLE_STATE_FINISHED;

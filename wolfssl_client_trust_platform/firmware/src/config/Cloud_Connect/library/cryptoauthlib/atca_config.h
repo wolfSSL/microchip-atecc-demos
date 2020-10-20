@@ -6,18 +6,13 @@
 #include "definitions.h"
 
 
-/* Enable HAL I2C */
 #ifndef ATCA_HAL_I2C
 #define ATCA_HAL_I2C
 #endif
 
 /** Include Device Support Options */
-#define ATCA_ATECC608A_SUPPORT
+#define ATCA_ATECC608_SUPPORT
 
-/** Define if cryptoauthlib is to use the maximum execution time method */
-//#ifndef ATCA_NO_POLL
-//#define ATCA_NO_POLL
-//#endif
 
 /* Polling Configuration Options  */
 #ifndef ATCA_POLLING_INIT_TIME_MSEC
@@ -49,6 +44,7 @@
 
 
 /* Define generic interfaces to the processor libraries */
+
 #define PLIB_I2C_ERROR          SERCOM_I2C_ERROR
 #define PLIB_I2C_ERROR_NONE     SERCOM_I2C_ERROR_NONE
 #define PLIB_I2C_TRANSFER_SETUP SERCOM_I2C_TRANSFER_SETUP
@@ -73,6 +69,10 @@ extern atca_plib_i2c_api_t sercom2_plib_i2c_api;
 /** Define certificate templates to be supported. */
 #define ATCA_TNGTLS_SUPPORT
 #define ATCA_TNG_LEGACY_SUPPORT
+
+/** Define Software Crypto Library to Use - if none are defined use the
+    cryptoauthlib version where applicable */
+#define ATCA_WOLFSSL
 
 
 #endif // ATCA_CONFIG_H

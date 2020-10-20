@@ -93,13 +93,18 @@ extern "C" {
 
 
 
-#define SYS_APPDEBUG_ENABLE
-
 
 #define SYS_CMD_ENABLE
 #define SYS_CMD_DEVICE_MAX_INSTANCES       SYS_CONSOLE_DEVICE_MAX_INSTANCES
 #define SYS_CMD_PRINT_BUFFER_SIZE          1024
 #define SYS_CMD_BUFFER_DMA_READY
+
+
+
+#define SYS_DEBUG_ENABLE
+#define SYS_DEBUG_GLOBAL_ERROR_LEVEL       SYS_ERROR_DEBUG
+#define SYS_DEBUG_BUFFER_DMA_READY
+#define SYS_DEBUG_USE_CONSOLE
 
 
 #define SYS_CONSOLE_DEVICE_MAX_INSTANCES   			1
@@ -119,7 +124,7 @@ extern "C" {
 #define DRV_SPI_INSTANCES_NUMBER              1
 
 /*** WiFi WINC Driver Configuration ***/
-#define WDRV_WINC_EIC_SOURCE                EIC_PIN_-1
+#define WDRV_WINC_EIC_SOURCE                EIC_PIN_5
 #define WDRV_WINC_SPI_INDEX                 DRV_SPI_INDEX_0
 #define WDRV_WINC_NETWORK_MODE_SOCKET
 #define WDRV_WINC_DEVICE_WINC1500
@@ -167,15 +172,37 @@ extern "C" {
 #define WOLFSSL_USER_IO
 #define NO_WRITEV
 //#define MICROCHIP_TCPIP
+
+    
+    
+
 #define NO_PWDBASED
+
 #define WOLFSSL_TLS13
 #define HAVE_HKDF
-#define WC_RSA_PSS
 #define HAVE_TLS_EXTENSIONS
 #define HAVE_SUPPORTED_CURVES
+
+    
+
+
+     
+    
+    
+    
+    
+
+    
 #define NO_OLD_TLS
-#define USE_FAST_MATH    
+    
+#define USE_FAST_MATH
+    
 #define NO_WOLFSSL_SERVER
+#define HAVE_PK_CALLBACKS
+    
+    
+   
+
 
 /*** wolfCrypt Library Configuration ***/
 #define MICROCHIP_PIC32
@@ -192,6 +219,7 @@ extern "C" {
 #define WOLF_CRYPTO_CB  // provide call-back support
 #define NO_MD4
 #define WOLFSSL_SHA224
+#define NO_DES3
 #define WOLFSSL_AES_128
 #define WOLFSSL_AES_192
 #define WOLFSSL_AES_256
@@ -199,23 +227,27 @@ extern "C" {
 #define HAVE_AES_DECRYPT
 #define HAVE_AES_ECB
 #define HAVE_AES_CBC
-#define WOLFSSL_AES_COUNTER
 #define HAVE_AESGCM
-#define HAVE_AESCCM
 #define NO_RC4
 #define NO_HC128
 #define NO_RABBIT
 #define HAVE_ECC
+#define HAVE_X963_KDF
+#define ECC_SHAMIR
 #define NO_DH
 #define NO_DSA
 #define FP_MAX_BITS 4096
 #define USE_CERT_BUFFERS_2048
+#define WC_RSA_PSS
 #define NO_DEV_RANDOM
 #define HAVE_HASHDRBG
-#define WC_NO_HARDEN
+#define TFM_TIMING_RESISTANT
+#define ECC_TIMING_RESISTANT
+#define WC_RSA_BLINDING
 #define SINGLE_THREADED
-#define NO_ERROR_STRINGS
 #define NO_WOLFSSL_MEMORY
+#define DEBUG
+#define DEBUG_WOLFSSL
 
 
 

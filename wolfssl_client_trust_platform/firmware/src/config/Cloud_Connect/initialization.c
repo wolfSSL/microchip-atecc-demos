@@ -243,6 +243,15 @@ const SYS_CMD_INIT sysCmdInit =
 };
 
 
+const SYS_DEBUG_INIT debugInit =
+{
+    .moduleInit = {0},
+    .errorLevel = SYS_DEBUG_GLOBAL_ERROR_LEVEL,
+    .consoleIndex = 0,
+};
+
+
+
 
 
 // *****************************************************************************
@@ -303,10 +312,10 @@ void SYS_Initialize ( void* data )
     sysObj.sysTime = SYS_TIME_Initialize(SYS_TIME_INDEX_0, (SYS_MODULE_INIT *)&sysTimeInitData);
     sysObj.sysConsole0 = SYS_CONSOLE_Initialize(SYS_CONSOLE_INDEX_0, (SYS_MODULE_INIT *)&sysConsole0Init);
 
-
-    sysObj.sysAppDebug = SYS_APPDEBUG_Initialize(NULL, NULL);
-
     SYS_CMD_Initialize((SYS_MODULE_INIT*)&sysCmdInit);
+
+    sysObj.sysDebug = SYS_DEBUG_Initialize(SYS_DEBUG_INDEX_0, (SYS_MODULE_INIT*)&debugInit);
+
 
 
     CRYPT_WCCB_Initialize();

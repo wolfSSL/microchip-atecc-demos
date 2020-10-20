@@ -1,8 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Configuration>
   <Components>
-    <UniqueComponent dnOrder="0" id="cmsis"/>
-    <UniqueComponent dnOrder="1" id="core">
+    <GeneratorComponent dnOrder="0" id="atecc608">
+      <Instances dnOrder="0">
+        <InstanceComponent dnOrder="0" id="atecc608" instance="0">
+          <Symbols dnOrder="0">
+            <String dnOrder="0" id="HAL_INTERFACE">
+              <Values dnOrder="0">
+                <Dynamic dnOrder="0" id="atecc608_0" value="SERCOM2"/>
+              </Values>
+            </String>
+            <Hex dnOrder="1" id="I2C_ADDR">
+              <Values dnOrder="0">
+                <Dynamic dnOrder="0" id="atecc608_0" value="106"/>
+              </Values>
+            </Hex>
+            <KeyValueSet dnOrder="2" id="INTERFACE">
+              <Attributes dnOrder="0">
+                <Boolean dnOrder="0" id="readOnly">
+                  <Value dnOrder="0">true</Value>
+                </Boolean>
+              </Attributes>
+              <Values dnOrder="1">
+                <Dynamic dnOrder="0" id="atecc608_0" value="0"/>
+              </Values>
+            </KeyValueSet>
+            <KeyValueSet dnOrder="3" id="PART_TYPE">
+              <Values dnOrder="0">
+                <User dnOrder="0" value="2"/>
+              </Values>
+            </KeyValueSet>
+          </Symbols>
+          <Attachments dnOrder="1">
+            <MultiCapability dnOrder="0" id="ATECC608_DEP_PLIB_I2C">
+              <TargetAttachments dnOrder="0">
+                <TargetAttachment dnOrder="0" targetAttachmentID="SERCOM2_I2C" targetComponentID="sercom2"/>
+              </TargetAttachments>
+            </MultiCapability>
+          </Attachments>
+        </InstanceComponent>
+      </Instances>
+    </GeneratorComponent>
+    <UniqueComponent dnOrder="1" id="cmsis"/>
+    <UniqueComponent dnOrder="2" id="core">
       <Symbols dnOrder="0">
         <Integer dnOrder="0" id="ADC_CLOCK_FREQUENCY">
           <Values dnOrder="0">
@@ -1868,31 +1908,427 @@
         </Integer>
       </Symbols>
     </UniqueComponent>
-    <UniqueComponent dnOrder="2" id="cryptoauthlib">
+    <UniqueComponent dnOrder="3" id="cryptoauthlib">
       <Symbols dnOrder="0">
-        <Boolean dnOrder="0" id="CAL_ENABLE_RTOS">
+        <ListEntry dnOrder="0" id="CAL_DEVICE_LIST_ENTRIES">
+          <Attributes dnOrder="0">
+            <StringArray dnOrder="0" id="values">
+              <Values dnOrder="0">
+                <Value dnOrder="0">ATECC608</Value>
+              </Values>
+            </StringArray>
+          </Attributes>
+        </ListEntry>
+        <Boolean dnOrder="1" id="CAL_ENABLE_RTOS">
           <Values dnOrder="0">
             <Dynamic dnOrder="0" id="cryptoauthlib" value="false"/>
           </Values>
         </Boolean>
-        <Boolean dnOrder="1" id="CAL_ENABLE_WOLFCRYPTO">
+        <Boolean dnOrder="2" id="CAL_ENABLE_WOLFCRYPTO">
           <Values dnOrder="0">
-            <Dynamic dnOrder="0" id="cryptoauthlib" value="false"/>
+            <Dynamic dnOrder="0" id="cryptoauthlib" value="true"/>
           </Values>
         </Boolean>
+        <File dnOrder="3" id="CAL_FILE_SRC_39">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="4" id="CAL_FILE_SRC_40">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="5" id="CAL_FILE_SRC_41">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="6" id="CAL_FILE_SRC_42">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="7" id="CAL_FILE_SRC_43">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="8" id="CAL_FILE_SRC_44">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="9" id="CAL_FILE_SRC_45">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="10" id="CAL_FILE_SRC_46">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="11" id="CAL_FILE_SRC_47">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="12" id="CAL_FILE_SRC_48">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="13" id="CAL_FILE_SRC_49">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="14" id="CAL_FILE_SRC_50">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="15" id="CAL_FILE_SRC_51">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="16" id="CAL_FILE_SRC_52">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="17" id="CAL_FILE_SRC_53">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="18" id="CAL_FILE_SRC_54">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="19" id="CAL_FILE_SRC_55">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="20" id="CAL_FILE_SRC_56">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="21" id="CAL_FILE_SRC_57">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="22" id="CAL_FILE_SRC_58">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="23" id="CAL_FILE_SRC_59">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="24" id="CAL_FILE_SRC_60">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="25" id="CAL_FILE_SRC_61">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="26" id="CAL_FILE_SRC_62">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="27" id="CAL_FILE_SRC_63">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="28" id="CAL_FILE_SRC_64">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="29" id="CAL_FILE_SRC_65">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="30" id="CAL_FILE_SRC_66">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="31" id="CAL_FILE_SRC_67">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="32" id="CAL_FILE_SRC_68">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="33" id="CAL_FILE_SRC_69">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="34" id="CAL_FILE_SRC_70">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="35" id="CAL_FILE_SRC_71">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="36" id="CAL_FILE_SRC_72">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="37" id="CAL_FILE_SRC_73">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="38" id="CAL_FILE_SRC_74">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="39" id="CAL_FILE_SRC_75">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="40" id="CAL_FILE_SRC_76">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="41" id="CAL_FILE_SRC_77">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="42" id="CAL_FILE_SRC_78">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="43" id="CAL_FILE_SRC_79">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="44" id="CAL_FILE_SRC_80">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="45" id="CAL_FILE_SRC_81">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="46" id="CAL_FILE_SRC_82">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="47" id="CAL_FILE_SRC_83">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="48" id="CAL_FILE_SRC_84">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="49" id="CAL_FILE_SRC_85">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="50" id="CAL_FILE_SRC_86">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="51" id="CAL_FILE_SRC_HAL_I2C">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <File dnOrder="52" id="CAL_FILE_SRC_WOLFSSL_WRAPPER">
+          <Attributes dnOrder="0">
+            <Boolean dnOrder="0" id="enabled">
+              <Value dnOrder="0">true</Value>
+            </Boolean>
+          </Attributes>
+        </File>
+        <ListEntry dnOrder="53" id="CAL_PLIB_LIST_ENTRIES">
+          <Attributes dnOrder="0">
+            <StringArray dnOrder="0" id="values">
+              <Values dnOrder="0">
+                <Value dnOrder="0">sercom2_i2c</Value>
+              </Values>
+            </StringArray>
+          </Attributes>
+        </ListEntry>
       </Symbols>
+      <Attachments dnOrder="1">
+        <DirectDependency dnOrder="0" id="WolfSSL_Crypto_Dependency">
+          <Attributes dnOrder="0">
+            <String dnOrder="0" id="targetComponentID">
+              <Value dnOrder="0">lib_wolfcrypt</Value>
+            </String>
+            <String dnOrder="1" id="targetAttachmentID">
+              <Value dnOrder="0">lib_wolfcrypt</Value>
+            </String>
+          </Attributes>
+        </DirectDependency>
+      </Attachments>
     </UniqueComponent>
-    <UniqueComponent dnOrder="3" id="cryptoauthlib_tng">
+    <UniqueComponent dnOrder="4" id="cryptoauthlib_tng">
       <Symbols dnOrder="0">
-        <Boolean dnOrder="0" id="CAL_TNGTLS_SUPPORT">
+        <Boolean dnOrder="0" id="CAL_TFLEX_SUPPORT">
+          <Values dnOrder="0">
+            <Dynamic dnOrder="0" id="cryptoauthlib_tng" value="false"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="1" id="CAL_TNGLORA_SUPPORT">
+          <Values dnOrder="0">
+            <Dynamic dnOrder="0" id="cryptoauthlib_tng" value="false"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="2" id="CAL_TNGTLS_SUPPORT">
+          <Values dnOrder="0">
+            <Dynamic dnOrder="0" id="cryptoauthlib_tng" value="true"/>
+            <User dnOrder="1" value="true"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="3" id="CAL_TNG_LEGACY_SUPPORT">
           <Values dnOrder="0">
             <User dnOrder="0" value="true"/>
           </Values>
         </Boolean>
       </Symbols>
     </UniqueComponent>
-    <UniqueComponent dnOrder="4" id="dfp"/>
-    <GeneratorComponent dnOrder="5" id="drv_spi">
+    <UniqueComponent dnOrder="5" id="dfp"/>
+    <GeneratorComponent dnOrder="6" id="drv_spi">
       <Symbols dnOrder="0">
         <Combo dnOrder="0" id="DRV_SPI_COMMON_MODE">
           <Values dnOrder="0">
@@ -1964,7 +2400,7 @@
         </InstanceComponent>
       </Instances>
     </GeneratorComponent>
-    <UniqueComponent dnOrder="6" id="drvWifiWinc">
+    <UniqueComponent dnOrder="7" id="drvWifiWinc">
       <Symbols dnOrder="0">
         <Boolean dnOrder="0" id="DRV_WIFI_WINC_EIC_SRC_0">
           <Attributes dnOrder="0">
@@ -2035,6 +2471,9 @@
               <Value dnOrder="0">true</Value>
             </Boolean>
           </Attributes>
+          <Values dnOrder="1">
+            <User dnOrder="0" value="true"/>
+          </Values>
         </Boolean>
         <Boolean dnOrder="12" id="DRV_WIFI_WINC_EIC_SRC_6">
           <Values dnOrder="0">
@@ -2056,23 +2495,28 @@
             <Dynamic dnOrder="0" id="drvWifiWinc" value="false"/>
           </Values>
         </Boolean>
-        <Combo dnOrder="16" id="DRV_WIFI_WINC_LOG_LEVEL">
+        <Integer dnOrder="16" id="DRV_WIFI_WINC_EIC_SRC_SELECT">
+          <Values dnOrder="0">
+            <Dynamic dnOrder="0" id="drvWifiWinc" value="5"/>
+          </Values>
+        </Integer>
+        <Combo dnOrder="17" id="DRV_WIFI_WINC_LOG_LEVEL">
           <Values dnOrder="0">
             <User dnOrder="0" value="Inform"/>
           </Values>
         </Combo>
-        <String dnOrder="17" id="DRV_WIFI_WINC_SPI_INST">
+        <String dnOrder="18" id="DRV_WIFI_WINC_SPI_INST">
           <Values dnOrder="0">
             <Dynamic dnOrder="0" id="drvWifiWinc" value="drv_spi_0"/>
             <User dnOrder="1" value=""/>
           </Values>
         </String>
-        <Integer dnOrder="18" id="DRV_WIFI_WINC_SPI_INST_IDX">
+        <Integer dnOrder="19" id="DRV_WIFI_WINC_SPI_INST_IDX">
           <Values dnOrder="0">
             <Dynamic dnOrder="0" id="drvWifiWinc" value="0"/>
           </Values>
         </Integer>
-        <File dnOrder="19" id="DRV_WIFI_WINC_SYS_RTOS_TASK">
+        <File dnOrder="20" id="DRV_WIFI_WINC_SYS_RTOS_TASK">
           <Attributes dnOrder="0">
             <Boolean dnOrder="0" id="enabled">
               <Value dnOrder="0">false</Value>
@@ -2093,7 +2537,7 @@
         </DirectDependency>
       </Attachments>
     </UniqueComponent>
-    <UniqueComponent dnOrder="7" id="eic">
+    <UniqueComponent dnOrder="8" id="eic">
       <Symbols dnOrder="0">
         <Boolean dnOrder="0" id="EIC_CHAN_0">
           <Values dnOrder="0">
@@ -2237,7 +2681,7 @@
         </Boolean>
       </Symbols>
     </UniqueComponent>
-    <UniqueComponent dnOrder="8" id="evsys">
+    <UniqueComponent dnOrder="9" id="evsys">
       <Symbols dnOrder="0">
         <Boolean dnOrder="0" id="EVSYS_CHANNEL_0_GENERATOR_ACTIVE">
           <Values dnOrder="0">
@@ -2476,7 +2920,7 @@
         </Boolean>
       </Symbols>
     </UniqueComponent>
-    <UniqueComponent dnOrder="9" id="HarmonyCore">
+    <UniqueComponent dnOrder="10" id="HarmonyCore">
       <Symbols dnOrder="0">
         <File dnOrder="0" id="APP0_C">
           <Attributes dnOrder="0">
@@ -2496,8 +2940,8 @@
           <Attributes dnOrder="0">
             <KeyValuePairList dnOrder="0" id="pairs">
               <Pairs dnOrder="0">
-                <Pair description="TRUE" dnOrder="0" key="ENABLE_DRV_COMMON" value="1"/>
-                <Pair description="TRUE" dnOrder="1" key="ENABLE_SYS_COMMON" value="2"/>
+                <Pair description="TRUE" dnOrder="0" key="ENABLE_DRV_COMMON" value="2"/>
+                <Pair description="TRUE" dnOrder="1" key="ENABLE_SYS_COMMON" value="3"/>
                 <Pair description="FALSE" dnOrder="2" key="ENABLE_SYS_MEDIA" value="0"/>
                 <Pair description="FALSE" dnOrder="3" key="ENABLE_SYS_PORTS" value="0"/>
                 <Pair description="FALSE" dnOrder="4" key="ENABLE_SYS_DMA" value="0"/>
@@ -2717,7 +3161,7 @@
         </File>
       </Symbols>
     </UniqueComponent>
-    <UniqueComponent dnOrder="10" id="lib_crypto">
+    <UniqueComponent dnOrder="11" id="lib_crypto">
       <Attachments dnOrder="0">
         <DirectDependency dnOrder="0" id="LIB_CRYPTO_WOLFCRYPT_Dependency">
           <Attributes dnOrder="0">
@@ -2731,7 +3175,7 @@
         </DirectDependency>
       </Attachments>
     </UniqueComponent>
-    <UniqueComponent dnOrder="11" id="lib_wolfcrypt">
+    <UniqueComponent dnOrder="12" id="lib_wolfcrypt">
       <Symbols dnOrder="0">
         <Boolean dnOrder="0" id="cryptoCrya_U2803">
           <Values dnOrder="0">
@@ -2743,14 +3187,59 @@
             <Dynamic dnOrder="0" id="lib_wolfcrypt" value="false"/>
           </Values>
         </Boolean>
-        <Boolean dnOrder="2" id="wolfssl_included">
+        <Boolean dnOrder="2" id="wolfcrypt_aes_ccm">
+          <Values dnOrder="0">
+            <User dnOrder="0" value="false"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="3" id="wolfcrypt_aes_ctr">
+          <Values dnOrder="0">
+            <User dnOrder="0" value="false"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="4" id="wolfcrypt_debug">
+          <Values dnOrder="0">
+            <User dnOrder="0" value="true"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="5" id="wolfcrypt_errorstrings">
+          <Values dnOrder="0">
+            <User dnOrder="0" value="true"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="6" id="wolfcrypt_harden">
+          <Values dnOrder="0">
+            <User dnOrder="0" value="true"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="7" id="wolfcrypt_kdf">
+          <Values dnOrder="0">
+            <User dnOrder="0" value="true"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="8" id="wolfcrypt_rsaPss">
+          <Values dnOrder="0">
+            <User dnOrder="0" value="true"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="9" id="wolfcrypt_shamir">
+          <Values dnOrder="0">
+            <User dnOrder="0" value="true"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="10" id="wolfcrypt_tdes">
+          <Values dnOrder="0">
+            <User dnOrder="0" value="false"/>
+          </Values>
+        </Boolean>
+        <Boolean dnOrder="11" id="wolfssl_included">
           <Values dnOrder="0">
             <Dynamic dnOrder="0" id="lib_wolfcrypt" value="true"/>
           </Values>
         </Boolean>
       </Symbols>
     </UniqueComponent>
-    <UniqueComponent dnOrder="12" id="lib_wolfssl">
+    <UniqueComponent dnOrder="13" id="lib_wolfssl">
       <Symbols dnOrder="0">
         <Boolean dnOrder="0" id="wolfsslDTLS">
           <Values dnOrder="0">
@@ -2801,7 +3290,7 @@
         </DirectDependency>
       </Attachments>
     </UniqueComponent>
-    <UniqueComponent dnOrder="13" id="nvmctrl">
+    <UniqueComponent dnOrder="14" id="nvmctrl">
       <Symbols dnOrder="0">
         <Integer dnOrder="0" id="NVM_RWS">
           <Values dnOrder="0">
@@ -2810,7 +3299,7 @@
         </Integer>
       </Symbols>
     </UniqueComponent>
-    <UniqueComponent dnOrder="14" id="rtc">
+    <UniqueComponent dnOrder="15" id="rtc">
       <Symbols dnOrder="0">
         <String dnOrder="0" id="CALLBACK_API_NAME">
           <Values dnOrder="0">
@@ -2906,7 +3395,7 @@
         </Integer>
       </Symbols>
     </UniqueComponent>
-    <UniqueComponent dnOrder="15" id="sercom1">
+    <UniqueComponent dnOrder="16" id="sercom1">
       <Symbols dnOrder="0">
         <Hex dnOrder="0" id="I2CM_BAUD">
           <Values dnOrder="0">
@@ -3013,7 +3502,7 @@
         </DirectCapability>
       </Attachments>
     </UniqueComponent>
-    <UniqueComponent dnOrder="16" id="sercom2">
+    <UniqueComponent dnOrder="17" id="sercom2">
       <Symbols dnOrder="0">
         <Hex dnOrder="0" id="I2CM_BAUD">
           <Values dnOrder="0">
@@ -3243,14 +3732,24 @@
         </Boolean>
       </Symbols>
       <Attachments dnOrder="1">
-        <DirectCapability dnOrder="0" id="SERCOM2_SPI">
+        <DirectCapability dnOrder="0" id="SERCOM2_I2C">
+          <Attributes dnOrder="0">
+            <String dnOrder="0" id="targetComponentID">
+              <Value dnOrder="0">atecc608_0</Value>
+            </String>
+            <String dnOrder="1" id="targetAttachmentID">
+              <Value dnOrder="0">ATECC608_DEP_PLIB_I2C</Value>
+            </String>
+          </Attributes>
+        </DirectCapability>
+        <DirectCapability dnOrder="1" id="SERCOM2_SPI">
           <Attributes dnOrder="0">
             <Boolean dnOrder="0" id="enabled">
               <Value dnOrder="0">false</Value>
             </Boolean>
           </Attributes>
         </DirectCapability>
-        <DirectCapability dnOrder="1" id="SERCOM2_UART">
+        <DirectCapability dnOrder="2" id="SERCOM2_UART">
           <Attributes dnOrder="0">
             <Boolean dnOrder="0" id="enabled">
               <Value dnOrder="0">false</Value>
@@ -3259,7 +3758,7 @@
         </DirectCapability>
       </Attachments>
     </UniqueComponent>
-    <UniqueComponent dnOrder="17" id="sercom3">
+    <UniqueComponent dnOrder="18" id="sercom3">
       <Symbols dnOrder="0">
         <Hex dnOrder="0" id="I2CM_BAUD">
           <Values dnOrder="0">
@@ -3396,7 +3895,7 @@
         </DirectCapability>
       </Attachments>
     </UniqueComponent>
-    <UniqueComponent dnOrder="18" id="sys_command">
+    <UniqueComponent dnOrder="19" id="sys_command">
       <Symbols dnOrder="0">
         <String dnOrder="0" id="SYS_CONSOLE_DEVICE">
           <Values dnOrder="0">
@@ -3422,7 +3921,7 @@
         </DirectDependency>
       </Attachments>
     </UniqueComponent>
-    <GeneratorComponent dnOrder="19" id="sys_console">
+    <GeneratorComponent dnOrder="20" id="sys_console">
       <Symbols dnOrder="0">
         <Integer dnOrder="0" id="SYS_CONSOLE_UART_CONNECTION_COUNTER">
           <Values dnOrder="0">
@@ -3492,7 +3991,33 @@
         </InstanceComponent>
       </Instances>
     </GeneratorComponent>
-    <UniqueComponent dnOrder="20" id="sys_time">
+    <UniqueComponent dnOrder="21" id="sys_debug">
+      <Symbols dnOrder="0">
+        <String dnOrder="0" id="SYS_CONSOLE_DEVICE">
+          <Values dnOrder="0">
+            <Dynamic dnOrder="0" id="sys_debug" value="SYS_CONSOLE_0"/>
+          </Values>
+        </String>
+        <String dnOrder="1" id="SYS_CONSOLE_INDEX">
+          <Values dnOrder="0">
+            <Dynamic dnOrder="0" id="sys_debug" value="0"/>
+          </Values>
+        </String>
+      </Symbols>
+      <Attachments dnOrder="1">
+        <DirectDependency dnOrder="0" id="sys_debug_SYS_CONSOLE_dependency">
+          <Attributes dnOrder="0">
+            <String dnOrder="0" id="targetComponentID">
+              <Value dnOrder="0">sys_console_0</Value>
+            </String>
+            <String dnOrder="1" id="targetAttachmentID">
+              <Value dnOrder="0">sys_console</Value>
+            </String>
+          </Attributes>
+        </DirectDependency>
+      </Attachments>
+    </UniqueComponent>
+    <UniqueComponent dnOrder="22" id="sys_time">
       <Symbols dnOrder="0">
         <Integer dnOrder="0" id="SYS_TIME_MAX_TIMERS">
           <Values dnOrder="0">
@@ -3523,8 +4048,7 @@
         </DirectDependency>
       </Attachments>
     </UniqueComponent>
-    <UniqueComponent dnOrder="21" id="sysAppDebugPic32mzw1"/>
-    <UniqueComponent dnOrder="22" id="tc3">
+    <UniqueComponent dnOrder="23" id="tc3">
       <Symbols dnOrder="0">
         <String dnOrder="0" id="COMPARE_SET_API_NAME">
           <Values dnOrder="0">
@@ -3708,28 +4232,29 @@
     <ComponentGraph dnOrder="1" id="__ROOTVIEW">
       <ElementPositions dnOrder="0">
         <ElementPosition dnOrder="0" id="HarmonyCore" x="705" y="16"/>
-        <ElementPosition dnOrder="1" id="cmsis" x="573" y="21"/>
-        <ElementPosition dnOrder="2" id="core" x="495" y="21"/>
-        <ElementPosition dnOrder="3" id="cryptoauthlib" x="810" y="200"/>
-        <ElementPosition dnOrder="4" id="cryptoauthlib_tng" x="330" y="60"/>
-        <ElementPosition dnOrder="5" id="dfp" x="308" y="23"/>
-        <ElementPosition dnOrder="6" id="drvWifiWinc" x="331" y="400"/>
-        <ElementPosition dnOrder="7" id="drv_spi" x="168" y="93"/>
-        <ElementPosition dnOrder="8" id="eic" x="6" y="102"/>
-        <ElementPosition dnOrder="9" id="evsys" x="181" y="20"/>
-        <ElementPosition dnOrder="10" id="lib_crypto" x="510" y="320"/>
-        <ElementPosition dnOrder="11" id="lib_wolfcrypt" x="510" y="400"/>
-        <ElementPosition dnOrder="12" id="lib_wolfssl" x="693" y="412"/>
-        <ElementPosition dnOrder="13" id="nvmctrl" x="20" y="20"/>
-        <ElementPosition dnOrder="14" id="rtc" x="726" y="128"/>
-        <ElementPosition dnOrder="15" id="sercom1" x="6" y="155"/>
-        <ElementPosition dnOrder="16" id="sercom2" x="855" y="18"/>
-        <ElementPosition dnOrder="17" id="sercom3" x="0" y="279"/>
-        <ElementPosition dnOrder="18" id="sysAppDebugPic32mzw1" x="330" y="140"/>
-        <ElementPosition dnOrder="19" id="sys_command" x="306" y="272"/>
-        <ElementPosition dnOrder="20" id="sys_console" x="149" y="270"/>
-        <ElementPosition dnOrder="21" id="sys_time" x="649" y="193"/>
-        <ElementPosition dnOrder="22" id="tc3" x="490" y="173"/>
+        <ElementPosition dnOrder="1" id="atecc608" x="370" y="528"/>
+        <ElementPosition dnOrder="2" id="cmsis" x="573" y="21"/>
+        <ElementPosition dnOrder="3" id="core" x="495" y="21"/>
+        <ElementPosition dnOrder="4" id="cryptoauthlib" x="726" y="526"/>
+        <ElementPosition dnOrder="5" id="cryptoauthlib_tng" x="522" y="577"/>
+        <ElementPosition dnOrder="6" id="dfp" x="308" y="23"/>
+        <ElementPosition dnOrder="7" id="drvWifiWinc" x="324" y="167"/>
+        <ElementPosition dnOrder="8" id="drv_spi" x="168" y="93"/>
+        <ElementPosition dnOrder="9" id="eic" x="6" y="102"/>
+        <ElementPosition dnOrder="10" id="evsys" x="181" y="20"/>
+        <ElementPosition dnOrder="11" id="lib_crypto" x="723" y="343"/>
+        <ElementPosition dnOrder="12" id="lib_wolfcrypt" x="523" y="354"/>
+        <ElementPosition dnOrder="13" id="lib_wolfssl" x="723" y="421"/>
+        <ElementPosition dnOrder="14" id="nvmctrl" x="20" y="20"/>
+        <ElementPosition dnOrder="15" id="rtc" x="655" y="120"/>
+        <ElementPosition dnOrder="16" id="sercom1" x="7" y="157"/>
+        <ElementPosition dnOrder="17" id="sercom2" x="238" y="580"/>
+        <ElementPosition dnOrder="18" id="sercom3" x="5" y="334"/>
+        <ElementPosition dnOrder="19" id="sys_command" x="330" y="265"/>
+        <ElementPosition dnOrder="20" id="sys_console" x="148" y="268"/>
+        <ElementPosition dnOrder="21" id="sys_debug" x="331" y="381"/>
+        <ElementPosition dnOrder="22" id="sys_time" x="649" y="189"/>
+        <ElementPosition dnOrder="23" id="tc3" x="504" y="235"/>
       </ElementPositions>
     </ComponentGraph>
   </UserData>

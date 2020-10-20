@@ -77,10 +77,7 @@ ATCA_STATUS hal_i2c_discover_devices(int bus_num, ATCAIfaceCfg cfg[], int *found
 static ATCA_STATUS hal_i2c_wait(atca_plib_i2c_api_t* plib, uint32_t rate, uint16_t length)
 {
     ATCA_STATUS status = ATCA_SUCCESS;
-
-    /* I2C Address, start & stop, R/W and ACK (11 bits) + packet size */
     /* Maximum packet size is 1024 bytes (TA device) and 200 bytes (CA device) */
-    length += 2;
     /* so assume rate can be sub 1kHz */
     uint32_t timeout = (uint32_t)length * 9 * 1000;
 
@@ -394,13 +391,13 @@ ATCA_STATUS hal_i2c_wake(ATCAIface iface)
     {
         /* Wait for the I2C bus to be ready */
         /* Since the wait time is unknown, waiting for 30 bytes duration */
-        if (ATCA_SUCCESS == (status = hal_i2c_wait(plib, 100000, 30)))
+        if (ATCA_SUCCESS == (status = hal_i2c_wait(plib, cfg->atcai2c.baud, 30)))
         {
             // Send the 00 address as the wake pulse; part will NACK, so don't check for status
             (void)plib->write(0x00, (uint8_t*)&data[0], 1);
 
             /* Wait for the I2C transfer to complete */
-            status = hal_i2c_wait(plib, 100000, 1);
+            status = hal_i2c_wait(plib, cfg->atcai2c.baud, 1);
         }
     }
 
@@ -415,7 +412,7 @@ ATCA_STATUS hal_i2c_wake(ATCAIface iface)
             if (plib->read(cfg->atcai2c.slave_address>>1, (uint8_t*)&data[0], 4) == true)
             {
                 /* Wait for the I2C transfer to complete */
-                status = hal_i2c_wait(plib, 100000, 4);
+                status = hal_i2c_wait(plib, cfg->atcai2c.baud, 4);
 
                 if (ATCA_SUCCESS == status)
                 {

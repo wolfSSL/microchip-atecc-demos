@@ -144,13 +144,10 @@
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f3" displayName="system" projectFiles="true">
-            <logicalFolder name="f6" displayName="appdebug" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/appdebug/sys_appdebug.h</itemPath>
-            </logicalFolder>
-            <logicalFolder name="f7" displayName="command" projectFiles="true">
+            <logicalFolder name="f6" displayName="command" projectFiles="true">
               <itemPath>../src/config/Cloud_Connect/system/command/sys_command.h</itemPath>
             </logicalFolder>
-            <logicalFolder name="f8" displayName="console" projectFiles="true">
+            <logicalFolder name="f7" displayName="console" projectFiles="true">
               <itemPath>../src/config/Cloud_Connect/system/console/sys_console.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f5" displayName="debug" projectFiles="true">
@@ -186,7 +183,7 @@
           <itemPath>../src/config/Cloud_Connect/config.h</itemPath>
         </logicalFolder>
       </logicalFolder>
-      <logicalFolder name="f3" displayName="packs" projectFiles="true">
+      <logicalFolder name="f4" displayName="packs" projectFiles="true">
         <logicalFolder name="f1" displayName="ATSAMD21E18A_DFP" projectFiles="true">
           <logicalFolder name="f1" displayName="component" projectFiles="true">
             <itemPath>../src/packs/ATSAMD21E18A_DFP/component/pac.h</itemPath>
@@ -237,7 +234,7 @@
           </logicalFolder>
         </logicalFolder>
       </logicalFolder>
-      <logicalFolder name="f4" displayName="wolfcrypt" projectFiles="true">
+      <logicalFolder name="f3" displayName="wolfcrypt" projectFiles="true">
         <logicalFolder name="f1" displayName="port" projectFiles="true">
           <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/port/pic32/pic32mz-crypt.h</itemPath>
           <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/port/pic32/CryptoLib_Fmult_pb.h</itemPath>
@@ -301,6 +298,7 @@
           <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/port/pic32/crypt_sha_sam6156.h</itemPath>
           <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/port/pic32/crypt_aes_sam6149.h</itemPath>
         </logicalFolder>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/port/atmel/atmel.h</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/signature.h</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/md2.h</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/sp.h</itemPath>
@@ -386,6 +384,8 @@
         <itemPath>../src/third_party/wolfssl/wolfssl/sniffer_error.h</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/error-ssl.h</itemPath>
       </logicalFolder>
+      <itemPath>../../../common/atecc_common.h</itemPath>
+      <itemPath>../../../common/tls_common.h</itemPath>
       <itemPath>../src/app.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -471,7 +471,57 @@
           </logicalFolder>
           <logicalFolder name="f2" displayName="library" projectFiles="true">
             <logicalFolder name="f1" displayName="cryptoauthlib" projectFiles="true">
-              <logicalFolder name="f2" displayName="crypto" projectFiles="true">
+              <logicalFolder name="f5" displayName="atcacert" projectFiles="true">
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_client.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_hw.h</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_date.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_pem.h</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_der.h</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_def.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_sw.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert.h</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_hw.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_client.h</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_pem.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_date.h</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_der.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_sw.h</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_def.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="f6" displayName="calib" projectFiles="true">
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_info.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_random.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_verify.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_privwrite.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_execution.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_read.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_sign.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_selftest.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_nonce.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_hmac.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_command.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes_gcm.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_sha.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_ecdh.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_basic.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_kdf.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_gendig.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_secureboot.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_lock.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_write.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_genkey.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_execution.h</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_counter.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_derivekey.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_mac.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_checkmac.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_updateextra.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_command.h</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes_gcm.h</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_basic.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="f3" displayName="crypto" projectFiles="true">
                 <logicalFolder name="f1" displayName="hashes" projectFiles="true">
                   <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/hashes/sha2_routines.h</itemPath>
                   <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/hashes/sha1_routines.c</itemPath>
@@ -492,15 +542,21 @@
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_sw_rand.h</itemPath>
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_sw.h</itemPath>
               </logicalFolder>
-              <logicalFolder name="f4" displayName="hal" projectFiles="true">
+              <logicalFolder name="f2" displayName="hal" projectFiles="true">
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/ATECC608_0.c</itemPath>
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/atca_hal.c</itemPath>
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/atca_hal.h</itemPath>
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/atca_start_config.h</itemPath>
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/atca_start_iface.h</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_i2c_harmony.c</itemPath>
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_harmony_init.c</itemPath>
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_cortex_m_delay.c</itemPath>
               </logicalFolder>
-              <logicalFolder name="f3" displayName="jwt" projectFiles="true">
+              <logicalFolder name="f7" displayName="host" projectFiles="true">
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/host/atca_host.c</itemPath>
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/host/atca_host.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="f4" displayName="jwt" projectFiles="true">
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/jwt/atca_jwt.h</itemPath>
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/jwt/atca_jwt.c</itemPath>
               </logicalFolder>
@@ -515,6 +571,9 @@
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tflxtls_cert_def_4_device.c</itemPath>
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tng_atcacert_client.c</itemPath>
                 <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/tng/tngtls_cert_def_1_signer.c</itemPath>
+              </logicalFolder>
+              <logicalFolder name="f8" displayName="wolfssl" projectFiles="true">
+                <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/wolfssl/atca_wolfssl_interface.c</itemPath>
               </logicalFolder>
               <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_cfgs.c</itemPath>
               <itemPath>../src/config/Cloud_Connect/library/cryptoauthlib/atca_helpers.h</itemPath>
@@ -582,10 +641,7 @@
             <itemPath>../src/config/Cloud_Connect/stdio/xc32_monitor.c</itemPath>
           </logicalFolder>
           <logicalFolder name="f3" displayName="system" projectFiles="true">
-            <logicalFolder name="f5" displayName="appdebug" projectFiles="true">
-              <itemPath>../src/config/Cloud_Connect/system/appdebug/src/sys_appdebug.c</itemPath>
-            </logicalFolder>
-            <logicalFolder name="f6" displayName="command" projectFiles="true">
+            <logicalFolder name="f5" displayName="command" projectFiles="true">
               <itemPath>../src/config/Cloud_Connect/system/command/src/sys_command.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f2" displayName="console" projectFiles="true">
@@ -594,6 +650,10 @@
               <itemPath>../src/config/Cloud_Connect/system/console/src/sys_console_uart.c</itemPath>
               <itemPath>../src/config/Cloud_Connect/system/console/src/sys_console.c</itemPath>
               <itemPath>../src/config/Cloud_Connect/system/console/src/sys_console_local.h</itemPath>
+            </logicalFolder>
+            <logicalFolder name="f6" displayName="debug" projectFiles="true">
+              <itemPath>../src/config/Cloud_Connect/system/debug/src/sys_debug_local.h</itemPath>
+              <itemPath>../src/config/Cloud_Connect/system/debug/src/sys_debug.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f4" displayName="dma" projectFiles="true">
               <itemPath>../src/config/Cloud_Connect/system/dma/sys_dma.c</itemPath>
@@ -636,6 +696,7 @@
           <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/port/pic32/crypt_rsa_pukcl.c</itemPath>
           <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/port/pic32/crypt_ecc_pukcl.c</itemPath>
         </logicalFolder>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/port/atmel/atmel.c</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/ecc_fp.c</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sp_dsp32.c</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sp_armthumb.c</itemPath>
@@ -718,6 +779,8 @@
         <itemPath>../src/third_party/wolfssl/src/wolfio.c</itemPath>
         <itemPath>../src/third_party/wolfssl/src/internal.c</itemPath>
       </logicalFolder>
+      <itemPath>../../../common/atecc_common.c</itemPath>
+      <itemPath>../../../common/tls_common.c</itemPath>
       <itemPath>../src/app.c</itemPath>
       <itemPath>../src/main.c</itemPath>
     </logicalFolder>
@@ -736,6 +799,7 @@
   </logicalFolder>
   <sourceRootList>
     <Elem>../src</Elem>
+    <Elem>../../../common</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -745,7 +809,7 @@
         <targetDevice>ATSAMD21E18A</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>nEdbgTool</platformTool>
+        <platformTool>noID</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion>2.50</languageToolchainVersion>
         <platform>4</platform>
@@ -813,7 +877,7 @@
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src/config/Cloud_Connect/library/cryptoauthlib;../src/config/Cloud_Connect/library/cryptoauthlib/crypto;../src/config/Cloud_Connect/library/cryptoauthlib/pkcs11;../src/third_party/wolfssl/wolfssl;../src/third_party/wolfssl;../src;../src/config/Cloud_Connect;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/;../src/config/Cloud_Connect/driver/winc/include/drv/spi_flash;../src/config/Cloud_Connect/driver/winc/include/drv/socket;../src/config/Cloud_Connect/driver/winc/include/drv/driver;../src/config/Cloud_Connect/driver/winc/include/drv/common;../src/config/Cloud_Connect/driver/winc/include/drv/bsp/include;../src/config/Cloud_Connect/driver/winc/include/drv/bsp;../src/config/Cloud_Connect/driver/winc/include/dev;../src/config/Cloud_Connect/driver/winc/include/;../src/common;../src/common/paho_mqtt_embedded_c;../src/common/parson_json;../src/common/utilities;../src/common/paho_mqtt_embedded_c/MQTTClient-C;../src/common/paho_mqtt_embedded_c/MQTTPacket;../src/common/paho_mqtt_embedded_c/platform"/>
+                  value="../src/config/Cloud_Connect/library/cryptoauthlib;../src/config/Cloud_Connect/library/cryptoauthlib/crypto;../src/config/Cloud_Connect/library/cryptoauthlib/pkcs11;../src/third_party/wolfssl/wolfssl;../src/third_party/wolfssl;../src;../src/config/Cloud_Connect;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/;../src/config/Cloud_Connect/driver/winc/include/drv/spi_flash;../src/config/Cloud_Connect/driver/winc/include/drv/socket;../src/config/Cloud_Connect/driver/winc/include/drv/driver;../src/config/Cloud_Connect/driver/winc/include/drv/common;../src/config/Cloud_Connect/driver/winc/include/drv/bsp/include;../src/config/Cloud_Connect/driver/winc/include/drv/bsp;../src/config/Cloud_Connect/driver/winc/include/dev;../src/config/Cloud_Connect/driver/winc/include/;../src/common;../src/common/paho_mqtt_embedded_c;../src/common/parson_json;../src/common/utilities;../src/common/paho_mqtt_embedded_c/MQTTClient-C;../src/common/paho_mqtt_embedded_c/MQTTPacket;../src/common/paho_mqtt_embedded_c/platform;../../../common;../../../common/tng"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="true"/>
@@ -2004,6 +2068,190 @@
             ex="true"
             overriding="false">
       </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_client.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_client.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_date.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_date.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_def.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_def.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_der.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_der.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_hw.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_hw.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_sw.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_sw.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_pem.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_pem.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes_gcm.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes_gcm.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_basic.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_basic.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_checkmac.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_command.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_command.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_counter.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_derivekey.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_ecdh.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_execution.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_execution.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_gendig.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_genkey.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_hmac.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_info.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_kdf.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_lock.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_mac.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_nonce.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_privwrite.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_random.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_read.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_secureboot.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_selftest.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_sha.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_sign.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_updateextra.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_verify.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_write.c"
+            ex="true"
+            overriding="false">
+      </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_hw_aes.h"
             ex="true"
             overriding="false">
@@ -2076,6 +2324,10 @@
             ex="true"
             overriding="false">
       </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/ATECC608_0.c"
+            ex="true"
+            overriding="false">
+      </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/atca_hal.c"
             ex="true"
             overriding="false">
@@ -2097,6 +2349,18 @@
             overriding="false">
       </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_harmony_init.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_i2c_harmony.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/host/atca_host.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/host/atca_host.h"
             ex="true"
             overriding="false">
       </item>
@@ -2185,6 +2449,10 @@
             overriding="false">
       </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/tng/tngtls_cert_def_3_device.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/wolfssl/atca_wolfssl_interface.c"
             ex="true"
             overriding="false">
       </item>
@@ -2320,14 +2588,6 @@
             ex="true"
             overriding="false">
       </item>
-      <item path="../src/config/Cloud_Connect/system/appdebug/src/sys_appdebug.c"
-            ex="true"
-            overriding="false">
-      </item>
-      <item path="../src/config/Cloud_Connect/system/appdebug/sys_appdebug.h"
-            ex="true"
-            overriding="false">
-      </item>
       <item path="../src/config/Cloud_Connect/system/command/src/sys_command.c"
             ex="true"
             overriding="false">
@@ -2357,6 +2617,14 @@
             overriding="false">
       </item>
       <item path="../src/config/Cloud_Connect/system/console/sys_console.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/system/debug/src/sys_debug.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/system/debug/src/sys_debug_local.h"
             ex="true"
             overriding="false">
       </item>
@@ -4245,6 +4513,8 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-3ffff"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="/Users/davidgarske/GitHub/microchip-atecc-demos/wolfssl_client_trust_platform/firmware/wolfssl_client_trust_platform.X/debug/Google_Cloud/wolfssl_client_trust_platform_ptg"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges"
@@ -4763,6 +5033,190 @@
             ex="true"
             overriding="false">
       </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_client.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_client.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_date.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_date.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_def.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_def.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_der.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_der.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_hw.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_hw.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_sw.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_sw.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_pem.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_pem.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes_gcm.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes_gcm.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_basic.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_basic.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_checkmac.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_command.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_command.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_counter.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_derivekey.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_ecdh.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_execution.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_execution.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_gendig.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_genkey.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_hmac.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_info.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_kdf.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_lock.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_mac.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_nonce.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_privwrite.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_random.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_read.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_secureboot.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_selftest.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_sha.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_sign.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_updateextra.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_verify.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_write.c"
+            ex="true"
+            overriding="false">
+      </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_hw_aes.h"
             ex="true"
             overriding="false">
@@ -4835,6 +5289,10 @@
             ex="true"
             overriding="false">
       </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/ATECC608_0.c"
+            ex="true"
+            overriding="false">
+      </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/atca_hal.c"
             ex="true"
             overriding="false">
@@ -4856,6 +5314,18 @@
             overriding="false">
       </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_harmony_init.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_i2c_harmony.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/host/atca_host.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/host/atca_host.h"
             ex="true"
             overriding="false">
       </item>
@@ -4944,6 +5414,10 @@
             overriding="false">
       </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/tng/tngtls_cert_def_3_device.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/wolfssl/atca_wolfssl_interface.c"
             ex="true"
             overriding="false">
       </item>
@@ -5079,14 +5553,6 @@
             ex="true"
             overriding="false">
       </item>
-      <item path="../src/config/Cloud_Connect/system/appdebug/src/sys_appdebug.c"
-            ex="true"
-            overriding="false">
-      </item>
-      <item path="../src/config/Cloud_Connect/system/appdebug/sys_appdebug.h"
-            ex="true"
-            overriding="false">
-      </item>
       <item path="../src/config/Cloud_Connect/system/command/src/sys_command.c"
             ex="true"
             overriding="false">
@@ -5116,6 +5582,14 @@
             overriding="false">
       </item>
       <item path="../src/config/Cloud_Connect/system/console/sys_console.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/system/debug/src/sys_debug.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/system/debug/src/sys_debug_local.h"
             ex="true"
             overriding="false">
       </item>
@@ -7004,6 +7478,8 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-3ffff"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="/Users/davidgarske/GitHub/microchip-atecc-demos/wolfssl_client_trust_platform/firmware/wolfssl_client_trust_platform.X/debug/AWS_Cloud/wolfssl_client_trust_platform_ptg"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges"
@@ -7522,6 +7998,190 @@
             ex="true"
             overriding="false">
       </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_client.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_client.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_date.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_date.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_def.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_def.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_der.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_der.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_hw.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_hw.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_sw.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_host_sw.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_pem.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/atcacert/atcacert_pem.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes_gcm.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_aes_gcm.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_basic.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_basic.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_checkmac.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_command.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_command.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_counter.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_derivekey.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_ecdh.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_execution.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_execution.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_gendig.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_genkey.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_hmac.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_info.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_kdf.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_lock.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_mac.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_nonce.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_privwrite.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_random.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_read.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_secureboot.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_selftest.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_sha.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_sign.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_updateextra.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_verify.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/calib/calib_write.c"
+            ex="true"
+            overriding="false">
+      </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/crypto/atca_crypto_hw_aes.h"
             ex="true"
             overriding="false">
@@ -7594,6 +8254,10 @@
             ex="true"
             overriding="false">
       </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/ATECC608_0.c"
+            ex="true"
+            overriding="false">
+      </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/atca_hal.c"
             ex="true"
             overriding="false">
@@ -7615,6 +8279,18 @@
             overriding="false">
       </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_harmony_init.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/hal/hal_i2c_harmony.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/host/atca_host.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/host/atca_host.h"
             ex="true"
             overriding="false">
       </item>
@@ -7703,6 +8379,10 @@
             overriding="false">
       </item>
       <item path="../src/config/Cloud_Connect/library/cryptoauthlib/tng/tngtls_cert_def_3_device.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/library/cryptoauthlib/wolfssl/atca_wolfssl_interface.c"
             ex="true"
             overriding="false">
       </item>
@@ -7838,14 +8518,6 @@
             ex="true"
             overriding="false">
       </item>
-      <item path="../src/config/Cloud_Connect/system/appdebug/src/sys_appdebug.c"
-            ex="true"
-            overriding="false">
-      </item>
-      <item path="../src/config/Cloud_Connect/system/appdebug/sys_appdebug.h"
-            ex="true"
-            overriding="false">
-      </item>
       <item path="../src/config/Cloud_Connect/system/command/src/sys_command.c"
             ex="true"
             overriding="false">
@@ -7875,6 +8547,14 @@
             overriding="false">
       </item>
       <item path="../src/config/Cloud_Connect/system/console/sys_console.h"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/system/debug/src/sys_debug.c"
+            ex="true"
+            overriding="false">
+      </item>
+      <item path="../src/config/Cloud_Connect/system/debug/src/sys_debug_local.h"
             ex="true"
             overriding="false">
       </item>
@@ -9763,6 +10443,8 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-3ffff"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="/Users/davidgarske/GitHub/microchip-atecc-demos/wolfssl_client_trust_platform/firmware/wolfssl_client_trust_platform.X/debug/Azure_Cloud/wolfssl_client_trust_platform_ptg"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges"
