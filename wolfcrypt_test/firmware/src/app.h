@@ -5,9 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
-#ifdef HAVE_CONFIG_H
 #include "configuration.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
