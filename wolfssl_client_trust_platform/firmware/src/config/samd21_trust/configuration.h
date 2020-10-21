@@ -94,7 +94,7 @@ extern "C" {
 
 
 #define SYS_CONSOLE_DEVICE_MAX_INSTANCES   			1
-#define SYS_CONSOLE_UART_MAX_INSTANCES 	   			2
+#define SYS_CONSOLE_UART_MAX_INSTANCES 	   			1
 #define SYS_CONSOLE_USB_CDC_MAX_INSTANCES 	   		0
 #define SYS_CONSOLE_PRINT_BUFFER_SIZE        		200
 
@@ -146,19 +146,20 @@ extern "C" {
 /*wolfSSL TLS Layer Configuration*/
 /******************************************************************************/
 
+#if 0 /* disabled to save code space */
 #define WOLFSSL_ALT_NAMES
 #define WOLFSSL_DER_LOAD
 #define KEEP_OUR_CERT
 #define KEEP_PEER_CERT
 #define HAVE_CRL_IO
 #define HAVE_IO_TIMEOUT
+#endif
 #define TFM_NO_ASM
 #define WOLFSSL_NO_ASM
 #define SIZEOF_LONG_LONG 8
 #define WOLFSSL_USER_IO
 #define NO_WRITEV
 //#define MICROCHIP_TCPIP
-#define WOLFSSL_USER_IO
 
     
     
@@ -171,6 +172,7 @@ extern "C" {
 
     
 
+#define NO_SESSION_CACHE
 
 #define WOLFSSL_SMALL_STACK
      
@@ -211,24 +213,20 @@ extern "C" {
 #define WOLFSSL_SHA224
 #define NO_DES3
 #define WOLFSSL_AES_128
-#define WOLFSSL_AES_192
-#define WOLFSSL_AES_256
+#define NO_AES_192
+#define NO_AES_256
 #define WOLFSSL_AES_DIRECT
 #define HAVE_AES_DECRYPT
 #define HAVE_AES_ECB
-#define HAVE_AES_CBC
+#define NO_AES_CBC
 #define HAVE_AESGCM
 #define NO_RC4
 #define NO_HC128
 #define NO_RABBIT
 #define HAVE_ECC
-#define HAVE_X963_KDF
-#define ECC_SHAMIR
 #define NO_DH
 #define NO_DSA
-#define FP_MAX_BITS 4096
-#define USE_CERT_BUFFERS_2048
-#define WC_RSA_PSS
+#define NO_RSA
 #define NO_DEV_RANDOM
 #define HAVE_HASHDRBG
 #define TFM_TIMING_RESISTANT
@@ -239,7 +237,18 @@ extern "C" {
 #define NO_ERROR_STRINGS
 #define NO_WOLFSSL_MEMORY
 
-
+#if 0
+/* Disable certificate date checking for testing */
+#define NO_ASN_TIME
+#else
+/* Override Current Time */
+/* Allows custom "custom_time()" function to be used for benchmark */
+#define WOLFSSL_USER_CURRTIME
+#define WOLFSSL_GMTIME
+#define USER_TICKS
+extern unsigned long my_time(unsigned long* timer);
+#define XTIME my_time
+#endif
 
 // *****************************************************************************
 // *****************************************************************************

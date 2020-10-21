@@ -40,7 +40,7 @@ static WDRV_WINC_AUTH_CONTEXT authCtx;
 static WDRV_WINC_BSS_CONTEXT bssCtx;
 
 extern ATCAIfaceCfg atecc608_0_init_data;
-
+static uint8_t gRTCSet = 0;
 static uint8_t gTlsSocketBuf[WIFI_MAX_BUFFER_SIZE];
 
 typedef struct SockCbInfo {
@@ -87,6 +87,7 @@ typedef enum
     EXAMPLE_STATE_BSD_CONNECTING,
     EXAMPLE_STATE_BSD_CONNECTED,
     EXAMPLE_STATE_WOLFSSL_INIT,
+    EXAMPLE_STATE_NTP_WAIT,
     EXAMPLE_STATE_LOAD_CERTS,
     EXAMPLE_STATE_DO_HANDSHAKE,
     EXAMPLE_STATE_SEND_HTTP_GET,
@@ -118,6 +119,42 @@ int _gettimeofday(struct timeval *tv, void *tzvp)
 {
     return 0;
 }
+/* TIME CODE */
+/* TODO: Implement real RTC */
+/* Optionally you can define NO_ASN_TIME to disable all cert time checks */
+static int hw_get_time_sec(void)
+{
+    return RTC_Timer32CounterGet();
+}
+
+/* This is used by wolfCrypt asn.c for cert time checking */
+unsigned long my_time(unsigned long* timer)
+{
+    (void)timer;
+    return hw_get_time_sec();
+}
+
+#ifndef WOLFCRYPT_ONLY
+/* This is used by TLS only */
+unsigned int LowResTimer(void)
+{
+    return hw_get_time_sec();
+}
+#endif
+
+#ifndef NO_CRYPT_BENCHMARK
+/* This is used by wolfCrypt benchmark tool only */
+double current_time(int reset)
+{
+    double time;
+	int timeMs = RTC_Timer32CounterGet();
+    (void)reset;
+    time = (timeMs / 1000); // sec
+    time += (double)(timeMs % 1000) / 1000; // ms
+    return time;
+}
+#endif
+
 
 static int socket_recv_cb(WOLFSSL* ssl, char* buf, int sz, void* ctx)
 {
@@ -127,27 +164,26 @@ static int socket_recv_cb(WOLFSSL* ssl, char* buf, int sz, void* ctx)
     /* If nothing in the buffer then do read */
     if (info->bufRemain <= 0) {
 	    recvd = (int)recv(info->sd, gTlsSocketBuf, sizeof(gTlsSocketBuf), 0);
-        info->bufRemain = recvd;
+        if (recvd == SOCK_ERR_TIMEOUT) {
+            return WOLFSSL_CBIO_ERR_WANT_READ;
+        }
+        else if (recvd != SOCK_ERR_NO_ERROR) {
+            return WOLFSSL_CBIO_ERR_GENERAL;
+        }
         info->bufPos = 0;
+        info->bufRemain = sz;
 
+        /* wait for WINC event */
     	while (!GET_SOCKET_STATUS(SOCKET_STATUS_RECEIVE)) {
     		m2m_wifi_handle_events();
     	}
     	DISABLE_SOCKET_STATUS(SOCKET_STATUS_RECEIVE);
-
-        if (recvd < 0) {
-            APP_DebugPrintf("Failed to receive packet\r\n");
-    		return WOLFSSL_CBIO_ERR_GENERAL;
-        }
-        else if (recvd == 0) {
-            APP_DebugPrintf("Failed to receive packet, Connection closed\r\n");
-            return WOLFSSL_CBIO_ERR_CONN_CLOSE;
-        }
+        /* Wifi socket recv callback populates info->bufRemain */
+        recvd = sz;
 	}
     else {
         recvd = info->bufRemain;
     }
-
 	if (sz > recvd) {
 	    sz = recvd;
 	}
@@ -156,7 +192,7 @@ static int socket_recv_cb(WOLFSSL* ssl, char* buf, int sz, void* ctx)
     info->bufPos += sz;
     info->bufRemain -= sz;
 
-    APP_DebugPrintf("Recv: %p (%d): recvd %d\r\n", buf, sz, recvd);
+    APP_DebugPrintf("Recv: %p (%d): recvd %d, remain %d\r\n", buf, sz, recvd, info->bufRemain);
 
     return recvd;
 }
@@ -167,10 +203,10 @@ static int socket_send_cb(WOLFSSL* ssl, char* buf, int sz, void* ctx)
     int sent;
     sent = send(info->sd, buf, sz, 0);
 
+    /* wait for WINC event */
     while (!GET_SOCKET_STATUS(SOCKET_STATUS_SEND)) {
 		m2m_wifi_handle_events();
 	}
-
 	DISABLE_SOCKET_STATUS(SOCKET_STATUS_SEND);
     
     APP_DebugPrintf("Send: %p (%d): Res %d\r\n", buf, sz, sent);
@@ -185,6 +221,7 @@ static int socket_send_cb(WOLFSSL* ssl, char* buf, int sz, void* ctx)
 
 int tls_setup_client_ctx(void)
 {
+    int status;
     byte* clientCertChainDer = NULL;
     word32 clientCertChainDerSz = 0;
 
@@ -210,9 +247,10 @@ int tls_setup_client_ctx(void)
      * verify the wolfSSL example server. The example server should be started
      * using the <wolfssl_root>/certs/server-ecc.pem certificate and
      * <wolfssl_root>/certs/ecc-key.pem private key. */
-    if (wolfSSL_CTX_load_verify_buffer(ctx_client, ca_ecc_cert_der_256,
-            sizeof_ca_ecc_cert_der_256, SSL_FILETYPE_ASN1) != WOLFSSL_SUCCESS) {
-        APP_DebugPrintf("Failed to load verification certificate!\r\n");
+    status = wolfSSL_CTX_load_verify_buffer(ctx_client, ca_ecc_cert_der_256,
+            sizeof_ca_ecc_cert_der_256, SSL_FILETYPE_ASN1);
+    if (status != WOLFSSL_SUCCESS) {
+        APP_DebugPrintf("Failed to load verification certificate! %d\r\n", status);
         return WOLFSSL_FAILURE;
     }
     APP_DebugPrintf("Loaded verify cert buffer into WOLFSSL_CTX\r\n");
@@ -225,10 +263,11 @@ int tls_setup_client_ctx(void)
     memcpy(clientCertChainDer + atcert.end_user_size,
            atcert.signer_ca, atcert.signer_ca_size);
 
-    if (wolfSSL_CTX_use_certificate_chain_buffer_format(ctx_client,
+    status = wolfSSL_CTX_use_certificate_chain_buffer_format(ctx_client,
             clientCertChainDer, clientCertChainDerSz,
-            WOLFSSL_FILETYPE_ASN1) != WOLFSSL_SUCCESS) {
-        APP_DebugPrintf("Failed to load client certificate chain\r\n");
+            WOLFSSL_FILETYPE_ASN1);
+    if (status != WOLFSSL_SUCCESS) {
+        APP_DebugPrintf("Failed to load client certificate chain! %d\r\n", status);
         free(clientCertChainDer);
         return WOLFSSL_FAILURE;
     }
@@ -283,18 +322,17 @@ static void dns_resolve_handler(uint8_t *pu8DomainName, uint32_t u32ServerIP)
 static void APP_ExampleDHCPAddressEventCallback(DRV_HANDLE handle, uint32_t ipAddress)
 {
     char s[20];
-
     APP_DebugPrintf("IP address is %s\r\n", inet_ntop(AF_INET, &ipAddress, s, sizeof(s)));
     g_example_state = EXAMPLE_STATE_GOT_IP;
 }
 
 static void APP_ExampleGetSystemTimeEventCallback(DRV_HANDLE handle, uint32_t time)
 {
-    if (true == WDRV_WINC_IPLinkActive(handle))
-    {
-        APP_DebugPrintf("Time %u \r\n", time);
+    if (WDRV_WINC_IPLinkActive(handle)) {
+        APP_DebugPrintf("Time %u\r\n", time);
         RTC_Timer32CounterSet(time);
         RTC_Timer32Start();
+        gRTCSet = 1;
     }
 }
 
@@ -353,6 +391,7 @@ static void socket_callback_handler(SOCKET socket, uint8_t messageType, void *pM
         tstrSocketRecvMsg *socket_receive_message = (tstrSocketRecvMsg*)pMessage;;
         (void)socket_receive_message;
         if (socket_receive_message && socket_receive_message->s16BufferSize > 0) {
+            gIoCtx.bufRemain = socket_receive_message->s16BufferSize;
 			ENABLE_SOCKET_STATUS(SOCKET_STATUS_RECEIVE);
             APP_DebugPrintf("WINC Recv: %d bytes\r\n", socket_receive_message->s16BufferSize);
         }
@@ -574,6 +613,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 return;
             }
+            memset(&gIoCtx, 0, sizeof(gIoCtx));
             gIoCtx.sd = tcpSocket;
             g_example_state = EXAMPLE_STATE_BSD_CONNECT;
             break;
@@ -609,20 +649,30 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                 if (status != WOLFSSL_SUCCESS) {
                     APP_DebugPrintf("wolfSSL_Init() failed, ret = %d\r\n", status);
                     g_example_state = EXAMPLE_STATE_FINISHED;
+                    break;
                 }
-                else {
-                    /* Uncomment next line to enable debug messages, also need
-                     * to recompile wolfSSL with DEBUG_WOLFSSL defined. */
-                    /* wolfSSL_Debugging_ON(); */
-
-                    g_example_state = EXAMPLE_STATE_LOAD_CERTS;
-                }
-            } else {
+            }
+            else {
                 APP_DebugPrintf("wolfCrypt_ATECC_SetConfig() failed\r\n");
                 g_example_state = EXAMPLE_STATE_FINISHED;
+                break;
             }
+            /* Uncomment next line to enable debug messages, also need
+                * to recompile wolfSSL with DEBUG_WOLFSSL defined. */
+            /* wolfSSL_Debugging_ON(); */
+
+            g_example_state = EXAMPLE_STATE_NTP_WAIT;
+            APP_DebugPrintf("Waiting for time\r\n");
             break;
         }
+        
+        case EXAMPLE_STATE_NTP_WAIT:
+            /* waiting for network time to be set via APP_ExampleGetSystemTimeEventCallback */
+            /* check if RTC is enabled and running */
+            if (gRTCSet) {
+                g_example_state = EXAMPLE_STATE_LOAD_CERTS;
+            }
+            break;
 
         case EXAMPLE_STATE_LOAD_CERTS:
         {

@@ -125,18 +125,17 @@
               <itemPath>../src/config/samd21_trust/peripheral/rtc/plib_rtc.h</itemPath>
             </logicalFolder>
             <logicalFolder name="f4" displayName="sercom" projectFiles="true">
-              <logicalFolder name="f2" displayName="i2c_master" projectFiles="true">
+              <logicalFolder name="f1" displayName="i2c_master" projectFiles="true">
                 <itemPath>../src/config/samd21_trust/peripheral/sercom/i2c_master/plib_sercom_i2c_master_common.h</itemPath>
                 <itemPath>../src/config/samd21_trust/peripheral/sercom/i2c_master/plib_sercom2_i2c_master.h</itemPath>
               </logicalFolder>
-              <logicalFolder name="f3" displayName="spi_master" projectFiles="true">
+              <logicalFolder name="f2" displayName="spi_master" projectFiles="true">
                 <itemPath>../src/config/samd21_trust/peripheral/sercom/spi_master/plib_sercom1_spi_master.h</itemPath>
                 <itemPath>../src/config/samd21_trust/peripheral/sercom/spi_master/plib_sercom_spi_master_common.h</itemPath>
               </logicalFolder>
-              <logicalFolder name="f1" displayName="usart" projectFiles="true">
-                <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom3_usart.h</itemPath>
-                <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom_usart_common.h</itemPath>
+              <logicalFolder name="f3" displayName="usart" projectFiles="true">
                 <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom0_usart.h</itemPath>
+                <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom_usart_common.h</itemPath>
               </logicalFolder>
             </logicalFolder>
             <logicalFolder name="f3" displayName="tc" projectFiles="true">
@@ -619,14 +618,13 @@
               <itemPath>../src/config/samd21_trust/peripheral/rtc/plib_rtc_timer.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f4" displayName="sercom" projectFiles="true">
-              <logicalFolder name="f2" displayName="i2c_master" projectFiles="true">
+              <logicalFolder name="f1" displayName="i2c_master" projectFiles="true">
                 <itemPath>../src/config/samd21_trust/peripheral/sercom/i2c_master/plib_sercom2_i2c_master.c</itemPath>
               </logicalFolder>
-              <logicalFolder name="f3" displayName="spi_master" projectFiles="true">
+              <logicalFolder name="f2" displayName="spi_master" projectFiles="true">
                 <itemPath>../src/config/samd21_trust/peripheral/sercom/spi_master/plib_sercom1_spi_master.c</itemPath>
               </logicalFolder>
-              <logicalFolder name="f1" displayName="usart" projectFiles="true">
-                <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom3_usart.c</itemPath>
+              <logicalFolder name="f3" displayName="usart" projectFiles="true">
                 <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom0_usart.c</itemPath>
               </logicalFolder>
             </logicalFolder>
@@ -931,7 +929,7 @@
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
-        <property key="heap-size" value="13312"/>
+        <property key="heap-size" value="11164"/>
         <property key="input-libraries" value=""/>
         <property key="kseg-length" value=""/>
         <property key="kseg-origin" value=""/>
