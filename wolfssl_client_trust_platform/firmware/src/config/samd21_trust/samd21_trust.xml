@@ -1986,14 +1986,14 @@
         <Setting dnOrder="383" id="XC32_HEAP">
           <Attributes dnOrder="0">
             <String dnOrder="0" id="value">
-              <Value dnOrder="0">16384</Value>
+              <Value dnOrder="0">13312</Value>
             </String>
           </Attributes>
         </Setting>
         <Integer dnOrder="384" id="XC32_HEAP_SIZE">
           <Values dnOrder="0">
             <Dynamic dnOrder="0" id="core" value="1024"/>
-            <User dnOrder="1" value="16384"/>
+            <User dnOrder="1" value="13312"/>
           </Values>
         </Integer>
       </Symbols>

@@ -23,10 +23,7 @@ Harmony v3 code generation needs the following changes:
 /* Because WINC1500 is being used */
 -//#define MICROCHIP_TCPIP
 +#define MICROCHIP_TCPIP
-#define NO_OLD_WC_NAMES
-
-/* for TLS v1.3 */
-#define HAVE_HKDF
+#define WOLFSSL_USER_IO /* use custom IO callbacks */
 
 /* for ATECC public key callbacks */
 #define HAVE_PK_CALLBACKS
@@ -47,7 +44,6 @@ Harmony v3 code generation needs the following changes:
 #endif
 ```
 
-
 ## Running the example
 
 1) Choose the TLS server:
@@ -60,8 +56,8 @@ cd wolfssl
 ./autogen.sh
 ./configure
 make
-# Start server with ECC long term test key
-./examples/server/server -b -d -i -g -x -l ECDHE-ECDSA-AES128-GCM-SHA256 -k ./certs/ecc-key.pem -c ./certs/server-ecc.pem
+# Start server with ECC test key and cert
+./examples/server/server -b -d -i -g -x -k ./certs/ecc-key.pem -c ./certs/server-ecc.pem
 ```
 
 Or use a public website like `www.google.com`.

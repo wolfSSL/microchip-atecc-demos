@@ -158,7 +158,7 @@ extern "C" {
 #define WOLFSSL_USER_IO
 #define NO_WRITEV
 //#define MICROCHIP_TCPIP
-#define NO_ASN_TIME
+#define WOLFSSL_USER_IO
 
     
     

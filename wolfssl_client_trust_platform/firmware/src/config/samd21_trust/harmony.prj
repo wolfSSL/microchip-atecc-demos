@@ -5009,7 +5009,7 @@
         <Setting append="true" category="C32" delimiter=";" dnOrder="11" key="extra-include-directories" security="NON_SECURE" value="../src;../src/config/samd21_trust;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/"/>
         <Setting append="true" category="C32" delimiter=";" dnOrder="12" key="preprocessor-macros" security="NON_SECURE" value="HAVE_CONFIG_H"/>
         <Setting append="true" category="C32" delimiter=";" dnOrder="13" key="preprocessor-macros" security="NON_SECURE" value="WOLFSSL_IGNORE_FILE_WARN"/>
-        <Setting category="C32-LD" dnOrder="14" key="heap-size" security="NON_SECURE" value="16384"/>
+        <Setting category="C32-LD" dnOrder="14" key="heap-size" security="NON_SECURE" value="13312"/>
         <Setting category="C32-LD" dnOrder="15" key="no-device-startup-code" security="NON_SECURE" value="true"/>
         <Setting append="true" category="C32-LD" delimiter=";=" dnOrder="16" key="preprocessor-macros" security="NON_SECURE" value=""/>
         <Setting append="true" category="C32CPP" delimiter=";" dnOrder="17" key="extra-include-directories" security="NON_SECURE" value="../src;../src/config/samd21_trust;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/CMSIS/Core/Include;../src/packs/CMSIS/"/>

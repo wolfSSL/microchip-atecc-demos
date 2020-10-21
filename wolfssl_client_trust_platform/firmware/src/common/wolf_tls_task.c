@@ -25,8 +25,8 @@
 #ifndef SERVER_PORT
 #define SERVER_PORT         11111
 #endif
+#define WIFI_MAX_BUFFER_SIZE 1460
 
-static SOCKET gSock;
 static struct sockaddr_in gAddr;
 static char* gHost = SERVER_HOST;
 static uint16_t gPort = SERVER_PORT;
@@ -40,6 +40,17 @@ static WDRV_WINC_AUTH_CONTEXT authCtx;
 static WDRV_WINC_BSS_CONTEXT bssCtx;
 
 extern ATCAIfaceCfg atecc608_0_init_data;
+
+static uint8_t gTlsSocketBuf[WIFI_MAX_BUFFER_SIZE];
+
+typedef struct SockCbInfo {
+    int sd;         /* Socket */
+
+    /* Reader buffer markers */
+    int bufRemain;
+    int bufPos;     /* Position */
+} SockCbInfo;
+static SockCbInfo gIoCtx;
 
 typedef struct t_atcert {
     uint32_t signer_ca_size;
@@ -88,6 +99,89 @@ typedef enum
 
 static EXAMPLE_STATE g_example_state = EXAMPLE_STATE_EXAMPLE_INIT;
 
+/** Socket Status */
+#define	SOCKET_STATUS_BIND					(1 << 0)		/* 00000001 */
+#define	SOCKET_STATUS_LISTEN				(1 << 1)		/* 00000010 */
+#define	SOCKET_STATUS_ACCEPT				(1 << 2)		/* 00000100 */
+#define	SOCKET_STATUS_CONNECT				(1 << 3)		/* 00001000 */
+#define	SOCKET_STATUS_RECEIVE				(1 << 4)		/* 00010000 */
+#define	SOCKET_STATUS_SEND			    	(1 << 5)		/* 00100000 */
+#define	SOCKET_STATUS_RECEIVE_FROM	    	(1 << 6)		/* 01000000 */
+#define	SOCKET_STATUS_SEND_TO				(1 << 7)		/* 10000000 */
+static uint16_t tls_socket_status;
+#define ENABLE_SOCKET_STATUS(index)        		(tls_socket_status |= index)
+#define DISABLE_SOCKET_STATUS(index)        	(tls_socket_status &= ~index)
+#define GET_SOCKET_STATUS(index)        		(tls_socket_status & index)
+
+/* appease libnano */
+int _gettimeofday(struct timeval *tv, void *tzvp)
+{
+    return 0;
+}
+
+static int socket_recv_cb(WOLFSSL* ssl, char* buf, int sz, void* ctx)
+{
+    SockCbInfo* info = (SockCbInfo*)ctx;
+    int recvd = 0;
+
+    /* If nothing in the buffer then do read */
+    if (info->bufRemain <= 0) {
+	    recvd = (int)recv(info->sd, gTlsSocketBuf, sizeof(gTlsSocketBuf), 0);
+        info->bufRemain = recvd;
+        info->bufPos = 0;
+
+    	while (!GET_SOCKET_STATUS(SOCKET_STATUS_RECEIVE)) {
+    		m2m_wifi_handle_events();
+    	}
+    	DISABLE_SOCKET_STATUS(SOCKET_STATUS_RECEIVE);
+
+        if (recvd < 0) {
+            APP_DebugPrintf("Failed to receive packet\r\n");
+    		return WOLFSSL_CBIO_ERR_GENERAL;
+        }
+        else if (recvd == 0) {
+            APP_DebugPrintf("Failed to receive packet, Connection closed\r\n");
+            return WOLFSSL_CBIO_ERR_CONN_CLOSE;
+        }
+	}
+    else {
+        recvd = info->bufRemain;
+    }
+
+	if (sz > recvd) {
+	    sz = recvd;
+	}
+
+    memcpy(buf, &gTlsSocketBuf[info->bufPos], sz);
+    info->bufPos += sz;
+    info->bufRemain -= sz;
+
+    APP_DebugPrintf("Recv: %p (%d): recvd %d\r\n", buf, sz, recvd);
+
+    return recvd;
+}
+
+static int socket_send_cb(WOLFSSL* ssl, char* buf, int sz, void* ctx)
+{
+    SockCbInfo* info = (SockCbInfo*)ctx;
+    int sent;
+    sent = send(info->sd, buf, sz, 0);
+
+    while (!GET_SOCKET_STATUS(SOCKET_STATUS_SEND)) {
+		m2m_wifi_handle_events();
+	}
+
+	DISABLE_SOCKET_STATUS(SOCKET_STATUS_SEND);
+    
+    APP_DebugPrintf("Send: %p (%d): Res %d\r\n", buf, sz, sent);
+    if (sent == SOCK_ERR_TIMEOUT) {
+        return WOLFSSL_CBIO_ERR_WANT_WRITE;
+    }
+    else if (sent != SOCK_ERR_NO_ERROR) {
+        return WOLFSSL_CBIO_ERR_GENERAL;
+    }
+    return sz;
+}
 
 int tls_setup_client_ctx(void)
 {
@@ -107,6 +201,10 @@ int tls_setup_client_ctx(void)
         return WOLFSSL_FAILURE;
     }
     APP_DebugPrintf("Created new WOLFSSL_CTX\r\n");
+
+    /* setup socket IO callbacks */
+    wolfSSL_CTX_SetIOSend(ctx_client, socket_send_cb);
+    wolfSSL_CTX_SetIORecv(ctx_client, socket_recv_cb);
 
     /* Load root CA certificate used to verify peer. This buffer is set up to
      * verify the wolfSSL example server. The example server should be started
@@ -232,6 +330,8 @@ static void socket_callback_handler(SOCKET socket, uint8_t messageType, void *pM
 
         if (socket_connect_message) {
             if (socket_connect_message->s8Error != SOCK_ERR_NO_ERROR) {
+                DISABLE_SOCKET_STATUS(SOCKET_STATUS_CONNECT);
+
                 /* An error has occurred */
                 APP_DebugPrintf("WINC1500 WIFI: Failed to connect to %s:%d\r\n", gHost, gPort);
                 APP_DebugPrintf("SOCKET_MSG_CONNECT error %d\r\n", 
@@ -239,6 +339,9 @@ static void socket_callback_handler(SOCKET socket, uint8_t messageType, void *pM
                 
                 g_example_state = EXAMPLE_STATE_SHUTDOWN;
                 break;
+            }
+            else {
+                ENABLE_SOCKET_STATUS(SOCKET_STATUS_CONNECT);
             }
         }
         g_example_state = EXAMPLE_STATE_BSD_CONNECTED;
@@ -249,10 +352,23 @@ static void socket_callback_handler(SOCKET socket, uint8_t messageType, void *pM
     {
         tstrSocketRecvMsg *socket_receive_message = (tstrSocketRecvMsg*)pMessage;;
         (void)socket_receive_message;
+        if (socket_receive_message && socket_receive_message->s16BufferSize > 0) {
+			ENABLE_SOCKET_STATUS(SOCKET_STATUS_RECEIVE);
+            APP_DebugPrintf("WINC Recv: %d bytes\r\n", socket_receive_message->s16BufferSize);
+        }
+        else {
+            DISABLE_SOCKET_STATUS(SOCKET_STATUS_RECEIVE);
+        }
         break;
     }
     case SOCKET_MSG_SEND:
     {
+        tstrSocketConnectMsg *socket_send_message = (tstrSocketConnectMsg*)pMessage;
+        if (socket_send_message && socket_send_message->s8Error >= 0) {
+            ENABLE_SOCKET_STATUS(SOCKET_STATUS_SEND);
+        } else {
+            DISABLE_SOCKET_STATUS(SOCKET_STATUS_SEND);
+        }
         break;
     }
     default:
@@ -452,13 +568,13 @@ void APP_ExampleTasks(DRV_HANDLE handle)
         {
             int tcpSocket;
             APP_DebugPrintf("Creating socket\r\n");
-            tcpSocket = socket(AF_INET, SOCK_STREAM, 1);
+            tcpSocket = socket(AF_INET, SOCK_STREAM, 0);
             if (tcpSocket < 0) {
                 APP_DebugPrintf("Error creating socket! %d\r\n", status);
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 return;
             }
-            gSock = (SOCKET)tcpSocket;
+            gIoCtx.sd = tcpSocket;
             g_example_state = EXAMPLE_STATE_BSD_CONNECT;
             break;
         }
@@ -468,7 +584,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             APP_DebugPrintf("TCP client: connecting...\r\n");
             gAddr.sin_family = AF_INET;
             gAddr.sin_port = _htons(gPort);
-            if (connect(gSock, (struct sockaddr*)&gAddr, addrlen) != SOCK_ERR_NO_ERROR) {
+            if (connect(gIoCtx.sd, (struct sockaddr*)&gAddr, addrlen) != SOCK_ERR_NO_ERROR) {
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 return;
             }
@@ -548,8 +664,8 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             }
 
             /* Pass socket descriptor to wolfSSL for I/O */
-            wolfSSL_set_fd(ssl_client, gSock);
-            APP_DebugPrintf("Registered SOCKET with wolfSSL\r\n");
+            wolfSSL_SetIOReadCtx(ssl_client, &gIoCtx);
+            wolfSSL_SetIOWriteCtx(ssl_client, &gIoCtx);
 
             g_example_state = EXAMPLE_STATE_DO_HANDSHAKE;
             break;
@@ -646,8 +762,8 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                 ctx_client = NULL;
                 APP_DebugPrintf("Freed WOLFSSL_CTX\r\n");
             }
-            shutdown(gSock);
-            gSock = -1;
+            shutdown(gIoCtx.sd);
+            gIoCtx.sd = -1;
             APP_DebugPrintf("\r\nConnection Closed\r\n");
 
             g_example_state = EXAMPLE_STATE_FINISHED;
