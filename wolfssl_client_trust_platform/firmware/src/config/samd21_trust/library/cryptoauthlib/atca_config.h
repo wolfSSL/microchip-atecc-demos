@@ -66,6 +66,7 @@ typedef struct atca_plib_api
 } atca_plib_i2c_api_t;
 
 extern atca_plib_i2c_api_t sercom2_plib_i2c_api;
+extern atca_plib_i2c_api_t sercom2_plib_i2c_api;
 
 /** Define certificate templates to be supported. */
 #define ATCA_TNGTLS_SUPPORT

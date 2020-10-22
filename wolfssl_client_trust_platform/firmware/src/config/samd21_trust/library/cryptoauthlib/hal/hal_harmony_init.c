@@ -40,5 +40,13 @@ atca_plib_i2c_api_t sercom2_plib_i2c_api = {
     .transfer_setup = SERCOM2_I2C_TransferSetup
 };
 
+atca_plib_i2c_api_t sercom2_plib_i2c_api = {
+    .read = SERCOM2_I2C_Read,
+    .write = SERCOM2_I2C_Write,
+    .is_busy = SERCOM2_I2C_IsBusy,
+    .error_get = SERCOM2_I2C_ErrorGet,
+    .transfer_setup = SERCOM2_I2C_TransferSetup
+};
+
 
 

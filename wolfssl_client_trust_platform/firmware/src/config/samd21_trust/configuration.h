@@ -146,20 +146,18 @@ extern "C" {
 /*wolfSSL TLS Layer Configuration*/
 /******************************************************************************/
 
-#if 0 /* disabled to save code space */
 #define WOLFSSL_ALT_NAMES
 #define WOLFSSL_DER_LOAD
 #define KEEP_OUR_CERT
 #define KEEP_PEER_CERT
 #define HAVE_CRL_IO
 #define HAVE_IO_TIMEOUT
-#endif
 #define TFM_NO_ASM
 #define WOLFSSL_NO_ASM
 #define SIZEOF_LONG_LONG 8
 #define WOLFSSL_USER_IO
 #define NO_WRITEV
-//#define MICROCHIP_TCPIP
+#define MICROCHIP_TCPIP
 
     
     
@@ -187,9 +185,6 @@ extern "C" {
     
     
 #define NO_WOLFSSL_SERVER
-#define HAVE_PK_CALLBACKS
-#define WOLFSSL_ATECC608A
-#define WOLFSSL_ATECC_TNGTLS
     
     
    
@@ -237,18 +232,7 @@ extern "C" {
 #define NO_ERROR_STRINGS
 #define NO_WOLFSSL_MEMORY
 
-#if 0
-/* Disable certificate date checking for testing */
-#define NO_ASN_TIME
-#else
-/* Override Current Time */
-/* Allows custom "custom_time()" function to be used for benchmark */
-#define WOLFSSL_USER_CURRTIME
-#define WOLFSSL_GMTIME
-#define USER_TICKS
-extern unsigned long my_time(unsigned long* timer);
-#define XTIME my_time
-#endif
+
 
 // *****************************************************************************
 // *****************************************************************************
