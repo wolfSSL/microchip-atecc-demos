@@ -20,12 +20,17 @@
 2. Using the Harmony Configuration tool make sure the following components are selected:
 
 * ATECC608
+  - Click on the Instance 0 and choose interface type -> "Trust & Go: TLS"
 * wolfSSL
 * wolfCrypt
 * Trust&Go
 * WINC
 
-3. Harmony v3 code generation needs the following changes:
+3. Harmony v3 code generation needs a few changes
+
+See wolfssl_trust_platform_patch.diff and apply using `patch -p1 < wolfssl_trust_platform_patch.diff`.
+
+Here are the changes:
 
 * `src/config/samd21_trust/configuration.h`:
 

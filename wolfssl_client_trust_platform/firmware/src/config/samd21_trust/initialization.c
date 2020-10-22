@@ -273,6 +273,8 @@ void SYS_Initialize ( void* data )
 
     TC3_TimerInitialize();
 
+    SERCOM3_USART_Initialize();
+
     SERCOM2_I2C_Initialize();
 
     SERCOM1_SPI_Initialize();
