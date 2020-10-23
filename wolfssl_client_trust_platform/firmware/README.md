@@ -55,6 +55,7 @@ Here are the changes:
 
 /* Reduce the fastmath size for ECC only */
 #define FP_MAX_BITS (256 * 2) /* max ECC key size * 2 */
+#define WOLFSSL_SMALL_STACK_CACHE /* reduce heap thrash with SHA256 */
 
 /* Override Current Time */
 /* Allows custom "custom_time()" function to be used for benchmark */
@@ -94,8 +95,11 @@ cd wolfssl
 ./configure --enable-opensslextra CFLAGS="-DSHOW_CERTS"
 make
 # Start server with ECC test key and cert
-./examples/server/server -b -d -i -g -x -k ./certs/ecc-key.pem -c ./certs/server-ecc.pem
+./examples/server/server -b -i -g -x -k ./certs/ecc-key.pem -c ./certs/server-ecc.pem
 ```
+
+For the mutual authentication to work the peer's signer (CA) certificate must be provided via -A argument.
+Use the `-d` to disable mutual auth.
 
 2. Modify the `common/wolf_tls_task.c` or specify as build pre-processor macros:
 

@@ -100,6 +100,7 @@ typedef enum
 
 static EXAMPLE_STATE g_example_state = EXAMPLE_STATE_EXAMPLE_INIT;
 
+#if 0
 /* from certs/dummy-ecc.pem (as DER) */
 static const unsigned char DUMMY_ECC_KEY[] = {
     0x30, 0x77, 0x02, 0x01, 0x01, 0x04, 0x20, 0x05, 0x0F, 0xEA, 0xB6, 0x2C, 0x7C,
@@ -113,6 +114,7 @@ static const unsigned char DUMMY_ECC_KEY[] = {
     0xA6, 0x5D, 0xD4, 0x11, 0x44, 0xB1, 0x91, 0x66, 0x50, 0xC0, 0x2C, 0x8C, 0x71,
     0x35, 0x0E, 0x28, 0xB4
 };
+#endif
 
 /** Socket Status */
 #define	SOCKET_STATUS_BIND					(1 << 0)		/* 00000001 */
@@ -288,6 +290,7 @@ int tls_setup_client_ctx(void)
     free(clientCertChainDer);
     APP_DebugPrintf("Loaded client certificate chain in to WOLFSSL_CTX\r\n");
 
+#if 0
     /* Workaround for TLS mutual authentication */
     /* load dummy private key so wolfSSL knows we want to present a client certificate */
     APP_DebugPrintf("Loading ECC dummy key\r\n");
@@ -300,7 +303,8 @@ int tls_setup_client_ctx(void)
         APP_DebugPrintf("Failed to set key! %d\r\n", status);
         return WOLFSSL_FAILURE;
     }
-
+#endif
+    
     /* Enable peer verification */
     wolfSSL_CTX_set_verify(ctx_client, WOLFSSL_VERIFY_PEER, NULL);
     atcatls_set_callbacks(ctx_client);
