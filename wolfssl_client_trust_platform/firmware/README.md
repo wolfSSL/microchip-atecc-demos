@@ -21,9 +21,10 @@
 
 * ATECC608
   - Click on the Instance 0 and choose interface type -> "Trust & Go: TLS"
+* Trust&Go
+  - Choose TNGTLS Certificates and Legacy Trust Certificates.
 * wolfSSL
 * wolfCrypt
-* Trust&Go
 * WINC
 
 3. Harmony v3 code generation needs a few changes
@@ -44,14 +45,16 @@ Here are the changes:
 #define HAVE_IO_TIMEOUT
 #endif
 
-/* Because WINC1500 is being used */
--//#define MICROCHIP_TCPIP
-+#define MICROCHIP_TCPIP
+/* Disable because WINC1500 is being used */
+//#define MICROCHIP_TCPIP
 
 /* for ATECC public key callbacks */
 #define HAVE_PK_CALLBACKS
 #define WOLFSSL_ATECC608A
 #define WOLFSSL_ATECC_TNGTLS
+
+/* Reduce the fastmath size for ECC only */
+#define FP_MAX_BITS (256 * 2) /* max ECC key size * 2 */
 
 /* Override Current Time */
 /* Allows custom "custom_time()" function to be used for benchmark */

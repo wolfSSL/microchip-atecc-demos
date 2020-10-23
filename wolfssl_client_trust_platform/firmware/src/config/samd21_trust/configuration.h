@@ -236,6 +236,7 @@ extern "C" {
 #define NO_SIG_WRAPPER
 #define NO_ERROR_STRINGS
 #define NO_WOLFSSL_MEMORY
+#define FP_MAX_BITS (256 * 2) /* max ECC key size * 2 */
 
 #if 0
 /* Disable certificate date checking for testing */
