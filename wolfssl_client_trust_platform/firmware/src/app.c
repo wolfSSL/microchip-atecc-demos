@@ -51,7 +51,6 @@
 
 #include <stdlib.h>
 #include "app.h"
-//#include "osal/osal.h"
 #include "wdrv_winc_client_api.h"
 #include "stdarg.h"
 
@@ -235,7 +234,6 @@ void APP_Tasks(void)
             if (DRV_HANDLE_INVALID != wdrvHandle)
             {
                 appData.state = APP_STATE_WDRV_OPEN;
-                //APP_ExampleInitialize(wdrvHandle);
             }
             break;
         }

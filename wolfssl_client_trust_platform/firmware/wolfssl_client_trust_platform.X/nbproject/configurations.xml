@@ -136,7 +136,6 @@
               <logicalFolder name="f1" displayName="usart" projectFiles="true">
                 <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom3_usart.h</itemPath>
                 <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom_usart_common.h</itemPath>
-                <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom0_usart.h</itemPath>
               </logicalFolder>
             </logicalFolder>
             <logicalFolder name="f3" displayName="tc" projectFiles="true">
@@ -627,7 +626,6 @@
               </logicalFolder>
               <logicalFolder name="f1" displayName="usart" projectFiles="true">
                 <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom3_usart.c</itemPath>
-                <itemPath>../src/config/samd21_trust/peripheral/sercom/usart/plib_sercom0_usart.c</itemPath>
               </logicalFolder>
             </logicalFolder>
             <logicalFolder name="f3" displayName="tc" projectFiles="true">

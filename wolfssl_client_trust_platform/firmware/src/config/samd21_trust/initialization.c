@@ -202,13 +202,13 @@ const SYS_TIME_INIT sysTimeInitData =
 };
 
 // </editor-fold>
-// <editor-fold defaultstate="collapsed" desc="SYS_CONSOLE Instance 3 Initialization Data">
+// <editor-fold defaultstate="collapsed" desc="SYS_CONSOLE Instance 0 Initialization Data">
 
 
 /* Declared in console device implementation (sys_console_uart.c) */
 extern const SYS_CONSOLE_DEV_DESC sysConsoleUARTDevDesc;
 
-const SYS_CONSOLE_UART_PLIB_INTERFACE sysConsole3UARTPlibAPI =
+const SYS_CONSOLE_UART_PLIB_INTERFACE sysConsole0UARTPlibAPI =
 {
     .read = (SYS_CONSOLE_UART_PLIB_READ)SERCOM3_USART_Read,
 	.readCountGet = (SYS_CONSOLE_UART_PLIB_READ_COUNT_GET)SERCOM3_USART_ReadCountGet,
@@ -218,14 +218,14 @@ const SYS_CONSOLE_UART_PLIB_INTERFACE sysConsole3UARTPlibAPI =
 	.writeFreeBufferCountGet = (SYS_CONSOLE_UART_PLIB_WRITE_FREE_BUFFER_COUNT_GET)SERCOM3_USART_WriteFreeBufferCountGet,
 };
 
-const SYS_CONSOLE_UART_INIT_DATA sysConsole3UARTInitData =
+const SYS_CONSOLE_UART_INIT_DATA sysConsole0UARTInitData =
 {
-    .uartPLIB = &sysConsole3UARTPlibAPI,    
+    .uartPLIB = &sysConsole0UARTPlibAPI,    
 };
 
 const SYS_CONSOLE_INIT sysConsole0Init =
 {
-    .deviceInitData = (const void*)&sysConsole3UARTInitData,
+    .deviceInitData = (const void*)&sysConsole0UARTInitData,
     .consDevDesc = &sysConsoleUARTDevDesc,
     .deviceIndex = 0,
 };
@@ -280,8 +280,6 @@ void SYS_Initialize ( void* data )
     SERCOM1_SPI_Initialize();
 
     EVSYS_Initialize();
-
-    SERCOM0_USART_Initialize();
 
     DMAC_Initialize();
 
