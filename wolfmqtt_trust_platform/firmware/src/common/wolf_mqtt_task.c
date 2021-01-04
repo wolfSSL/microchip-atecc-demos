@@ -72,6 +72,7 @@
 typedef enum
 {
     EXAMPLE_STATE_EXAMPLE_INIT=0,
+    EXAMPLE_STATE_WOLFSSL_INIT,
     EXAMPLE_STATE_NET_INIT,
     EXAMPLE_STATE_MQTT_INIT,
     EXAMPLE_STATE_WIFI_CONNECT,
@@ -153,6 +154,7 @@ typedef struct _SocketContext {
     /* Reader buffer markers */
     int bufRemain;
     int bufPos;     /* Position */
+    int8_t s8Error;
 } SocketContext;
 
 extern void APP_DebugPrintf(const char* format, ...);
@@ -256,7 +258,7 @@ double current_time(int reset)
 
 static void dns_resolve_handler(uint8_t *pu8DomainName, uint32_t u32ServerIP)
 {
-    if (u32ServerIP != 0) {
+    if (u32ServerIP != 0 && gSockCtx) {
         uint32_t newIP;
         uint8_t host_ip_address[4];
         host_ip_address[0] = u32ServerIP & 0xFF;
@@ -356,24 +358,27 @@ static void socket_callback_handler(SOCKET socket, uint8_t messageType, void *pM
     {
         tstrSocketRecvMsg *socket_receive_message = (tstrSocketRecvMsg*)pMessage;;
         if (socket_receive_message && socket_receive_message->s16BufferSize > 0) {
-            gSockCtx->bufRemain = socket_receive_message->s16BufferSize;
-			ENABLE_SOCKET_STATUS(SOCKET_STATUS_RECEIVE);
+            if (gSockCtx)
+                gSockCtx->bufRemain = socket_receive_message->s16BufferSize;
             PRINTF("WINC Recv: %d bytes", socket_receive_message->s16BufferSize);
         }
         else {
-            DISABLE_SOCKET_STATUS(SOCKET_STATUS_RECEIVE);
+            if (gSockCtx)
+                gSockCtx->s8Error = SOCK_ERR_TIMEOUT;
+            PRINTF("WINC Recv Error");
         }
+        ENABLE_SOCKET_STATUS(SOCKET_STATUS_RECEIVE);
         break;
     }
     case SOCKET_MSG_SEND:
     {
         tstrSocketConnectMsg *socket_send_message = (tstrSocketConnectMsg*)pMessage;
-        if (socket_send_message && socket_send_message->s8Error >= 0) {
-            ENABLE_SOCKET_STATUS(SOCKET_STATUS_SEND);
+        if (socket_send_message && socket_send_message->s8Error != SOCK_ERR_NO_ERROR) {
+            if (gSockCtx)
+                gSockCtx->s8Error = socket_send_message->s8Error;
+            PRINTF("WINC Send Error: %d", socket_send_message->s8Error);
         }
-        else {
-            DISABLE_SOCKET_STATUS(SOCKET_STATUS_SEND);
-        }
+        ENABLE_SOCKET_STATUS(SOCKET_STATUS_SEND);
         break;
     }
     default:
@@ -666,6 +671,7 @@ static int NetRead(void *context, byte* buf, int sz,
 
     /* If nothing in the buffer then do read */
     if (sockCtx->bufRemain <= 0) {
+        sockCtx->s8Error = SOCK_ERR_NO_ERROR;
 	    recvd = (int)recv(sockCtx->fd, sockCtx->socketBuf, sizeof(sockCtx->socketBuf), 0);
         if (recvd == SOCK_ERR_TIMEOUT) {
             return MQTT_CODE_CONTINUE;
@@ -681,19 +687,22 @@ static int NetRead(void *context, byte* buf, int sz,
     		m2m_wifi_handle_events();
     	}
     	DISABLE_SOCKET_STATUS(SOCKET_STATUS_RECEIVE);
-        /* Wifi socket recv callback populates info->bufRemain */
-        recvd = sz;
+
+        /* Wifi socket recv callback populates sockCtx->bufRemain */
 	}
-    else {
-        recvd = sockCtx->bufRemain;
-    }
+    recvd = sockCtx->bufRemain;
 	if (sz > recvd) {
 	    sz = recvd;
 	}
 
-    memcpy(buf, &sockCtx->socketBuf[sockCtx->bufPos], sz);
-    sockCtx->bufPos += sz;
-    sockCtx->bufRemain -= sz;
+    if (sockCtx->s8Error != SOCK_ERR_NO_ERROR) {
+        recvd = MQTT_CODE_ERROR_NETWORK;
+    }
+    else {
+        memcpy(buf, &sockCtx->socketBuf[sockCtx->bufPos], sz);
+        sockCtx->bufPos += sz;
+        sockCtx->bufRemain -= sz;
+    }
 
     PRINTF("Recv: %p (%d): recvd %d, remain %d", buf, sz, recvd, sockCtx->bufRemain);
 
@@ -705,6 +714,8 @@ static int NetWrite(void *context, const byte* buf, int sz,
 {
     SocketContext *sockCtx = (SocketContext*)context;
     int sent;
+
+    sockCtx->s8Error = SOCK_ERR_NO_ERROR;
     sent = send(sockCtx->fd, (byte*)buf, sz, 0);
 
     /* wait for WINC event */
@@ -714,11 +725,15 @@ static int NetWrite(void *context, const byte* buf, int sz,
 	DISABLE_SOCKET_STATUS(SOCKET_STATUS_SEND);
     
     PRINTF("Send: %p (%d): Res %d", buf, sz, sent);
+
     if (sent == SOCK_ERR_TIMEOUT) {
         return MQTT_CODE_CONTINUE;
     }
-    else if (sent != SOCK_ERR_NO_ERROR) {
+    else if (sent != SOCK_ERR_NO_ERROR && sockCtx->s8Error != SOCK_ERR_NO_ERROR) {
         return MQTT_CODE_ERROR_NETWORK;
+    }
+    else {
+        sent = sz;
     }
     return sent;
 }
@@ -807,6 +822,7 @@ int MqttClientNet_DeInit(MqttNet* net)
             WOLFMQTT_FREE(net->context);
         }
         memset(net, 0, sizeof(MqttNet));
+        gSockCtx = NULL;
 
         /* Disconnect from the WINC1500 WIFI */
         m2m_wifi_disconnect();
@@ -840,6 +856,7 @@ static int mqtt_tls_verify_cb(int preverify, WOLFSSL_X509_STORE_CTX* store)
         PRINTF("  Allowing cert anyways");
     }
 
+
     return 1;
 }
 
@@ -848,14 +865,17 @@ static int mqtt_tls_cb(MqttClient* client)
 {
     int rc = WOLFSSL_FAILURE;
     int status;
+#if 0
     byte* clientCertChainDer = NULL;
     word32 clientCertChainDerSz = 0;
+#endif
 
     client->tls.ctx = wolfSSL_CTX_new(wolfTLSv1_2_client_method());
     if (client->tls.ctx) {
         /* default to success */
         rc = WOLFSSL_SUCCESS;
 
+#if 0
         PRINTF("Loading certs/keys");
         status = tls_build_signer_ca_cert_tlstng();
         if (status != ATCACERT_E_SUCCESS) {
@@ -874,6 +894,7 @@ static int mqtt_tls_cb(MqttClient* client)
         else {
             PRINTF("Built client certificate");
         }
+#endif
 
         /* Load root CA certificate used to verify peer. This buffer is set up to
         * verify the wolfSSL example server. The example server should be started
@@ -887,6 +908,7 @@ static int mqtt_tls_cb(MqttClient* client)
         }
         PRINTF("Loaded verify cert buffer into WOLFSSL_CTX");
 
+#if 0
         /* Concatenate client cert with intermediate signer cert to send chain,
         * peer will have root CA loaded to verify chain */
         clientCertChainDerSz = atcert.end_user_size + atcert.signer_ca_size;
@@ -920,6 +942,7 @@ static int mqtt_tls_cb(MqttClient* client)
             return WOLFSSL_FAILURE;
         }
     #endif
+#endif
         
         /* Enable peer verification */
         wolfSSL_CTX_set_verify(client->tls.ctx, WOLFSSL_VERIFY_PEER, 
@@ -950,6 +973,13 @@ word16 mqtt_get_packetid(MQTTCtx* mqttCtx)
     return ++mqttCtx->packetIdLast;
 }
 
+#ifdef DEBUG_WOLFSSL
+static void wolfLogCb(const int logLevel, const char *const logMessage)
+{
+    PRINTF("WOLF %d: %s", logLevel, logMessage);
+}
+#endif
+
 void APP_ExampleTasks(DRV_HANDLE handle)
 {
     int rc, i;
@@ -959,11 +989,6 @@ void APP_ExampleTasks(DRV_HANDLE handle)
     {
         case EXAMPLE_STATE_EXAMPLE_INIT:
         {
-            PRINTF("");
-            PRINTF("===========================");
-            PRINTF("AzureIoTHub Client: QoS %d, Use TLS %d", mqttCtx.qos, mqttCtx.use_tls);
-            PRINTF("===========================");
-
             /* init defaults */
             memset(&mqttCtx, 0, sizeof(MQTTCtx));
             mqttCtx.clean_session = 1;
@@ -975,6 +1000,11 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             mqttCtx.topic_name = AZURE_MSGS_TOPIC_NAME;
             mqttCtx.cmd_timeout_ms = AZURE_CMD_TIMEOUT_MS;
             mqttCtx.use_tls = 1;
+
+            PRINTF("");
+            PRINTF("===========================");
+            PRINTF("AzureIoTHub Client: QoS %d, Use TLS %d", mqttCtx.qos, mqttCtx.use_tls);
+            PRINTF("===========================");
 
             /* setup tx/rx buffers */
             mqttCtx.tx_buf = (byte*)WOLFMQTT_MALLOC(MAX_BUFFER_SIZE);
@@ -993,6 +1023,36 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                 g_example_state = EXAMPLE_STATE_FINISHED;
                 break;
             }
+
+            g_example_state = EXAMPLE_STATE_WOLFSSL_INIT;
+            break;
+        }
+
+        case EXAMPLE_STATE_WOLFSSL_INIT:
+        {
+            PRINTF("Initializing wolfSSL");
+            rc = wolfCrypt_ATECC_SetConfig(&atecc608_0_init_data);
+            if (rc == 0) {
+                /* this calls atmel_init(), which handles setting up the atca device above */
+                rc = wolfSSL_Init();
+                if (rc != WOLFSSL_SUCCESS) {
+                    PRINTF("wolfSSL_Init() failed, ret = %d", rc);
+                    g_example_state = EXAMPLE_STATE_FINISHED;
+                    break;
+                }
+            }
+            else {
+                PRINTF("wolfCrypt_ATECC_SetConfig() failed");
+                g_example_state = EXAMPLE_STATE_FINISHED;
+                break;
+            }
+
+        #ifdef DEBUG_WOLFSSL
+            /* Uncomment next line to enable debug messages, also need
+             * to recompile wolfSSL with DEBUG_WOLFSSL defined. */
+            wolfSSL_SetLoggingCb(wolfLogCb);
+            wolfSSL_Debugging_ON();
+        #endif
 
             g_example_state = EXAMPLE_STATE_NET_INIT;
             break;
@@ -1056,6 +1116,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             break;
 
         case EXAMPLE_STATE_GOT_IP:
+            PRINTF("Waiting for network time sync");
             g_example_state = EXAMPLE_STATE_NTP_WAIT;
             break;
 
@@ -1255,6 +1316,7 @@ void APP_ExampleTasks(DRV_HANDLE handle)
             /* Cleanup network */
             MqttClientNet_DeInit(&mqttCtx.net);
             MqttClient_DeInit(&mqttCtx.client);
+            wolfSSL_Cleanup();
 
             g_example_state = EXAMPLE_STATE_WAIT;
             break;

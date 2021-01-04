@@ -166,15 +166,15 @@ extern "C" {
 //#define MICROCHIP_TCPIP
 
     
-    
+
 
 #define NO_PWDBASED
 
 #define HAVE_TLS_EXTENSIONS
 #define HAVE_SUPPORTED_CURVES
 #define HAVE_SNI
-
-    
+#define HAVE_EXTENDED_MASTER    
+#define HAVE_ENCRYPT_THEN_MAC
 
 #define NO_SESSION_CACHE
 
@@ -184,7 +184,7 @@ extern "C" {
     
     
     
-
+//#define DEBUG_WOLFSSL
 #define NO_ERROR_STRINGS
     
 #define NO_OLD_TLS
@@ -238,7 +238,6 @@ extern "C" {
 #define WC_RSA_BLINDING
 #define SINGLE_THREADED
 #define NO_SIG_WRAPPER
-#define NO_ERROR_STRINGS
 #define NO_WOLFSSL_MEMORY
 
 #define FP_MAX_BITS (256 * 2) /* max ECC key size * 2 */
