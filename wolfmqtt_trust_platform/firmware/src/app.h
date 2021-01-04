@@ -170,11 +170,6 @@ void APP_Initialize ( void );
 
 void APP_Tasks( void );
 
-void APP_DebugPrintf(const char* format, ...);
-
-char APP_HexToChar(uint8_t hex);
-
-void APP_DebugPrintBuffer(const uint8_t *pBuf, uint16_t bufLen);
 
 //DOM-IGNORE-BEGIN
 #ifdef __cplusplus

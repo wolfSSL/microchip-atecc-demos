@@ -147,9 +147,6 @@
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f3" displayName="system" projectFiles="true">
-            <logicalFolder name="f6" displayName="console" projectFiles="true">
-              <itemPath>../src/config/samd21_trust/system/console/sys_console.h</itemPath>
-            </logicalFolder>
             <logicalFolder name="f5" displayName="debug" projectFiles="true">
               <itemPath>../src/config/samd21_trust/system/debug/sys_debug.h</itemPath>
             </logicalFolder>
@@ -654,17 +651,10 @@
             <itemPath>../src/config/samd21_trust/stdio/xc32_monitor.c</itemPath>
           </logicalFolder>
           <logicalFolder name="f3" displayName="system" projectFiles="true">
-            <logicalFolder name="f2" displayName="console" projectFiles="true">
-              <itemPath>../src/config/samd21_trust/system/console/src/sys_console_uart.h</itemPath>
-              <itemPath>../src/config/samd21_trust/system/console/src/sys_console_uart_definitions.h</itemPath>
-              <itemPath>../src/config/samd21_trust/system/console/src/sys_console_uart.c</itemPath>
-              <itemPath>../src/config/samd21_trust/system/console/src/sys_console.c</itemPath>
-              <itemPath>../src/config/samd21_trust/system/console/src/sys_console_local.h</itemPath>
-            </logicalFolder>
-            <logicalFolder name="f4" displayName="dma" projectFiles="true">
+            <logicalFolder name="f3" displayName="dma" projectFiles="true">
               <itemPath>../src/config/samd21_trust/system/dma/sys_dma.c</itemPath>
             </logicalFolder>
-            <logicalFolder name="f3" displayName="int" projectFiles="true">
+            <logicalFolder name="f2" displayName="int" projectFiles="true">
               <itemPath>../src/config/samd21_trust/system/int/src/sys_int.c</itemPath>
             </logicalFolder>
             <logicalFolder name="f1" displayName="time" projectFiles="true">

@@ -73,6 +73,7 @@ typedef enum
 {
     EXAMPLE_STATE_EXAMPLE_INIT=0,
     EXAMPLE_STATE_NET_INIT,
+    EXAMPLE_STATE_MQTT_INIT,
     EXAMPLE_STATE_WIFI_CONNECT,
     EXAMPLE_STATE_WIFI_CONNECTING,
     EXAMPLE_STATE_WIFI_CONNECTED,
@@ -156,7 +157,7 @@ typedef struct _SocketContext {
 
 extern void APP_DebugPrintf(const char* format, ...);
 #undef  PRINTF
-#define PRINTF(_f_, ...)  APP_DebugPrintf( (_f_ "\r\n"), ##__VA_ARGS__)
+#define PRINTF(_f_, ...)  printf( (_f_ "\r\n"), ##__VA_ARGS__)
 
 /* Locals */
 static WDRV_WINC_AUTH_CONTEXT authCtx;
@@ -296,7 +297,7 @@ static void APP_ExampleDHCPAddressEventCallback(DRV_HANDLE handle, uint32_t ipAd
 static void APP_ExampleGetSystemTimeEventCallback(DRV_HANDLE handle, uint32_t time)
 {
     if (WDRV_WINC_IPLinkActive(handle)) {
-        PRINTF("Time %u", time);
+        PRINTF("Time %u", (unsigned int)time);
         RTC_Timer32CounterSet(time);
         RTC_Timer32Start();
         gRTCSet = 1;
@@ -993,27 +994,6 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                 break;
             }
 
-            /* Initialize MqttClient structure */
-            rc = MqttClient_Init(&mqttCtx.client, &mqttCtx.net, mqtt_message_cb,
-                mqttCtx.tx_buf, MAX_BUFFER_SIZE, mqttCtx.rx_buf, MAX_BUFFER_SIZE,
-                mqttCtx.cmd_timeout_ms);
-            if (rc == MQTT_CODE_CONTINUE) {
-                break;
-            }
-            PRINTF("MQTT Init: %s (%d)",
-                MqttClient_ReturnCodeToString(rc), rc);
-            if (rc != MQTT_CODE_SUCCESS) {
-                g_example_state = EXAMPLE_STATE_FINISHED;
-                break;
-            }
-            mqttCtx.client.ctx = &mqttCtx;
-
-        #ifdef WOLFMQTT_V5
-            /* AWS broker only supports v3.1.1 client */
-            mqttCtx.client.protocol_level = MQTT_CONNECT_PROTOCOL_LEVEL_4;
-        #endif
-        
-
             g_example_state = EXAMPLE_STATE_NET_INIT;
             break;
         }
@@ -1033,6 +1013,31 @@ void APP_ExampleTasks(DRV_HANDLE handle)
                 break;
             }
 
+            g_example_state = EXAMPLE_STATE_MQTT_INIT;
+            break;
+        }
+
+        case EXAMPLE_STATE_MQTT_INIT:
+        {
+            /* Initialize MqttClient structure */
+            rc = MqttClient_Init(&mqttCtx.client, &mqttCtx.net, mqtt_message_cb,
+                mqttCtx.tx_buf, MAX_BUFFER_SIZE, mqttCtx.rx_buf, MAX_BUFFER_SIZE,
+                mqttCtx.cmd_timeout_ms);
+            if (rc == MQTT_CODE_CONTINUE) {
+                break;
+            }
+            PRINTF("MQTT Init: %s (%d)",
+                MqttClient_ReturnCodeToString(rc), rc);
+            if (rc != MQTT_CODE_SUCCESS) {
+                g_example_state = EXAMPLE_STATE_FINISHED;
+                break;
+            }
+            mqttCtx.client.ctx = &mqttCtx;
+
+        #ifdef WOLFMQTT_V5
+            /* AWS broker only supports v3.1.1 client */
+            mqttCtx.client.protocol_level = MQTT_CONNECT_PROTOCOL_LEVEL_4;
+        #endif
             g_example_state = EXAMPLE_STATE_WIFI_CONNECT;
             break;
         }
