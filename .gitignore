@@ -50,7 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-/wolfssl_client_trust_platform/firmware/wolfssl_client_trust_platform.X/build/
-/wolfssl_client_trust_platform/firmware/wolfssl_client_trust_platform.X/dist/
 private.xml
+wolfssl_client_trust_platform/firmware/wolfssl_client_trust_platform.X/build/
+wolfssl_client_trust_platform/firmware/wolfssl_client_trust_platform.X/dist/
 wolfssl_client_trust_platform/firmware/wolfssl_client_trust_platform.X/nbproject/private
+wolfmqtt_trust_platform/firmware/wolfmqtt_trust_platform.X/build/
+wolfmqtt_trust_platform/firmware/wolfmqtt_trust_platform.X/dist/
+wolfmqtt_trust_platform/firmware/wolfmqtt_trust_platform.X/nbproject/private

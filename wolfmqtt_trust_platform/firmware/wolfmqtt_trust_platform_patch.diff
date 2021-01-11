@@ -1,0 +1,571 @@
+From c20e7365592b8d8de72ddcca2c02b2116a89e229 Mon Sep 17 00:00:00 2001
+From: David Garske <david@wolfssl.com>
+Date: Mon, 11 Jan 2021 14:11:35 -0800
+Subject: [PATCH] Revert "Generated Harmony Code."
+
+This reverts commit 30ed50a9186c5904fa6994057ecc294a0b7237a3.
+---
+ .../firmware/src/app_mqtt_task.h              |   2 +
+ .../src/config/samd21_trust/configuration.h   |  69 +++++----
+ .../library/cryptoauthlib/atca_config.h       |   1 -
+ .../crypto/hashes/sha2_routines.h             |   4 +
+ .../cryptoauthlib/hal/hal_harmony_init.c      |   8 -
+ .../wolfssl/wolfssl/wolfcrypt/asn.h           |   4 +
+ .../wolfssl/wolfssl/wolfcrypt/src/asn.c       | 139 ++++++++++++++++--
+ .../wolfssl/wolfssl/wolfcrypt/src/ecc.c       | 122 +--------------
+ 8 files changed, 172 insertions(+), 177 deletions(-)
+
+diff --git a/wolfmqtt_trust_platform/firmware/src/app_mqtt_task.h b/wolfmqtt_trust_platform/firmware/src/app_mqtt_task.h
+index ed3d932..0862ac0 100644
+--- a/wolfmqtt_trust_platform/firmware/src/app_mqtt_task.h
++++ b/wolfmqtt_trust_platform/firmware/src/app_mqtt_task.h
+@@ -56,7 +56,9 @@
+ #include <stdlib.h>
+ #include "configuration.h"
+ #include "definitions.h" 
++#ifdef MICROCHIP_TCPIP
+ #include "tcpip/tcpip.h"
++#endif
+ #include "wolfmqtt/mqtt_client.h"
+ 
+ // TODO: add MQTT task definitions here 
+diff --git a/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/configuration.h b/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/configuration.h
+index 7052504..c155e66 100644
+--- a/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/configuration.h
++++ b/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/configuration.h
+@@ -137,74 +137,61 @@ extern "C" {
+ #define WOLFMQTT_USER_SETTINGS
+ // #define WOLFMQTT_NO_TIMEOUT
+ // #define WOLFMQTT_NO_STDIN_CAP
+-
+ #define WOLFMQTT_DISCONNECT_CB
+-#define WOLFMQTT_NO_ERROR_STRINGS
+-#define WOLFMQTT_NO_STDIO
+-
+ #define ENABLE_MQTT_TLS
+ 
+-/*** wolMQTT Net Glue configuration ***/
+-#define WMQTT_NET_GLUE_FORCE_TLS			true
+-#define WMQTT_NET_GLUE_IPV6					false
+-#define WMQTT_NET_GLUE_MAX_BROKER_NAME		64
+-#define WMQTT_NET_GLUE_DEBUG_ENABLE			false
+-#define WMQTT_NET_GLUE_ERROR_STRINGS		true
+-#define WMQTT_NET_GLUE_MALLOC				malloc
+-#define WMQTT_NET_GLUE_FREE					free
+-#define WMQTT_NET_SKT_TX_BUFF				2048
+-#define WMQTT_NET_SKT_RX_BUFF				2048
+-
+-
+-
++//#define WOLFMQTT_DEBUG_CLIENT
++//#define WOLFMQTT_DEBUG_SOCKET
++//#define WOLFMQTT_NO_ERROR_STRINGS
++//#define WOLFMQTT_NO_STDIO
+ 
+ 
+ /******************************************************************************/
+ /*wolfSSL TLS Layer Configuration*/
+ /******************************************************************************/
+ 
++#if 0 /* disabled to save code space */
+ #define WOLFSSL_ALT_NAMES
+ #define WOLFSSL_DER_LOAD
+ #define KEEP_OUR_CERT
+ #define KEEP_PEER_CERT
+ #define HAVE_CRL_IO
+ #define HAVE_IO_TIMEOUT
++#endif
+ #define TFM_NO_ASM
+ #define WOLFSSL_NO_ASM
+ #define SIZEOF_LONG_LONG 8
+ #define WOLFSSL_USER_IO
+ #define NO_WRITEV
+-#define MICROCHIP_TCPIP
+-
+-    
+-    
++//#define MICROCHIP_TCPIP
+ 
+ #define NO_PWDBASED
+ 
+ #define HAVE_TLS_EXTENSIONS
+ #define HAVE_SUPPORTED_CURVES
+ #define HAVE_SNI
+-
+-    
++#define HAVE_EXTENDED_MASTER    
++#define HAVE_ENCRYPT_THEN_MAC
+ 
+ #define NO_SESSION_CACHE
+ 
+-#define WOLFSSL_SMALL_STACK
+-     
+-    
+-    
+-    
+-    
++//#define DEBUG_WOLFSSL
++//#define NO_ERROR_STRINGS
+ 
+-    
+ #define NO_OLD_TLS
+     
+ #define USE_FAST_MATH
+     
+ #define NO_WOLFSSL_SERVER
+-    
+-    
+-   
++#define HAVE_PK_CALLBACKS
++#define WOLFSSL_ATECC608A
++#define WOLFSSL_ATECC_TNGTLS
++#define WOLFSSL_BASE64_ENCODE
++
++#define WOLFSSL_SMALL_STACK
++#define WOLFSSL_SMALL_STACK_CACHE /* reduce heap thrash with SHA256 */
++#define WOLFSSL_ALT_CERT_CHAINS /* allow just the peer certificate to verify - not all intermediates */
++#define WOLFSSL_VERIFY_CB_ALL_CERTS /* Issue callback for all intermediate certificates */
+ 
+ 
+ /*** wolfCrypt Library Configuration ***/
+@@ -248,10 +235,22 @@ extern "C" {
+ #define WC_RSA_BLINDING
+ #define SINGLE_THREADED
+ #define NO_SIG_WRAPPER
+-#define NO_ERROR_STRINGS
+ #define NO_WOLFSSL_MEMORY
+ 
+-
++#define FP_MAX_BITS (384 * 2) /* max ECC key size * 2 */
++
++#if 0
++/* Disable certificate date checking for testing */
++#define NO_ASN_TIME
++#else
++/* Override Current Time */
++/* Allows custom "custom_time()" function to be used for benchmark */
++#define WOLFSSL_USER_CURRTIME
++#define WOLFSSL_GMTIME
++#define USER_TICKS
++extern unsigned long my_time(unsigned long* timer);
++#define XTIME my_time
++#endif
+ 
+ // *****************************************************************************
+ // *****************************************************************************
+diff --git a/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/atca_config.h b/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/atca_config.h
+index 69b5c41..441a320 100644
+--- a/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/atca_config.h
++++ b/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/atca_config.h
+@@ -65,7 +65,6 @@ typedef struct atca_plib_api
+     atca_i2c_plib_transfer_setup    transfer_setup;
+ } atca_plib_i2c_api_t;
+ 
+-extern atca_plib_i2c_api_t sercom2_plib_i2c_api;
+ extern atca_plib_i2c_api_t sercom2_plib_i2c_api;
+ 
+ /** Define certificate templates to be supported. */
+diff --git a/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/crypto/hashes/sha2_routines.h b/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/crypto/hashes/sha2_routines.h
+index 7c7dd6d..8a13c2e 100644
+--- a/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/crypto/hashes/sha2_routines.h
++++ b/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/crypto/hashes/sha2_routines.h
+@@ -30,8 +30,12 @@
+ 
+ #include <stdint.h>
+ 
++#ifndef SHA256_DIGEST_SIZE
+ #define SHA256_DIGEST_SIZE (32)
++#endif
++#ifndef SHA256_BLOCK_SIZE
+ #define SHA256_BLOCK_SIZE  (64)
++#endif
+ 
+ #ifdef __cplusplus
+ extern "C" {
+diff --git a/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/hal/hal_harmony_init.c b/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/hal/hal_harmony_init.c
+index a271af9..083bbeb 100644
+--- a/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/hal/hal_harmony_init.c
++++ b/wolfmqtt_trust_platform/firmware/src/config/samd21_trust/library/cryptoauthlib/hal/hal_harmony_init.c
+@@ -40,13 +40,5 @@ atca_plib_i2c_api_t sercom2_plib_i2c_api = {
+     .transfer_setup = SERCOM2_I2C_TransferSetup
+ };
+ 
+-atca_plib_i2c_api_t sercom2_plib_i2c_api = {
+-    .read = SERCOM2_I2C_Read,
+-    .write = SERCOM2_I2C_Write,
+-    .is_busy = SERCOM2_I2C_IsBusy,
+-    .error_get = SERCOM2_I2C_ErrorGet,
+-    .transfer_setup = SERCOM2_I2C_TransferSetup
+-};
+-
+ 
+ 
+diff --git a/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/asn.h b/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/asn.h
+index e37de4a..f431e11 100644
+--- a/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/asn.h
++++ b/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/asn.h
+@@ -1152,8 +1152,12 @@ WOLFSSL_LOCAL int FlattenAltNames( byte*, word32, const DNS_entry*);
+     /* ASN sig helpers */
+     WOLFSSL_LOCAL int StoreECC_DSA_Sig(byte* out, word32* outLen, mp_int* r,
+                                       mp_int* s);
++    WOLFSSL_LOCAL int StoreECC_DSA_Sig_Bin(byte* out, word32* outLen, 
++        const byte* r, word32 rLen, const byte* s, word32 sLen);
+     WOLFSSL_LOCAL int DecodeECC_DSA_Sig(const byte* sig, word32 sigLen,
+                                        mp_int* r, mp_int* s);
++    WOLFSSL_LOCAL int DecodeECC_DSA_Sig_Bin(const byte* sig, word32 sigLen, 
++        byte* r, word32* rLen, byte* s, word32* sLen);
+ #endif
+ #if defined HAVE_ECC && (defined(OPENSSL_EXTRA) || defined(OPENSSL_EXTRA_X509_SMALL))
+ WOLFSSL_API int EccEnumToNID(int n);
+diff --git a/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/src/asn.c b/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/src/asn.c
+index d3d263e..5ee863d 100644
+--- a/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/src/asn.c
++++ b/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/src/asn.c
+@@ -15166,6 +15166,111 @@ int StoreECC_DSA_Sig(byte* out, word32* outLen, mp_int* r, mp_int* s)
+     return 0;
+ }
+ 
++/* determine if leading bit is set and trim leading zeros */
++static int is_leading_bit_set(const byte** input, word32 *sz)
++{
++    int i;
++    word32 leadingZeroCount = 0;
++    const byte* tmp = *input;
++    byte c = 0;
++    for (i=0; i<(int)*sz; i++) {
++        c = tmp[i];
++        if (c != 0)
++            break;
++        leadingZeroCount++;
++    }
++    *input += leadingZeroCount;
++    *sz -= leadingZeroCount;
++    return (c & 0x80) != 0;
++}
++
++/* Der Encode r & s ints into out, outLen is (in/out) size */
++int StoreECC_DSA_Sig_Bin(byte* out, word32* outLen, const byte* r, word32 rLen, 
++    const byte* s, word32 sLen)
++{
++    int ret;
++    word32 idx;
++    word32 headerSz = 4;   /* 2*ASN_TAG + 2*LEN(ENUM) */
++    int rAddLeadZero, sAddLeadZero;
++
++    /* If the leading bit on the INTEGER is a 1, add a leading zero */
++    /* Add leading zero if MSB is set */
++    /* Trim leading zeros */
++    rAddLeadZero = is_leading_bit_set(&r, &rLen);
++    sAddLeadZero = is_leading_bit_set(&s, &sLen);
++
++    if (*outLen < (rLen + rAddLeadZero + sLen + sAddLeadZero +
++                   headerSz + 2))  /* SEQ_TAG + LEN(ENUM) */
++        return BUFFER_E;
++
++    idx = SetSequence(rLen+rAddLeadZero + sLen+sAddLeadZero + headerSz, out);
++
++    /* store r */
++    ret = SetASNInt(rLen, rAddLeadZero ? 0x80 : 0x00, &out[idx]);
++    if (ret < 0)
++        return ret;
++    idx += ret;
++    XMEMCPY(&out[idx], r, rLen);
++    idx += rLen;
++
++    /* store s */
++    ret = SetASNInt(sLen, sAddLeadZero ? 0x80 : 0x00, &out[idx]);
++    if (ret < 0)
++        return ret;
++    idx += ret;
++    XMEMCPY(&out[idx], s, sLen);
++    idx += sLen;
++
++    *outLen = idx;
++
++    return 0;
++}
++
++
++/* Der Decode ECC-DSA Signature with R/S as unsigned bin */
++int DecodeECC_DSA_Sig_Bin(const byte* sig, word32 sigLen, byte* r, word32* rLen,
++    byte* s, word32* sLen)
++{
++    int    ret;
++    word32 idx = 0;
++    int    len = 0;
++
++    if (GetSequence(sig, &idx, &len, sigLen) < 0) {
++        return ASN_ECC_KEY_E;
++    }
++
++#ifndef NO_STRICT_ECDSA_LEN
++    /* enable strict length checking for signature */
++    if (sigLen != idx + (word32)len) {
++        return ASN_ECC_KEY_E;
++    }
++#else
++    /* allow extra signature bytes at end */
++    if ((word32)len > (sigLen - idx)) {
++        return ASN_ECC_KEY_E;
++    }
++#endif
++
++    ret = GetASNInt(sig, &idx, &len, sigLen);
++    if (ret != 0)
++        return ret;
++    if (rLen)
++        *rLen = len;
++    if (r)
++        XMEMCPY(r, (byte*)sig + idx, len);
++    idx += len;
++
++    ret = GetASNInt(sig, &idx, &len, sigLen);
++    if (ret != 0)
++        return ret;
++    if (sLen)
++        *sLen = len;
++    if (s)
++        XMEMCPY(s, (byte*)sig + idx, len);
++
++    return ret;
++}
++
+ 
+ /* Der Decode ECC-DSA Signature, r & s stored as big ints */
+ int DecodeECC_DSA_Sig(const byte* sig, word32 sigLen, mp_int* r, mp_int* s)
+@@ -15213,7 +15318,7 @@ int wc_EccPrivateKeyDecode(const byte* input, word32* inOutIdx, ecc_key* key,
+     int    curve_id = ECC_CURVE_DEF;
+ #ifdef WOLFSSL_SMALL_STACK
+     byte* priv;
+-    byte* pub;
++    byte* pub = NULL;
+ #else
+     byte priv[ECC_MAXSIZE+1];
+     byte pub[2*(ECC_MAXSIZE+1)]; /* public key has two parts plus header */
+@@ -15241,24 +15346,18 @@ int wc_EccPrivateKeyDecode(const byte* input, word32* inOutIdx, ecc_key* key,
+ 
+     if (GetLength(input, inOutIdx, &length, inSz) < 0)
+         return ASN_PARSE_E;
++    privSz = length;
+ 
+-    if (length > ECC_MAXSIZE)
++    if (privSz > ECC_MAXSIZE)
+         return BUFFER_E;
+ 
+ #ifdef WOLFSSL_SMALL_STACK
+-    priv = (byte*)XMALLOC(ECC_MAXSIZE+1, key->heap, DYNAMIC_TYPE_TMP_BUFFER);
++    priv = (byte*)XMALLOC(privSz, key->heap, DYNAMIC_TYPE_TMP_BUFFER);
+     if (priv == NULL)
+         return MEMORY_E;
+-
+-    pub = (byte*)XMALLOC(2*(ECC_MAXSIZE+1), key->heap, DYNAMIC_TYPE_TMP_BUFFER);
+-    if (pub == NULL) {
+-        XFREE(priv, key->heap, DYNAMIC_TYPE_TMP_BUFFER);
+-        return MEMORY_E;
+-    }
+ #endif
+ 
+     /* priv key */
+-    privSz = length;
+     XMEMCPY(priv, &input[*inOutIdx], privSz);
+     *inOutIdx += length;
+ 
+@@ -15302,13 +15401,21 @@ int wc_EccPrivateKeyDecode(const byte* input, word32* inOutIdx, ecc_key* key,
+             if (ret == 0) {
+                 /* pub key */
+                 pubSz = length;
+-                if (pubSz < 2*(ECC_MAXSIZE+1)) {
+-                    XMEMCPY(pub, &input[*inOutIdx], pubSz);
+-                    *inOutIdx += length;
+-                    pubData = pub;
+-                }
+-                else
++                if (pubSz > 2*(ECC_MAXSIZE+1))
+                     ret = BUFFER_E;
++                else {
++            #ifdef WOLFSSL_SMALL_STACK
++                    pub = (byte*)XMALLOC(pubSz, key->heap, DYNAMIC_TYPE_TMP_BUFFER);
++                    if (pub == NULL)
++                        ret = MEMORY_E;
++                    else
++            #endif
++                    {
++                        XMEMCPY(pub, &input[*inOutIdx], pubSz);
++                        *inOutIdx += length;
++                        pubData = pub;
++                    }
++                }
+             }
+         }
+     }
+diff --git a/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/src/ecc.c b/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/src/ecc.c
+index 6e46308..27facb7 100644
+--- a/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/src/ecc.c
++++ b/wolfmqtt_trust_platform/firmware/src/third_party/wolfssl/wolfssl/wolfcrypt/src/ecc.c
+@@ -7777,8 +7777,7 @@ int wc_ecc_import_private_key_ex(const byte* priv, word32 privSz,
+                                  int curve_id)
+ {
+     int ret;
+-#if defined(WOLFSSL_CRYPTOCELL) && !defined(WOLFSSL_ATECC508A) && \
+-    !defined(WOLFSSL_ATECC608A)
++#ifdef WOLFSSL_CRYPTOCELL
+     const CRYS_ECPKI_Domain_t* pDomain;
+     CRYS_ECPKI_BUILD_TempData_t tempBuff;
+ #endif
+@@ -7809,10 +7808,7 @@ int wc_ecc_import_private_key_ex(const byte* priv, word32 privSz,
+     if (ret != 0)
+         return ret;
+ 
+-#if defined(WOLFSSL_ATECC508A) || defined(WOLFSSL_ATECC608A)
+-    /* Hardware does not support loading private keys */
+-    return NOT_COMPILED_IN;
+-#elif defined(WOLFSSL_CRYPTOCELL)
++#ifdef WOLFSSL_CRYPTOCELL
+     pDomain = CRYS_ECPKI_GetEcDomain(cc310_mapCurve(curve_id));
+ 
+     if (pub != NULL && pub[0] != '\0') {
+@@ -7856,8 +7852,7 @@ int wc_ecc_import_private_key_ex(const byte* priv, word32 privSz,
+     }
+ #endif /* HAVE_WOLF_BIGINT */
+ 
+-
+-#endif /* WOLFSSL_ATECC508A */
++#endif /* WOLFSSL_CRYPTOCELL */
+ 
+ #ifdef WOLFSSL_VALIDATE_ECC_IMPORT
+     if ((pub != NULL) && (ret == MP_OKAY))
+@@ -7956,59 +7951,11 @@ int wc_ecc_rs_to_sig(const char* r, const char* s, byte* out, word32* outlen)
+ int wc_ecc_rs_raw_to_sig(const byte* r, word32 rSz, const byte* s, word32 sSz,
+     byte* out, word32* outlen)
+ {
+-    int err;
+-#ifdef WOLFSSL_SMALL_STACK
+-    mp_int* rtmp = NULL;
+-    mp_int* stmp = NULL;
+-#else
+-    mp_int  rtmp[1];
+-    mp_int  stmp[1];
+-#endif
+-
+     if (r == NULL || s == NULL || out == NULL || outlen == NULL)
+         return ECC_BAD_ARG_E;
+ 
+-#ifdef WOLFSSL_SMALL_STACK
+-    rtmp = (mp_int*)XMALLOC(sizeof(mp_int), NULL, DYNAMIC_TYPE_ECC);
+-    if (rtmp == NULL)
+-        return MEMORY_E;
+-    stmp = (mp_int*)XMALLOC(sizeof(mp_int), NULL, DYNAMIC_TYPE_ECC);
+-    if (stmp == NULL) {
+-        XFREE(rtmp, NULL, DYNAMIC_TYPE_ECC);
+-        return MEMORY_E;
+-    }
+-#endif
+-
+-    err = mp_init_multi(rtmp, stmp, NULL, NULL, NULL, NULL);
+-    if (err != MP_OKAY) {
+-    #ifdef WOLFSSL_SMALL_STACK
+-        XFREE(stmp, NULL, DYNAMIC_TYPE_ECC);
+-        XFREE(rtmp, NULL, DYNAMIC_TYPE_ECC);
+-    #endif
+-        return err;
+-    }
+-
+-    err = mp_read_unsigned_bin(rtmp, r, rSz);
+-    if (err == MP_OKAY)
+-        err = mp_read_unsigned_bin(stmp, s, sSz);
+-
+     /* convert mp_ints to ECDSA sig, initializes rtmp and stmp internally */
+-    if (err == MP_OKAY)
+-        err = StoreECC_DSA_Sig(out, outlen, rtmp, stmp);
+-
+-    if (err == MP_OKAY) {
+-        if (mp_iszero(rtmp) == MP_YES || mp_iszero(stmp) == MP_YES)
+-            err = MP_ZERO_E;
+-    }
+-
+-    mp_clear(rtmp);
+-    mp_clear(stmp);
+-#ifdef WOLFSSL_SMALL_STACK
+-    XFREE(stmp, NULL, DYNAMIC_TYPE_ECC);
+-    XFREE(rtmp, NULL, DYNAMIC_TYPE_ECC);
+-#endif
+-
+-    return err;
++    return StoreECC_DSA_Sig_Bin(out, outlen, r, rSz, s, sSz);
+ }
+ 
+ /**
+@@ -8024,69 +7971,10 @@ int wc_ecc_rs_raw_to_sig(const byte* r, word32 rSz, const byte* s, word32 sSz,
+ int wc_ecc_sig_to_rs(const byte* sig, word32 sigLen, byte* r, word32* rLen,
+                      byte* s, word32* sLen)
+ {
+-    int err;
+-    int tmp_valid = 0;
+-    word32 x = 0;
+-#ifdef WOLFSSL_SMALL_STACK
+-    mp_int* rtmp = NULL;
+-    mp_int* stmp = NULL;
+-#else
+-    mp_int  rtmp[1];
+-    mp_int  stmp[1];
+-#endif
+-
+     if (sig == NULL || r == NULL || rLen == NULL || s == NULL || sLen == NULL)
+         return ECC_BAD_ARG_E;
+ 
+-#ifdef WOLFSSL_SMALL_STACK
+-    rtmp = (mp_int*)XMALLOC(sizeof(mp_int), NULL, DYNAMIC_TYPE_ECC);
+-    if (rtmp == NULL)
+-        return MEMORY_E;
+-    stmp = (mp_int*)XMALLOC(sizeof(mp_int), NULL, DYNAMIC_TYPE_ECC);
+-    if (stmp == NULL) {
+-        XFREE(rtmp, NULL, DYNAMIC_TYPE_ECC);
+-        return MEMORY_E;
+-    }
+-#endif
+-
+-    err = DecodeECC_DSA_Sig(sig, sigLen, rtmp, stmp);
+-
+-    /* rtmp and stmp are initialized */
+-    if (err == MP_OKAY) {
+-        tmp_valid = 1;
+-
+-        /* extract r */
+-        x = mp_unsigned_bin_size(rtmp);
+-        if (*rLen < x)
+-            err = BUFFER_E;
+-    }
+-    if (err == MP_OKAY) {
+-        *rLen = x;
+-        err = mp_to_unsigned_bin(rtmp, r);
+-    }
+-
+-    /* extract s */
+-    if (err == MP_OKAY) {
+-        x = mp_unsigned_bin_size(stmp);
+-        if (*sLen < x)
+-            err = BUFFER_E;
+-
+-        if (err == MP_OKAY) {
+-            *sLen = x;
+-            err = mp_to_unsigned_bin(stmp, s);
+-        }
+-    }
+-
+-    if (tmp_valid) {
+-        mp_clear(rtmp);
+-        mp_clear(stmp);
+-    }
+-#ifdef WOLFSSL_SMALL_STACK
+-    XFREE(stmp, NULL, DYNAMIC_TYPE_ECC);
+-    XFREE(rtmp, NULL, DYNAMIC_TYPE_ECC);
+-#endif
+-
+-    return err;
++    return DecodeECC_DSA_Sig_Bin(sig, sigLen, r, rLen, s, sLen);
+ }
+ #endif /* !NO_ASN */
+ 
+-- 
+2.27.0
+

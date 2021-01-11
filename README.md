@@ -10,6 +10,11 @@ DTLS 1.2 protocols. These demos use the Microchip ATECC608A Trust&GO module conf
 This repository is intended for demo/example purposes only. It includes
 driver and middleware code which is copyright of Microchip Technology Inc.
 
+## SAMD21 CryptoAuth Trust Platform Demos (see links)
+
+* wolfMQTT TLS Client: [wolfmqtt_trust_platform](./wolfmqtt_trust_platform)
+* wolfSSL TLS Client: [wolfssl_client_trust_platform](./wolfssl_client_trust_platform)
+
 ## Software and Hardware Demo Details
 
 The included demo applications have been created for the following development

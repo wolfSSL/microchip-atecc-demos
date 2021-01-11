@@ -95,7 +95,7 @@ cd wolfssl
 ./configure --enable-opensslextra CFLAGS="-DSHOW_CERTS"
 make
 # Start server with ECC test key and cert
-./examples/server/server -b -i -g -x -k ./certs/ecc-key.pem -c ./certs/server-ecc.pem
+./examples/server/server -b -d -i -g -x -k ./certs/ecc-key.pem -c ./certs/server-ecc.pem
 ```
 
 For the mutual authentication to work the peer's signer (CA) certificate must be provided via -A argument.
