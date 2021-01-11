@@ -137,13 +137,13 @@ extern "C" {
 #define WOLFMQTT_USER_SETTINGS
 // #define WOLFMQTT_NO_TIMEOUT
 // #define WOLFMQTT_NO_STDIN_CAP
-
 #define WOLFMQTT_DISCONNECT_CB
-//#define WOLFMQTT_NO_ERROR_STRINGS
-#define WOLFMQTT_NO_STDIO
-
 #define ENABLE_MQTT_TLS
 
+//#define WOLFMQTT_DEBUG_CLIENT
+//#define WOLFMQTT_DEBUG_SOCKET
+//#define WOLFMQTT_NO_ERROR_STRINGS
+//#define WOLFMQTT_NO_STDIO
 
 
 /******************************************************************************/
@@ -165,9 +165,6 @@ extern "C" {
 #define NO_WRITEV
 //#define MICROCHIP_TCPIP
 
-    
-
-
 #define NO_PWDBASED
 
 #define HAVE_TLS_EXTENSIONS
@@ -178,25 +175,23 @@ extern "C" {
 
 #define NO_SESSION_CACHE
 
-#define WOLFSSL_SMALL_STACK
-     
-    
-    
-    
-    
 //#define DEBUG_WOLFSSL
-#define NO_ERROR_STRINGS
-    
+//#define NO_ERROR_STRINGS
+
 #define NO_OLD_TLS
     
+#define USE_FAST_MATH
     
 #define NO_WOLFSSL_SERVER
 #define HAVE_PK_CALLBACKS
 #define WOLFSSL_ATECC608A
 #define WOLFSSL_ATECC_TNGTLS
 #define WOLFSSL_BASE64_ENCODE
-    
-   
+
+#define WOLFSSL_SMALL_STACK
+#define WOLFSSL_SMALL_STACK_CACHE /* reduce heap thrash with SHA256 */
+#define WOLFSSL_ALT_CERT_CHAINS /* allow just the peer certificate to verify - not all intermediates */
+#define WOLFSSL_VERIFY_CB_ALL_CERTS /* Issue callback for all intermediate certificates */
 
 
 /*** wolfCrypt Library Configuration ***/
@@ -215,6 +210,8 @@ extern "C" {
 #define NO_MD4
 #define NO_MD5
 #define WOLFSSL_SHA224
+#define WOLFSSL_SHA384
+#define NO_SHA512
 #define NO_DES3
 #define WOLFSSL_AES_128
 #define NO_AES_192
@@ -240,8 +237,7 @@ extern "C" {
 #define NO_SIG_WRAPPER
 #define NO_WOLFSSL_MEMORY
 
-#define FP_MAX_BITS (256 * 2) /* max ECC key size * 2 */
-#define WOLFSSL_SMALL_STACK_CACHE /* reduce heap thrash with SHA256 */
+#define FP_MAX_BITS (384 * 2) /* max ECC key size * 2 */
 
 #if 0
 /* Disable certificate date checking for testing */

@@ -3055,8 +3055,8 @@
           <Security dnOrder="2">NON_SECURE</Security>
           <LogicalPath dnOrder="3">config/samd21_trust/</LogicalPath>
           <PhysicalPath dnOrder="4">/</PhysicalPath>
-          <GeneratedChecksum dnOrder="5">4EBA2ED3DA284F2480C7A5F46F806189</GeneratedChecksum>
-          <UserChecksum dnOrder="6">4EBA2ED3DA284F2480C7A5F46F806189</UserChecksum>
+          <GeneratedChecksum dnOrder="5">7236F460B84BAB65530B5E19DD41C3BA</GeneratedChecksum>
+          <UserChecksum dnOrder="6">7236F460B84BAB65530B5E19DD41C3BA</UserChecksum>
         </File>
         <File dnOrder="339">
           <Type dnOrder="0">HEADER</Type>
