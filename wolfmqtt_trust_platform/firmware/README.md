@@ -30,164 +30,93 @@
 
 3. Harmony v3 code generation needs a few changes
 
-See wolfssl_trust_platform_patch.diff and apply using `patch -p1 < wolfssl_trust_platform_patch.diff`.
-
-Here are the changes:
-
-* `src/config/samd21_trust/configuration.h`:
-
-```c
-#if 0 /* disabled to save code space */
-#define WOLFSSL_ALT_NAMES
-#define WOLFSSL_DER_LOAD
-#define KEEP_OUR_CERT
-#define KEEP_PEER_CERT
-#define HAVE_CRL_IO
-#define HAVE_IO_TIMEOUT
-#endif
-
-/* Disable because WINC1500 is being used */
-//#define MICROCHIP_TCPIP
-
-/* for ATECC public key callbacks */
-#define HAVE_PK_CALLBACKS
-#define WOLFSSL_ATECC608A
-#define WOLFSSL_ATECC_TNGTLS
-#define WOLFSSL_BASE64_ENCODE
-
-/* Reduce the fastmath size for ECC only */
-#define FP_MAX_BITS (256 * 2) /* max ECC key size * 2 */
-#define WOLFSSL_SMALL_STACK_CACHE /* reduce heap thrash with SHA256 */
-
-/* Override Current Time */
-/* Allows custom "custom_time()" function to be used for benchmark */
-#define WOLFSSL_USER_CURRTIME
-#define WOLFSSL_GMTIME
-#define USER_TICKS
-extern unsigned long my_time(unsigned long* timer);
-#define XTIME my_time
-```
-
-* Copy the `wolfcrypt/src/port/atmel/atmel.c` and `wolfssl/wolfcrypt/port/atmel/atmel.h` files from wolfSSL.
-
-* `src/config/samd21_trust/library/cryptoauthlib/crypto/hashes/sha2_routines.h`
-
-```c
-#ifndef SHA256_DIGEST_SIZE
-#define SHA256_DIGEST_SIZE (32)
-#endif
-#ifndef SHA256_BLOCK_SIZE
-#define SHA256_BLOCK_SIZE  (64)
-#endif
-```
-
-* Harmony may duplicate the `atecc608_0_init_data` definition and you may have to delete one.
+See wolmqtt_trust_platform_patch.diff and apply using `patch -p1 < wolfmqtt_trust_platform_patch.diff`.
 
 
 ## Running the example
 
-1. Choose the TLS server:
 
-For testing mutual authentication you can use the wolfSSL example server:
-
-```sh
-git clone https://github.com/wolfssl/wolfssl.git
-cd wolfssl
-./autogen.sh
-./configure --enable-opensslextra CFLAGS="-DSHOW_CERTS"
-make
-# Start server with ECC test key and cert
-./examples/server/server -b -i -g -x -k ./certs/ecc-key.pem -c ./certs/server-ecc.pem
-```
-
-For the mutual authentication to work the peer's signer (CA) certificate must be provided via -A argument.
-Use the `-d` to disable mutual auth.
-
-2. Modify the `common/wolf_tls_task.c` or specify as build pre-processor macros:
+1. Modify the `common/wolf_mqtt_task.c` or specify as build pre-processor macros:
 
 * `WLAN_SSID`
 * `WLAN_PSK`
-* `SERVER_HOST`
-* `SERVER_PORT`
 
-3. Run the TLS client example:
+2. Setup the Azure IoT Hub settings or use our example settings:
+
+* `AZURE_HOST`
+* `AZURE_DEVICE_ID`
+* `AZURE_KEY`
+
+3. Run the Azure IoT Hub MQTT client example:
 
 Example Console Output:
 
 ```
 ===========================
-wolfSSL Client Example
+AzureIoTHub Client: QoS 1, Use TLS 1
 ===========================
+Initializing wolfSSL
+MQTT Net Init: Success (0)
+MQTT Init: Success (0)
 Wifi Connected
 IP address is 192.168.0.236
-DNS Lookup 192.168.0.251
-WINC1500 WIFI: DNS lookup:
-  Host:       192.168.0.251
-  IP Address: 192.168.0.251
+Waiting for network time sync
+Time 1610402250
+SharedAccessSignature sr=momuno-V2-hub.azure-devices.net%2fdevices%2fsas-test-wolfssl-websocket&sig=iEvUhC%2bXHBQCWIc4DO4Q1QP6MO%2fLFgRmbAwCO%2fd5P8s%3d&se=1610405850
+DNS Lookup momuno-V2-hub.azure-devices.net
+WINC1500 WIFI: DNS lookup:  Host:       momuno-V2-hub.azure-devices.net  IP Address: 52.185.70.163
 Creating socket
 TCP client: connecting...
 connect() success
-Initializing wolfSSL
-Waiting for time
-Time 1603289501
-Loading certs/keys
-Successfully read signer cert
-Successfully read signer pub key
-
-Built server's signer certificate
-Successfully read device cert
-Successfully read device pub key
-
-Built client certificate
-Created wolfTLSv1_2_client_method()
-Created new WOLFSSL_CTX
 Loaded verify cert buffer into WOLFSSL_CTX
-Loaded client certificate chain in to WOLFSSL_CTX
-
-Loaded certs into wolfSSL
-Send: 0x200030d3 (84): Res 0
-WINC Recv: 87 bytes
-Recv: 0x20002900 (5): recvd 5, remain 82
-Recv: 0x200030d8 (82): recvd 82, remain 0
-WINC Recv: 691 bytes
-Recv: 0x20002900 (5): recvd 5, remain 686
-Recv: 0x200035d8 (686): recvd 686, remain 0
-WINC Recv: 153 bytes
-Recv: 0x20002900 (5): recvd 5, remain 148
-Recv: 0x20003098 (148): recvd 148, remain 0
-WINC Recv: 9 bytes
-Recv: 0x20002900 (5): recvd 5, remain 4
-Recv: 0x20002900 (4): recvd 4, remain 0
-Send: 0x200030db (75): Res 0
-Send: 0x20002f73 (6): Res 0
-Send: 0x200030ab (45): Res 0
-WINC Recv: 6 bytes
-Recv: 0x20002900 (5): recvd 5, remain 1
-Recv: 0x20002900 (1): recvd 1, remain 0
-WINC Recv: 45 bytes
-Recv: 0x20002900 (5): recvd 5, remain 40
-Recv: 0x20003068 (40): recvd 40, remain 0
-wolfSSL_connect() success!
-Send: 0x2000282b (58): Res 0
-Sent HTTP GET to peer
-WINC Recv: 254 bytes
-Recv: 0x20002900 (5): recvd 5, remain 249
-Recv: 0x20002798 (249): recvd 249, remain 0
-Response from server:
-----------
-HTTP/1.1 200 OK
-Content-Type: text/html
-C
-```
-
-Example Server Console Output
-
-```
-$ ./examples/server/server -b -d -i -g -x -k ./certs/ecc-key.pem -c ./certs/server-ecc.pem
-SSL version is TLSv1.2
-SSL cipher suite is TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-SSL curve name is SECP256R1
-Client message: GET /index.html HTTP/1.0
+MQTT TLS Setup (1)
+Send: 0x2000341b (90): Res 0
+WINC Recv: 1380 bytes
+Recv: 0x20002a38 (5): recvd 5, remain 1375
+Recv: 0x20003420 (88): recvd 88, remain 1287
+Recv: 0x20002a38 (5): recvd 5, remain 1282
+Recv: 0x20003610 (1809): recvd 1282, remain 0
+WINC Recv: 752 bytes
+Recv: 0x20003b12 (527): recvd 527, remain 225
+MQTT TLS Verify Callback for azureiothub: PreVerify 1, Error 0 (none)
+  Subject's domain name is DigiCert Global Root G3
+MQTT TLS Verify Callback for azureiothub: PreVerify 1, Error 0 (none)
+  Subject's domain name is *.azure-devices.net
+Recv: 0x20002a38 (5): recvd 5, remain 220
+Recv: 0x20004168 (148): recvd 148, remain 72
+Recv: 0x20002a38 (5): recvd 5, remain 67
+Recv: 0x20003440 (58): recvd 58, remain 9
+Recv: 0x20002a38 (5): recvd 5, remain 4
+Recv: 0x20002a38 (4): recvd 4, remain 0
+Send: 0x2000346b (12): Res 0
+Send: 0x2000342b (75): Res 0
+Send: 0x2000346b (6): Res 0
+Send: 0x200037bb (45): Res 0
+WINC Recv: 51 bytes
+Recv: 0x20002a38 (5): recvd 5, remain 46
+Recv: 0x20002a38 (1): recvd 1, remain 45
+Recv: 0x20002a38 (5): recvd 5, remain 40
+Recv: 0x20003428 (40): recvd 40, remain 0
+MQTT Socket Connect: Success (0)
+WINC Send: 1
+Send: 0x20002ea3 (322): Res 0
+WINC Recv: 33 bytes
+Recv: 0x20002a38 (5): recvd 5, remain 28
+Recv: 0x20003008 (28): recvd 28, remain 0
+MQTT Connect: Success (0)
+MQTT Connect Ack: Return Code 0, Session Present 0
+Send: 0x20002f8b (93): Res 0
+WINC Recv: 34 bytes
+Recv: 0x20002a38 (5): recvd 5, remain 29
+Recv: 0x20003008 (29): recvd 29, remain 0
+MQTT Subscribe: Success (0)
+  Topic devices/sas-test-wolfssl-websocket/messages/devicebound/#, Qos 1, Return Code 1
+Send: 0x20002f93 (86): Res 0
+WINC Recv: 33 bytes
+Recv: 0x20002a38 (5): recvd 5, remain 28
+Recv: 0x20003008 (28): recvd 28, remain 0
+MQTT Publish: Topic devices/sas-test-wolfssl-websocket/messages/events/, Success (0)
+MQTT Waiting for message...
 ```
 
 ## Support
