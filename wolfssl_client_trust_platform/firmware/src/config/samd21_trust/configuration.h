@@ -88,17 +88,6 @@ extern "C" {
 #define SYS_TIME_CPU_CLOCK_FREQUENCY                (48000000)
 #define SYS_TIME_COMPARE_UPDATE_EXECUTION_CYCLES    (200)
 
-#define SYS_CONSOLE_INDEX_0                       0
-
-
-
-
-#define SYS_CONSOLE_DEVICE_MAX_INSTANCES   			1
-#define SYS_CONSOLE_UART_MAX_INSTANCES 	   			1
-#define SYS_CONSOLE_USB_CDC_MAX_INSTANCES 	   		0
-#define SYS_CONSOLE_PRINT_BUFFER_SIZE        		200
-
-
 
 
 // *****************************************************************************
@@ -106,9 +95,6 @@ extern "C" {
 // Section: Driver Configuration
 // *****************************************************************************
 // *****************************************************************************
-/* SPI Driver Common Configuration Options */
-#define DRV_SPI_INSTANCES_NUMBER              1
-
 /*** WiFi WINC Driver Configuration ***/
 #define WDRV_WINC_EIC_SOURCE                EIC_PIN_5
 #define WDRV_WINC_SPI_INDEX                 DRV_SPI_INDEX_0
@@ -134,6 +120,9 @@ extern "C" {
 #define DRV_SPI_XMIT_DMA_CH_IDX0              SYS_DMA_CHANNEL_2
 #define DRV_SPI_RCV_DMA_CH_IDX0               SYS_DMA_CHANNEL_3
 #define DRV_SPI_QUEUE_SIZE_IDX0               4
+
+/* SPI Driver Common Configuration Options */
+#define DRV_SPI_INSTANCES_NUMBER              1
 
 
 

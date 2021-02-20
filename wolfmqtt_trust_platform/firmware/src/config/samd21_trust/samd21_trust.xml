@@ -1961,14 +1961,14 @@
         <Setting dnOrder="379" id="XC32_HEAP">
           <Attributes dnOrder="0">
             <String dnOrder="0" id="value">
-              <Value dnOrder="0">11420</Value>
+              <Value dnOrder="0">13312</Value>
             </String>
           </Attributes>
         </Setting>
         <Integer dnOrder="380" id="XC32_HEAP_SIZE">
           <Values dnOrder="0">
             <Dynamic dnOrder="0" id="core" value="1024"/>
-            <User dnOrder="1" value="11420"/>
+            <User dnOrder="1" value="13312"/>
           </Values>
         </Integer>
       </Symbols>
@@ -4018,30 +4018,31 @@
     <ComponentGraph dnOrder="0" id="__ROOTVIEW">
       <ElementPositions dnOrder="0">
         <ElementPosition dnOrder="0" id="HarmonyCore" x="705" y="16"/>
-        <ElementPosition dnOrder="1" id="atecc608" x="509" y="394"/>
+        <ElementPosition dnOrder="1" id="atecc608" x="233" y="385"/>
         <ElementPosition dnOrder="2" id="cmsis" x="573" y="21"/>
         <ElementPosition dnOrder="3" id="core" x="495" y="21"/>
-        <ElementPosition dnOrder="4" id="cryptoauthlib" x="710" y="410"/>
-        <ElementPosition dnOrder="5" id="cryptoauthlib_tng" x="319" y="308"/>
+        <ElementPosition dnOrder="4" id="cryptoauthlib" x="516" y="401"/>
+        <ElementPosition dnOrder="5" id="cryptoauthlib_tng" x="88" y="267"/>
         <ElementPosition dnOrder="6" id="dfp" x="308" y="23"/>
         <ElementPosition dnOrder="7" id="drvWifiWinc" x="324" y="167"/>
         <ElementPosition dnOrder="8" id="drv_spi" x="168" y="93"/>
-        <ElementPosition dnOrder="9" id="eic" x="6" y="102"/>
+        <ElementPosition dnOrder="9" id="eic" x="20" y="100"/>
         <ElementPosition dnOrder="10" id="evsys" x="181" y="20"/>
-        <ElementPosition dnOrder="11" id="lib_crypto" x="713" y="253"/>
-        <ElementPosition dnOrder="12" id="lib_wolfcrypt" x="534" y="269"/>
-        <ElementPosition dnOrder="13" id="lib_wolfmqtt" x="938" y="334"/>
-        <ElementPosition dnOrder="14" id="lib_wolfssl" x="712" y="333"/>
-        <ElementPosition dnOrder="15" id="nvmctrl" x="20" y="20"/>
+        <ElementPosition dnOrder="11" id="lib_crypto" x="515" y="252"/>
+        <ElementPosition dnOrder="12" id="lib_wolfcrypt" x="303" y="269"/>
+        <ElementPosition dnOrder="13" id="lib_wolfmqtt" x="698" y="328"/>
+        <ElementPosition dnOrder="14" id="lib_wolfssl" x="516" y="323"/>
+        <ElementPosition dnOrder="15" id="nvmctrl" x="26" y="18"/>
         <ElementPosition dnOrder="16" id="rtc" x="515" y="80"/>
-        <ElementPosition dnOrder="17" id="sercom1" x="7" y="157"/>
-        <ElementPosition dnOrder="18" id="sercom2" x="354" y="428"/>
-        <ElementPosition dnOrder="19" id="sercom3" x="12" y="357"/>
+        <ElementPosition dnOrder="17" id="sercom1" x="27" y="157"/>
+        <ElementPosition dnOrder="18" id="sercom2" x="34" y="433"/>
+        <ElementPosition dnOrder="19" id="sercom3" x="23" y="355"/>
         <ElementPosition dnOrder="20" id="stdio" x="157" y="371"/>
         <ElementPosition dnOrder="21" id="sys_time" x="658" y="122"/>
         <ElementPosition dnOrder="22" id="tc3" x="527" y="168"/>
       </ElementPositions>
     </ComponentGraph>
-    <GraphSettings canvasHeight="500" canvasWidth="500" dnOrder="1"/>
+    <GraphSettings canvasHeight="400" canvasWidth="400" dnOrder="1"/>
+    <ComponentGraph dnOrder="2" id="Group0"/>
   </UserData>
 </Configuration>

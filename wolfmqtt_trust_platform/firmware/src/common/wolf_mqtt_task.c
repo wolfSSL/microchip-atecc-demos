@@ -194,7 +194,6 @@ typedef struct _SocketContext {
     int8_t s8Error;
 } SocketContext;
 
-extern void APP_DebugPrintf(const char* format, ...);
 #undef  PRINTF
 #define PRINTF(_f_, ...)  printf( (_f_ "\r\n"), ##__VA_ARGS__)
 

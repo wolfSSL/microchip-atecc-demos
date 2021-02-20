@@ -48,18 +48,10 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "crypto/crypto.h"
-#include "peripheral/nvmctrl/plib_nvmctrl.h"
-#include "peripheral/rtc/plib_rtc.h"
-#include "peripheral/tc/plib_tc3.h"
-#include "system/time/sys_time.h"
-#include "driver/spi/drv_spi.h"
-#include "system/int/sys_int.h"
-#include "system/ports/sys_ports.h"
-#include "system/dma/sys_dma.h"
-#include "osal/osal.h"
-#include "system/debug/sys_debug.h"
 #include "peripheral/sercom/usart/plib_sercom3_usart.h"
+#include "peripheral/nvmctrl/plib_nvmctrl.h"
 #include "peripheral/sercom/i2c_master/plib_sercom2_i2c_master.h"
 #include "peripheral/sercom/spi_master/plib_sercom1_spi_master.h"
 #include "peripheral/evsys/plib_evsys.h"
@@ -69,9 +61,16 @@
 #include "peripheral/nvic/plib_nvic.h"
 #include "peripheral/dmac/plib_dmac.h"
 #include "peripheral/eic/plib_eic.h"
+#include "peripheral/rtc/plib_rtc.h"
+#include "peripheral/tc/plib_tc3.h"
+#include "system/time/sys_time.h"
 #include "wolfssl/wolfcrypt/port/pic32/crypt_wolfcryptcb.h"
-#include "system/console/sys_console.h"
-#include "system/console/src/sys_console_uart_definitions.h"
+#include "driver/spi/drv_spi.h"
+#include "system/int/sys_int.h"
+#include "system/ports/sys_ports.h"
+#include "system/dma/sys_dma.h"
+#include "osal/osal.h"
+#include "system/debug/sys_debug.h"
 #include "app.h"
 
 
@@ -194,13 +193,11 @@ Remarks:
         
 typedef struct
 {
-    SYS_MODULE_OBJ  sysTime;
-    SYS_MODULE_OBJ  sysConsole0;
-
     SYS_MODULE_OBJ  drvWifiWinc;
     /* SPI0 Driver Object */
     SYS_MODULE_OBJ drvSPI0;
 
+    SYS_MODULE_OBJ  sysTime;
 
 } SYSTEM_OBJECTS;
 
