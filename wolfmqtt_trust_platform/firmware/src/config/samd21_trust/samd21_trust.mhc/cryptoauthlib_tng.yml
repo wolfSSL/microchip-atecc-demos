@@ -1,0 +1,38 @@
+format_version: v1.0
+type: UniqueComponent
+attributes: {id: cryptoauthlib_tng}
+children:
+- type: Symbols
+  children:
+  - type: Boolean
+    attributes: {id: CAL_TFLEX_SUPPORT}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: cryptoauthlib_tng, value: 'false'}
+  - type: Boolean
+    attributes: {id: CAL_TNGLORA_SUPPORT}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: cryptoauthlib_tng, value: 'false'}
+  - type: Boolean
+    attributes: {id: CAL_TNGTLS_SUPPORT}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: cryptoauthlib_tng, value: 'true'}
+      - type: User
+        attributes: {value: 'true'}
+  - type: Boolean
+    attributes: {id: CAL_TNG_LEGACY_SUPPORT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: 'true'}
+- type: ElementPosition
+  attributes: {x: '88', y: '267', id: cryptoauthlib_tng}

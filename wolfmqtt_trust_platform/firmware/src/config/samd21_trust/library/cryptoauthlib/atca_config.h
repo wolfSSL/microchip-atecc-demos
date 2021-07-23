@@ -5,14 +5,20 @@
 /* MPLAB Harmony Common Include */
 #include "definitions.h"
 
-
 #ifndef ATCA_HAL_I2C
 #define ATCA_HAL_I2C
 #endif
 
+
+
 /** Include Device Support Options */
 #define ATCA_ATECC608A_SUPPORT
 #define ATCA_ATECC608_SUPPORT
+
+/** TA100 Specific - Enable auth sessions that require AES (CMAC/GCM) from
+   an external library */
+#define ATCA_TA100_AES_AUTH_SUPPORT
+
 
 
 /* Polling Configuration Options  */
@@ -30,6 +36,10 @@
 #ifndef ATCA_NO_HEAP
 #define ATCA_NO_HEAP
 #endif
+
+/** Define platform malloc/free */
+#define ATCA_PLATFORM_MALLOC    malloc
+#define ATCA_PLATFORM_FREE      free
 
 #define atca_delay_ms   hal_delay_ms
 #define atca_delay_us   hal_delay_us
@@ -67,6 +77,7 @@ typedef struct atca_plib_api
 
 extern atca_plib_i2c_api_t sercom2_plib_i2c_api;
 
+
 /** Define certificate templates to be supported. */
 #define ATCA_TNGTLS_SUPPORT
 #define ATCA_TNG_LEGACY_SUPPORT
@@ -74,6 +85,8 @@ extern atca_plib_i2c_api_t sercom2_plib_i2c_api;
 /** Define Software Crypto Library to Use - if none are defined use the
     cryptoauthlib version where applicable */
 #define ATCA_WOLFSSL
+
+#define ATCA_TEST_MULTIPLE_INSTANCES
 
 
 #endif // ATCA_CONFIG_H

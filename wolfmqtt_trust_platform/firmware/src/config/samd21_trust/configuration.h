@@ -95,9 +95,6 @@ extern "C" {
 // Section: Driver Configuration
 // *****************************************************************************
 // *****************************************************************************
-/* SPI Driver Common Configuration Options */
-#define DRV_SPI_INSTANCES_NUMBER              1
-
 /*** WiFi WINC Driver Configuration ***/
 #define WDRV_WINC_EIC_SOURCE                EIC_PIN_5
 #define WDRV_WINC_SPI_INDEX                 DRV_SPI_INDEX_0
@@ -114,6 +111,10 @@ extern "C" {
 #define WDRV_WINC_DEVICE_HOST_FILE_DOWNLOAD
 #define WDRV_WINC_DEVICE_SOFT_AP_EXT
 #define WDRV_WINC_DEVICE_MULTI_GAIN_TABLE
+#define WDRV_WINC_DEVICE_URL_TYPE           unsigned char
+//#define WDRV_WINC_DEVICE_SCAN_STOP_ON_FIRST
+#define WDRV_WINC_DEVICE_OTA_STATUS_EXTENDED
+#define WDRV_WINC_DEVICE_SCAN_SSID_LIST
 #define WDRV_WINC_DEBUG_LEVEL               WDRV_WINC_DEBUG_TYPE_NONE
 
 /* SPI Driver Instance 0 Configuration Options */
@@ -123,6 +124,9 @@ extern "C" {
 #define DRV_SPI_XMIT_DMA_CH_IDX0              SYS_DMA_CHANNEL_2
 #define DRV_SPI_RCV_DMA_CH_IDX0               SYS_DMA_CHANNEL_3
 #define DRV_SPI_QUEUE_SIZE_IDX0               4
+
+/* SPI Driver Common Configuration Options */
+#define DRV_SPI_INSTANCES_NUMBER              1
 
 
 
@@ -137,13 +141,26 @@ extern "C" {
 #define WOLFMQTT_USER_SETTINGS
 // #define WOLFMQTT_NO_TIMEOUT
 // #define WOLFMQTT_NO_STDIN_CAP
+
 #define WOLFMQTT_DISCONNECT_CB
+#define WOLFMQTT_NO_ERROR_STRINGS
+#define WOLFMQTT_NO_STDIO
+
 #define ENABLE_MQTT_TLS
 
-//#define WOLFMQTT_DEBUG_CLIENT
-//#define WOLFMQTT_DEBUG_SOCKET
-//#define WOLFMQTT_NO_ERROR_STRINGS
-//#define WOLFMQTT_NO_STDIO
+/*** wolMQTT Net Glue configuration ***/
+#define WMQTT_NET_GLUE_FORCE_TLS			true
+#define WMQTT_NET_GLUE_IPV6					false
+#define WMQTT_NET_GLUE_MAX_BROKER_NAME		64
+#define WMQTT_NET_GLUE_DEBUG_ENABLE			false
+#define WMQTT_NET_GLUE_ERROR_STRINGS		true
+#define WMQTT_NET_GLUE_MALLOC				malloc
+#define WMQTT_NET_GLUE_FREE					free
+#define WMQTT_NET_SKT_TX_BUFF				2048
+#define WMQTT_NET_SKT_RX_BUFF				2048
+
+
+
 
 
 /******************************************************************************/
@@ -207,6 +224,7 @@ extern "C" {
 #define NO_PWDBASED
 #define HAVE_MCAPI
 #define WOLF_CRYPTO_CB  // provide call-back support
+// ---------- FUNCTIONAL CONFIGURATION START ----------
 #define NO_MD4
 #define NO_MD5
 #define WOLFSSL_SHA224
@@ -214,8 +232,8 @@ extern "C" {
 #define NO_SHA512
 #define NO_DES3
 #define WOLFSSL_AES_128
-#define NO_AES_192
-#define NO_AES_256
+#define NO_AES_192 // not supported by HW accelerator
+#define NO_AES_256 // not supported by HW accelerator
 #define WOLFSSL_AES_DIRECT
 #define HAVE_AES_DECRYPT
 #define HAVE_AES_ECB
@@ -236,6 +254,8 @@ extern "C" {
 #define SINGLE_THREADED
 #define NO_SIG_WRAPPER
 #define NO_WOLFSSL_MEMORY
+// ---------- FUNCTIONAL CONFIGURATION END ----------
+
 
 #define FP_MAX_BITS (384 * 2) /* max ECC key size * 2 */
 
