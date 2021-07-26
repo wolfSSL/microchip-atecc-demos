@@ -1,6 +1,6 @@
 /* atmel.c
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2021 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -32,6 +32,10 @@
 #include <wolfssl/wolfcrypt/error-crypt.h>
 #include <wolfssl/ssl.h>
 #include <wolfssl/internal.h>
+
+#ifdef WOLFSSL_ATECC_TNGTLS
+#include "tng/tng_atcacert_client.h"
+#endif
 
 #ifdef NO_INLINE
     #include <wolfssl/wolfcrypt/misc.h>
@@ -88,7 +92,6 @@ static wolfSSL_Mutex mSlotMutex;
 static int ateccx08a_cfg_initialized = 0;
 static ATCAIfaceCfg cfg_ateccx08a_i2c_pi;
 #endif /* WOLFSSL_ATECC508A */
-
 
 /**
  * \brief Generate random number to be used for hash.
@@ -187,7 +190,11 @@ int wolfCrypt_ATECC_SetConfig(ATCAIfaceCfg* cfg)
     XMEMSET(&cfg_ateccx08a_i2c_pi, 0, sizeof(cfg_ateccx08a_i2c_pi));
     cfg_ateccx08a_i2c_pi.iface_type            = cfg->iface_type;
     cfg_ateccx08a_i2c_pi.devtype               = cfg->devtype;
+#ifdef ATCA_ENABLE_DEPRECATED
     cfg_ateccx08a_i2c_pi.atcai2c.slave_address = cfg->atcai2c.slave_address;
+#else
+    cfg_ateccx08a_i2c_pi.atcai2c.address       = cfg->atcai2c.address;
+#endif
     cfg_ateccx08a_i2c_pi.atcai2c.bus           = cfg->atcai2c.bus;
     cfg_ateccx08a_i2c_pi.atcai2c.baud          = cfg->atcai2c.baud;
     cfg_ateccx08a_i2c_pi.wake_delay            = cfg->wake_delay;
@@ -256,7 +263,12 @@ int atmel_ecc_alloc(int slotType)
                 goto exit;
             case ATMEL_SLOT_ECDHE:
                 slotId = ATECC_SLOT_ECDHE_PRIV;
+            #ifdef WOLFSSL_ATECC_TNGTLS
+                /* not reserved in mSlotList, so return */
+                goto exit;
+            #else
                 break;
+            #endif
             case ATMEL_SLOT_ECDHE_ENC:
                 slotId = ATECC_SLOT_ENC_PARENT;
             #ifdef WOLFSSL_ATECC_TNGTLS
@@ -336,6 +348,7 @@ int atmel_get_enc_key_default(byte* enckey, word16 keysize)
 /**
  * \brief Write enc key before.
  */
+#if defined(WOLFSSL_ATECC_ECDH_ENC) || defined(WOLFSSL_ATECC_ECDH_IOENC)
 static int atmel_init_enc_key(void)
 {
     int ret;
@@ -370,6 +383,7 @@ static int atmel_init_enc_key(void)
 
 	return ret;
 }
+#endif
 
 int atmel_get_rev_info(word32* revision)
 {
@@ -384,7 +398,7 @@ void atmel_show_rev_info(void)
 #ifdef WOLFSSL_ATECC_DEBUG
     word32 revision = 0;
     atmel_get_rev_info(&revision);
-    printf("ATECC508A Revision: %x\n", (word32)revision);
+    printf("ATECC608 Revision: %x\n", (word32)revision);
 #endif
 }
 
@@ -448,12 +462,15 @@ int atmel_ecc_sign(int slotId, const byte* message, byte* signature)
 }
 
 int atmel_ecc_verify(const byte* message, const byte* signature,
-    const byte* pubkey, int* verified)
+    const byte* pubkey, int* pVerified)
 {
     int ret;
+    bool verified = false;
 
-    ret = atcab_verify_extern(message, signature, pubkey, (bool*)verified);
+    ret = atcab_verify_extern(message, signature, pubkey, &verified);
     ret = atmel_ecc_translate_err(ret);
+    if (pVerified)
+        *pVerified = (int)verified;
     return ret;
 }
 
@@ -466,6 +483,14 @@ int atmel_init(void)
     int ret = 0;
 
 #if defined(WOLFSSL_ATECC508A) || defined(WOLFSSL_ATECC608A)
+
+#if defined(WOLFSSL_ATECC608A)
+    /*Harmony3 will generate configuration based on user inputs*/
+    #ifdef MICROCHIP_MPLAB_HARMONY_3
+    extern ATCAIfaceCfg atecc608_0_init_data;
+    #endif
+#endif
+    
     if (!mAtcaInitDone) {
         ATCA_STATUS status;
         int i;
@@ -488,13 +513,23 @@ int atmel_init(void)
                 mSlotList[i] = ATECC_INVALID_SLOT;
             }
         }
-
+#ifdef MICROCHIP_MPLAB_HARMONY_3
+        atcab_release();
+        atcab_wakeup();
+        #ifdef WOLFSSL_ATECC608A
+        wolfCrypt_ATECC_SetConfig(&atecc608_0_init_data);
+        #endif
+#endif
         if (ateccx08a_cfg_initialized == 0) {
             /* Setup the hardware interface using defaults */
             XMEMSET(&cfg_ateccx08a_i2c_pi, 0, sizeof(cfg_ateccx08a_i2c_pi));
             cfg_ateccx08a_i2c_pi.iface_type             = ATCA_I2C_IFACE;
             cfg_ateccx08a_i2c_pi.devtype                = ATECC_DEV_TYPE;
+        #ifdef ATCA_ENABLE_DEPRECATED
             cfg_ateccx08a_i2c_pi.atcai2c.slave_address  = ATECC_I2C_ADDR;
+        #else
+            cfg_ateccx08a_i2c_pi.atcai2c.address        = ATECC_I2C_ADDR;
+        #endif
             cfg_ateccx08a_i2c_pi.atcai2c.bus            = ATECC_I2C_BUS;
             cfg_ateccx08a_i2c_pi.atcai2c.baud           = 400000;
             cfg_ateccx08a_i2c_pi.wake_delay             = 1500;
@@ -516,6 +551,7 @@ int atmel_init(void)
         device_init_default();
     #endif
 
+#if defined(WOLFSSL_ATECC_ECDH_ENC) || defined(WOLFSSL_ATECC_ECDH_IOENC)
         /* Init the I2C pipe encryption key. */
         /* Value is generated/stored during pair for the ATECC508A and stored
             on micro flash */
@@ -524,6 +560,7 @@ int atmel_init(void)
 			WOLFSSL_MSG("Failed to initialize transport key");
             return WC_HW_E;
 		}
+#endif
 
         mAtcaInitDone = 1;
     }
@@ -892,13 +929,93 @@ exit:
     return ret;
 }
 
+static int atcatls_set_certificates(WOLFSSL_CTX *ctx) 
+{
+    int ret = 0;
+    ATCA_STATUS status;
+    size_t signerCertSize=0;
+    size_t deviceCertSize=0;
+    uint8_t *certBuffer;
+
+    /* fetch signer cert size */
+    status=tng_atcacert_read_signer_cert(NULL, &signerCertSize);
+    if (ATCA_SUCCESS != status) {
+        #ifdef WOLFSSL_ATECC_DEBUG
+        printf("Failed reading Signer cert size(0x%x)\r\n", status);
+        #endif
+        return WOLFSSL_FAILURE;
+    }
+
+    /* fetch device cert size */
+    status=tng_atcacert_read_device_cert(NULL, &deviceCertSize, NULL);
+    if (ATCA_SUCCESS != status) {
+        #ifdef WOLFSSL_ATECC_DEBUG
+        printf("Failed reading device cert size(0x%x)\r\n", status);
+        #endif
+        return WOLFSSL_FAILURE;
+    }    
+    certBuffer=(uint8_t*)XMALLOC(signerCertSize+deviceCertSize, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+    if(NULL == certBuffer){
+        #ifdef WOLFSSL_ATECC_DEBUG
+        printf("Failed allocating space for certBuffer\r\n");
+        #endif
+        return WOLFSSL_FAILURE;
+    }
+    
+    /* Read signer cert */
+    status = tng_atcacert_read_signer_cert(&certBuffer[deviceCertSize],
+                                           &signerCertSize);
+    if (ATCA_SUCCESS != status) {
+        #ifdef WOLFSSL_ATECC_DEBUG
+        printf("Error reading signer cert(0x%x)\r\n", status);
+        #endif
+        XFREE(certBuffer,NULL,DYNAMIC_TYPE_TMP_BUFFER);
+        ret = atmel_ecc_translate_err(ret);
+        return ret;
+    }
+
+    /* Read device cert signed by the signer above */
+    status = tng_atcacert_read_device_cert(certBuffer, &deviceCertSize,
+     	                                   &certBuffer[deviceCertSize]);
+    if (ATCA_SUCCESS != status) {
+        #ifdef WOLFSSL_ATECC_DEBUG
+        printf("Error reading device cert(0x%x)\r\n", status);
+        #endif
+        XFREE(certBuffer,NULL,DYNAMIC_TYPE_TMP_BUFFER);
+        ret = atmel_ecc_translate_err(ret);
+        return ret;
+    }
+
+    ret = wolfSSL_CTX_use_certificate_chain_buffer_format(ctx,
+          (const unsigned char*)certBuffer, signerCertSize+deviceCertSize,
+          WOLFSSL_FILETYPE_ASN1);
+    if (ret != WOLFSSL_SUCCESS) {
+        printf("Error registering certificate chain\r\n");
+        ret = -1;
+    }
+    else {
+	    ret = 0;
+    }
+    XFREE(certBuffer,NULL,DYNAMIC_TYPE_TMP_BUFFER);
+    return ret;
+}
+
 int atcatls_set_callbacks(WOLFSSL_CTX* ctx)
 {
+    int ret = 0;
     wolfSSL_CTX_SetEccKeyGenCb(ctx, atcatls_create_key_cb);
     wolfSSL_CTX_SetEccVerifyCb(ctx, atcatls_verify_signature_cb);
     wolfSSL_CTX_SetEccSignCb(ctx, atcatls_sign_certificate_cb);
     wolfSSL_CTX_SetEccSharedSecretCb(ctx, atcatls_create_pms_cb);
-    return 0;
+#ifdef WOLFSSL_ATECC_TNGTLS
+    ret = atcatls_set_certificates(ctx);
+    if (ret != 0) {
+        #ifdef WOLFSSL_ATECC_DEBUG
+        printf("atcatls_set_certificates failed. (%d)\r\n", ret);
+        #endif
+    }
+#endif
+    return ret;
 }
 
 int atcatls_set_callback_ctx(WOLFSSL* ssl, void* user_ctx)

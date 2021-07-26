@@ -7481,36 +7481,51 @@ int wolfSSL_CTX_check_private_key(const WOLFSSL_CTX* ctx)
         int type = 0;
         void *pkey = NULL;
 
+    #ifndef NO_RSA
         if (der->keyOID == RSAk) {
             type = DYNAMIC_TYPE_RSA;
         }
-        else if (der->keyOID == ECDSAk) {
+    #endif
+    #ifdef HAVE_ECC
+        if (der->keyOID == ECDSAk) {
             type = DYNAMIC_TYPE_ECC;
         }
+    #endif
         ret = CreateDevPrivateKey(&pkey, buff, size, type, ctx->privateKeyLabel,
                                   ctx->privateKeyId, ctx->heap,
                                   ctx->privateKeyDevId);
+    #ifndef NO_RSA
         if (ret == 0 && der->keyOID == RSAk) {
             ret = wc_CryptoCb_RsaCheckPrivKey((RsaKey*)pkey, der->publicKey,
                                               der->pubKeySize);
             wc_FreeRsaKey((RsaKey*)pkey);
         }
-        else if (ret == 0 && der->keyOID == ECDSAk) {
+    #endif
+    #ifdef HAVE_ECC
+        if (ret == 0 && der->keyOID == ECDSAk) {
             ret = wc_CryptoCb_EccCheckPrivKey((ecc_key*)pkey, der->publicKey,
                                               der->pubKeySize);
             wc_ecc_free((ecc_key*)pkey);
         }
+    #endif
         if (pkey != NULL) {
             XFREE(pkey, ctx->heap, type);
         }
-        if (ret == 0) {
-            ret = WOLFSSL_SUCCESS;
-        }
-        else {
-            ret = WOLFSSL_FAILURE;
+        if (ret != CRYPTOCB_UNAVAILABLE) {
+            if (ret == 0) {
+                ret = WOLFSSL_SUCCESS;
+            }
+            else {
+                ret = WOLFSSL_FAILURE;
+            }
         }
     }
-    else
+    else {
+        /* fall through if unavailable */
+        ret = CRYPTOCB_UNAVAILABLE;
+    }
+
+    if (ret == CRYPTOCB_UNAVAILABLE)
 #endif
     {
         ret = wc_CheckPrivateKeyCert(buff, size, der);
