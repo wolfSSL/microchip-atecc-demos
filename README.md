@@ -41,15 +41,15 @@ module.
 
 Located in the "wolfcrypt_test" directory, this application runs the
 wolfCrypt cryptography tests and verifies all algorithms are working
-correctly on the target platform. See the README.md located in the
-"wolfcrypt_test" directory for more details.
+correctly on the target platform. See the [README.md](./wolfcrypt_test/README.md) 
+located in the "wolfcrypt_test" directory for more details.
 
 ## wolfSSL Example Client
 
 Located in the "wolfssl_client" directory, this application makes a simple
 TLS 1.2 client connection, sends an HTTP GET message, and prints the server
-response that is received. See the README.md located in the "wolfssl_client"
-directory for more details.
+response that is received. See the [README.md](./wolfssl_client/README.md) 
+located in the "wolfssl_client" directory for more details.
 
 ## wolfSSL Example Server
 
@@ -57,7 +57,8 @@ Located in the "wolfssl_server" directory, this application runs a simple
 single-threaded TLS 1.2 server application. This server waits for a client
 connection, establishes a secure TLS 1.2 connection, reads a message from
 the client, then sends back a simple HTTP web page in response. See the
-README.md located in the "wolfssl_server" directory for more details.
+[README.md](./wolfssl_server/README.md) located in the "wolfssl_server" 
+directory for more details.
 
 # wolfSSL ATECC Build Options
 
