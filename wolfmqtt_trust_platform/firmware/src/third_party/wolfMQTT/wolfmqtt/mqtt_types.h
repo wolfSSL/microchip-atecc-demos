@@ -1,6 +1,6 @@
 /* mqtt_types.h
  *
- * Copyright (C) 2006-2018 wolfSSL Inc.
+ * Copyright (C) 2006-2020 wolfSSL Inc.
  *
  * This file is part of wolfMQTT.
  *
@@ -62,6 +62,10 @@
     #include "wolfmqtt/vs_settings.h"
 #endif
 
+#ifdef WOLFMQTT_USER_SETTINGS
+#include "user_settings.h"
+#endif
+
 #ifdef ENABLE_MQTT_TLS
     #if !defined(WOLFSSL_USER_SETTINGS) && !defined(USE_WINDOWS_API)
         #include <wolfssl/options.h>
@@ -69,11 +73,7 @@
     #include <wolfssl/wolfcrypt/settings.h>
     #include <wolfssl/ssl.h>
     #include <wolfssl/wolfcrypt/types.h>
-
-    #ifdef WOLFMQTT_MULTITHREAD
-        #include <wolfssl/wolfcrypt/wc_port.h>
-        #include <wolfssl/wolfcrypt/error-crypt.h>
-    #endif
+    #include <wolfssl/wolfcrypt/error-crypt.h>
 
     #ifndef WOLF_TLS_DHKEY_BITS_MIN /* allow define to be overridden */
         #ifdef WOLFSSL_MAX_STRENGTH
@@ -84,17 +84,44 @@
     #endif
 #endif
 
-#if !defined(ENABLE_MQTT_TLS) && defined(WOLFMQTT_MULTITHREAD)
-#warning "User must supply mutex components if wolfSSL is not included."
-    /*
-    User must supply these...
-        wolfSSL_Mutex
-        WOLFSSL_API int wc_InitMutex(wolfSSL_Mutex*);
-        WOLFSSL_API int wc_FreeMutex(wolfSSL_Mutex*);
-        WOLFSSL_API int wc_LockMutex(wolfSSL_Mutex*);
-        WOLFSSL_API int wc_UnLockMutex(wolfSSL_Mutex*);
-        #define BAD_MUTEX_E -106
-        */
+#ifdef WOLFMQTT_MULTITHREAD
+    /* Multi-threading uses binary semaphores */
+    #if defined(__MACH__)
+        /* Apple Style Dispatch Semaphore */
+        #include <dispatch/dispatch.h>
+        typedef dispatch_semaphore_t wm_Sem;
+
+    #elif defined(__FreeBSD__) || defined(__linux__)
+        /* Posix Style Semaphore */
+        #define WOLFMQTT_POSIX_SEMAPHORES
+        #include <semaphore.h>
+        typedef sem_t wm_Sem;
+
+    #elif defined(FREERTOS)
+        /* FreeRTOS binary semaphore */
+        #include <FreeRTOS.h>
+        
+        #include <semphr.h>
+        typedef SemaphoreHandle_t wm_Sem;
+
+    #elif defined(USE_WINDOWS_API)
+        /* Windows semaphore object */
+        #include <winsock2.h> /* winsock2.h needs included before windows.h */
+        #include <ws2tcpip.h>
+        #include <windows.h>
+        typedef HANDLE wm_Sem;
+    
+    #elif defined(WOLFMQTT_USER_THREADING)
+        /* User provides API's and wm_Sem type */
+
+    #else
+        #error "Multithreading requires binary semaphore implementation!"
+    #endif
+
+    WOLFMQTT_API int wm_SemInit(wm_Sem* s);
+    WOLFMQTT_API int wm_SemFree(wm_Sem* s);
+    WOLFMQTT_API int wm_SemLock(wm_Sem* s);
+    WOLFMQTT_API int wm_SemUnlock(wm_Sem* s);
 #endif
 
 /* configuration for Harmony */
@@ -239,7 +266,16 @@ enum MqttPacketResponseCodes {
         #define LINE_END    "\n"
     #endif
     #ifndef PRINTF
-        #define PRINTF(_f_, ...)  printf( (_f_ LINE_END), ##__VA_ARGS__)
+        #if defined(WOLFMQTT_MULTITHREAD) && defined(WOLFMQTT_DEBUG_THREAD)
+            #ifdef USE_WINDOWS_API
+                #define PRINTF(_f_, ...)  printf( ("%lx: "_f_ LINE_END), GetCurrentThreadId(), ##__VA_ARGS__)
+            #else
+                #include <pthread.h>
+                #define PRINTF(_f_, ...)  printf( ("%lx: "_f_ LINE_END), pthread_self(), ##__VA_ARGS__)
+            #endif
+        #else
+            #define PRINTF(_f_, ...)  printf( (_f_ LINE_END), ##__VA_ARGS__)
+        #endif
     #endif
 
     #ifndef WOLFMQTT_NO_STDIO

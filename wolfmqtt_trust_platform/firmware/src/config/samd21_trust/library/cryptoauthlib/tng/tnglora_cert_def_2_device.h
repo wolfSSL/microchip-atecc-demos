@@ -38,7 +38,7 @@ extern "C" {
  * @{
  */
 
-extern const atcacert_def_t g_tnglora_cert_def_2_device;
+ATCA_DLL const atcacert_def_t g_tnglora_cert_def_2_device;
 
 /** @} */
 

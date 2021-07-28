@@ -245,6 +245,7 @@ static void STDIO_BufferModeSet(void)
 
 void SYS_Initialize ( void* data )
 {
+
     NVMCTRL_REGS->NVMCTRL_CTRLB = NVMCTRL_CTRLB_RWS(3);
 
     STDIO_BufferModeSet();
@@ -258,13 +259,9 @@ void SYS_Initialize ( void* data )
 
 
 
-    NVMCTRL_Initialize( );
-
-    RTC_Initialize();
-
-    TC3_TimerInitialize();
-
     SERCOM3_USART_Initialize();
+
+    NVMCTRL_Initialize( );
 
     SERCOM2_I2C_Initialize();
 
@@ -275,6 +272,10 @@ void SYS_Initialize ( void* data )
     DMAC_Initialize();
 
     EIC_Initialize();
+
+    RTC_Initialize();
+
+    TC3_TimerInitialize();
 
 
     /* Initialize the WINC Driver */

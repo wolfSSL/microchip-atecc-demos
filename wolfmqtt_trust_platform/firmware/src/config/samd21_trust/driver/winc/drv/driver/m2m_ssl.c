@@ -197,7 +197,7 @@ int8_t m2m_ssl_send_certs_to_winc(uint8_t* pu8Buffer, uint32_t u32BufferSz)
 		pchkhdr->u16Offset32 = 0;
 		pchkhdr->u16Size32 = (u32BufferSz + 3) >> 2;
 		s8Ret = hif_send(M2M_REQ_GROUP_SSL, (M2M_SSL_REQ_WRITE_OWN_CERTS | M2M_REQ_DATA_PKT), NULL, 0, pu8Buffer, u32BufferSz, 0);
-		M2M_INFO("Transferred %u bytes of cert data NON-CHUNKED\n", u32BufferSz);
+        M2M_INFO("Transferred %" PRIu32 " bytes of cert data NON-CHUNKED\r\n", u32BufferSz);
 	}
 	else
 	{
@@ -219,7 +219,7 @@ int8_t m2m_ssl_send_certs_to_winc(uint8_t* pu8Buffer, uint32_t u32BufferSz)
 		pchkhdr->u16Offset32 = ((ofs + 3) >> 2);
 		pchkhdr->u16Size32 = ((thischunksz + 3) >> 2);
 		s8Ret = hif_send(M2M_REQ_GROUP_SSL, (M2M_SSL_REQ_WRITE_OWN_CERTS | M2M_REQ_DATA_PKT), NULL, 0, &pu8Buffer[ofs], thischunksz, 0);
-		M2M_INFO("Transferred %u bytes of cert data CHUNKED to offset %u total %u\n", thischunksz, ofs, u32BufferSz);
+        M2M_INFO("Transferred %" PRIu32 " bytes of cert data CHUNKED to offset %" PRIu32 " total %" PRIu32 "\r\n", thischunksz, ofs, u32BufferSz);
 		memcpy(&pu8Buffer[ofs], saveblob, CHUNKHDRSZ);
 		ofs += thischunksz;
 
@@ -235,7 +235,7 @@ int8_t m2m_ssl_send_certs_to_winc(uint8_t* pu8Buffer, uint32_t u32BufferSz)
 			pchkhdr->u16Offset32 = ((ofs + 3) >> 2);
 			pchkhdr->u16Size32 = ((thischunksz + 3) >> 2);
 			s8Ret = hif_send(M2M_REQ_GROUP_SSL, (M2M_SSL_REQ_WRITE_OWN_CERTS | M2M_REQ_DATA_PKT), NULL, 0, &pu8Buffer[ofs - CHUNKHDRSZ], thischunksz + CHUNKHDRSZ, 0);
-			M2M_INFO("Transferred %u bytes of cert data CHUNKED to offset %u total %u\n", thischunksz, ofs, u32BufferSz);
+            M2M_INFO("Transferred %" PRIu32 " bytes of cert data CHUNKED to offset %" PRIu32 " total %" PRIu32 "\r\n", thischunksz, ofs, u32BufferSz);
 			memcpy(&pu8Buffer[ofs - CHUNKHDRSZ], saveblob, CHUNKHDRSZ);
 			ofs += thischunksz;
 		}

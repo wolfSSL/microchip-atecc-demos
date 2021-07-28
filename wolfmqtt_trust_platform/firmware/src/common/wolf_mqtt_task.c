@@ -194,7 +194,6 @@ typedef struct _SocketContext {
     int8_t s8Error;
 } SocketContext;
 
-extern void APP_DebugPrintf(const char* format, ...);
 #undef  PRINTF
 #define PRINTF(_f_, ...)  printf( (_f_ "\r\n"), ##__VA_ARGS__)
 
@@ -343,7 +342,10 @@ static void APP_ExampleGetSystemTimeEventCallback(DRV_HANDLE handle, uint32_t ti
     }
 }
 
-static void wifi_callback_handler(DRV_HANDLE handle, WDRV_WINC_CONN_STATE currentState, WDRV_WINC_CONN_ERROR errorCode)
+static void wifi_callback_handler(DRV_HANDLE handle,
+    WDRV_WINC_ASSOC_HANDLE assocHandle,
+    WDRV_WINC_CONN_STATE currentState,
+    WDRV_WINC_CONN_ERROR errorCode)
 {
     if (currentState == WDRV_WINC_CONN_STATE_CONNECTED) {
         PRINTF("Wifi Connected");

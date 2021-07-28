@@ -57,7 +57,7 @@
 #endif
 
 /* Classic Cryptoauth Devices */
-#if defined(ATCA_SHA_SUPPORT) || defined(ATCA_ECC_SUPPORT)
+#if defined(ATCA_SHA_SUPPORT) || defined(ATCA_ECC_SUPPORT) || defined(ATCA_ECC204_SUPPORT)
 #define ATCA_CA_SUPPORT     1
 #else
 #define ATCA_CA_SUPPORT     0
@@ -68,12 +68,6 @@
 #define ATCA_TA_SUPPORT     1
 #else
 #define ATCA_TA_SUPPORT     0
-#endif
-
-#ifdef ATCA_BUILD_SHARED_LIBS
-#define ATCA_DLL    SHARED_LIB_EXPORT
-#else
-#define ATCA_DLL    SHARED_LIB_IMPORT
 #endif
 
 #include "atca_status.h"
@@ -96,6 +90,11 @@
 #define ATCA_ZONE_CONFIG                    ((uint8_t)0x00)
 #define ATCA_ZONE_OTP                       ((uint8_t)0x01)
 #define ATCA_ZONE_DATA                      ((uint8_t)0x02)
+
+#if defined(ATCA_ECC204_SUPPORT)
+#define ATCA_ECC204_ZONE_DATA               ((uint8_t)0x00)
+#define ATCA_ECC204_ZONE_CONFIG             ((uint8_t)0x01)
+#endif
 
 /** Place resulting digest both in Output buffer and TempKey */
 #define SHA_MODE_TARGET_TEMPKEY             ((uint8_t)0x00)

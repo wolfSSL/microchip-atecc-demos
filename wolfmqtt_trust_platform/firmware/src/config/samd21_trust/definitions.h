@@ -49,18 +49,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include "crypto/crypto.h"
-#include "peripheral/nvmctrl/plib_nvmctrl.h"
-#include "peripheral/rtc/plib_rtc.h"
-#include "peripheral/tc/plib_tc3.h"
-#include "system/time/sys_time.h"
-#include "driver/spi/drv_spi.h"
-#include "system/int/sys_int.h"
-#include "system/ports/sys_ports.h"
-#include "system/dma/sys_dma.h"
-#include "osal/osal.h"
-#include "system/debug/sys_debug.h"
 #include "peripheral/sercom/usart/plib_sercom3_usart.h"
+#include "peripheral/nvmctrl/plib_nvmctrl.h"
 #include "peripheral/sercom/i2c_master/plib_sercom2_i2c_master.h"
 #include "peripheral/sercom/spi_master/plib_sercom1_spi_master.h"
 #include "peripheral/evsys/plib_evsys.h"
@@ -70,7 +60,16 @@
 #include "peripheral/nvic/plib_nvic.h"
 #include "peripheral/dmac/plib_dmac.h"
 #include "peripheral/eic/plib_eic.h"
+#include "peripheral/rtc/plib_rtc.h"
+#include "peripheral/tc/plib_tc3.h"
+#include "system/time/sys_time.h"
 #include "wolfssl/wolfcrypt/port/pic32/crypt_wolfcryptcb.h"
+#include "driver/spi/drv_spi.h"
+#include "system/int/sys_int.h"
+#include "system/ports/sys_ports.h"
+#include "system/dma/sys_dma.h"
+#include "osal/osal.h"
+#include "system/debug/sys_debug.h"
 #include "app.h"
 
 
@@ -82,6 +81,9 @@ extern "C" {
 
 #endif
 // DOM-IGNORE-END
+
+/* CPU clock frequency */
+#define CPU_CLOCK_FREQUENCY 48000000
 
 // *****************************************************************************
 // *****************************************************************************
@@ -175,29 +177,29 @@ void SYS_Tasks ( void );
 // Section: Type Definitions
 // *****************************************************************************
 // *****************************************************************************
-    
+
 // *****************************************************************************
 /* System Objects
-        
+
 Summary:
     Structure holding the system's object handles
-        
+
 Description:
     This structure contains the object handles for all objects in the
     MPLAB Harmony project's system configuration.
-        
+
 Remarks:
     These handles are returned from the "Initialize" functions for each module
     and must be passed into the "Tasks" function for each module.
 */
-        
+
 typedef struct
 {
-    SYS_MODULE_OBJ  sysTime;
     SYS_MODULE_OBJ  drvWifiWinc;
     /* SPI0 Driver Object */
     SYS_MODULE_OBJ drvSPI0;
 
+    SYS_MODULE_OBJ  sysTime;
 
 } SYSTEM_OBJECTS;
 

@@ -384,7 +384,7 @@ int main (void)
 }
 @endcode
 */
-int8_t m2m_ota_start_update(uint8_t * u8DownloadUrl);
+int8_t m2m_ota_start_update(unsigned char * pcDownloadUrl);
 
 /*!
 @fn \

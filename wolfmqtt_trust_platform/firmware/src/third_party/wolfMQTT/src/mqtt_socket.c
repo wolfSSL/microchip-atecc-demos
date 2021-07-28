@@ -1,6 +1,6 @@
 /* mqtt_socket.c
  *
- * Copyright (C) 2006-2018 wolfSSL Inc.
+ * Copyright (C) 2006-2020 wolfSSL Inc.
  *
  * This file is part of wolfMQTT.
  *
@@ -25,7 +25,11 @@
 #endif
 
 #ifdef WOLFMQTT_NONBLOCK
-    #include <sys/errno.h>
+    /* need EWOULDBLOCK and EAGAIN */
+    #ifdef MICROCHIP_MPLAB_HARMONY
+        #include <sys/errno.h>
+    #endif
+    #include <errno.h>
 #endif
 
 #include "wolfmqtt/mqtt_client.h"
@@ -393,9 +397,6 @@ int MqttSocket_Connect(MqttClient *client, const char* host, word16 port,
 
             wolfSSL_SetIOReadCtx(client->tls.ssl, (void *)client);
             wolfSSL_SetIOWriteCtx(client->tls.ssl, (void *)client);
-        #if !defined(WOLFMQTT_NO_TIMEOUT) && defined(WOLFMQTT_NONBLOCK)
-            wolfSSL_set_using_nonblock(client->tls.ssl, 1);
-        #endif
         }
 
         if (client->ctx != NULL) {
