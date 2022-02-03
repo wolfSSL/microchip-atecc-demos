@@ -1,0 +1,516 @@
+# TLS Demo Project using ATECC508A and WINC1500
+
+
+## Introduction
+
+The end goal of this project is to show that the "TLS-ECDH-ECDSA-AES128-GCM-SHA256" cipher suite can be fully implemented using the ATECC508A without exposing a private key. This project fullfills the RFC4492 for "ECDH_ECDSA" Transport Layer Security.
+
+## Prerequisites for this demo
+
+Software:
+
+  - Atmel Studio 6.2 or
+  - Atmel Studio 7
+  
+Hardware:
+
+  - Atmel SAMD21 Xplained Pro(2 pcs)
+  - Atmel CryptoAuth Xplained Pro extension board(2 pcs)
+  - Atmel WINC1500 extension board(2 pcs)
+
+## Benchmarks
+
+TLS Establishment Times:
+
+* Hardware accelerated ATECC508A: 2.342 seconds avgerage
+* Software only: 13.422 seconds average
+
+The TLS connection establishment time is 5.73 times faster with the ATECC508A.
+
+## How to run this project
+
+1. The Atmel ATECC508A chips come from the factory un-programmed and need to be provisioned. Atmel provided us code as reference which exists in `cryptoauthlib/certs/provision.c`. The function is `atcatls_device_provision` and can be called more than once. If the device is not provisioned it will set it up with default slot settings. If its already provisioned it will skip.
+
+2. Load the "samd21_winc1500_wolf_tls_ecc508a_server.atsln" using Atmel Studio 7.
+
+3. Open "tls_demo/tls_common.h", And then edit MAIN_WLAN_SSID and MAIN_WLAN_PSK to access to your WI-FI AP.
+`#define MAIN_WLAN_SSID      "AVRGUEST"`
+`#define MAIN_WLAN_PSK       "MicroController"`
+
+4. Configure your UART port in "config/conf_uart_serial.h". By default its setup to use the UART at PTB10/PTB11 on EXT2/EXT3. The configuration can easily be changed to use the built-in EDBG CDC UART. The default baud rate is 115200. Use terminal software such as CoolTerm or Putty.
+5. Build this project and run.
+6. Once dynamic IP is assigned correctly it will be displayed on the terminal. `M2M_WIFI_RESP_CON_STATE_CHANGED: CONNECTED`
+`M2M_WIFI_REQ_DHCP_CONF: IP is 192.168.1.241`
+`WINC is connected to ATMEL_409_2G successfully!`
+7. Load the "samd21_winc1500_wolf_tls_ecc508a_client.atsln" using Atmel Studio 7.
+8. Open "tls_demo/tls_client.h" and define TLS_SERVER_IP to address that your server was assigned.
+9. Build and run this project.
+10. The TLS client should connect to the TLS server using ECDH-ECDSA.
+
+Here is an example log output:
+
+```
+-- TLS starts with ATECC508A over WINC module --
+(APP)(INFO)Chip ID 1502b1
+(APP)(INFO)Firmware ver   : 19.3.0
+(APP)(INFO)Min driver ver : 19.3.0
+(APP)(INFO)Curr driver ver: 19.3.0
+M2M_WIFI_RESP_CON_STATE_CHANGED: CONNECTED
+M2M_WIFI_REQ_DHCP_CONF: IP is 192.168.1.241
+WINC is connected to ATMEL_409_2G successfully!
+Date of Today : 2015 / 11 / 26
+socket callback : bind success!
+socket callback : listen success!
+socket callback : accept success!
+Built Signer Certificate:
+30 82 01 D3 30 82 01 79 A0 03 02 01 02 02 03 40
+C4 8B 30 0A 06 08 2A 86 48 CE 3D 04 03 02 30 43
+31 1D 30 1B 06 03 55 04 0A 0C 14 45 78 61 6D 70
+6C 65 20 4F 72 67 61 6E 69 7A 61 74 69 6F 6E 31
+22 30 20 06 03 55 04 03 0C 19 45 78 61 6D 70 6C
+65 20 41 54 45 43 43 35 30 38 41 20 52 6F 6F 74
+20 43 41 30 20 17 0D 31 34 30 38 30 32 32 30 30
+30 30 30 5A 18 0F 39 39 39 39 31 32 33 31 32 33
+35 39 35 39 5A 30 47 31 1D 30 1B 06 03 55 04 0A
+0C 14 45 78 61 6D 70 6C 65 20 4F 72 67 61 6E 69
+7A 61 74 69 6F 6E 31 26 30 24 06 03 55 04 03 0C
+1D 45 78 61 6D 70 6C 65 20 41 54 45 43 43 35 30
+38 41 20 53 69 67 6E 65 72 20 43 34 38 42 30 59
+30 13 06 07 2A 86 48 CE 3D 02 01 06 08 2A 86 48
+CE 3D 03 01 07 03 42 00 04 83 F9 93 71 AD D3 71
+E3 FB A7 C0 13 97 7B 29 DF C8 AC D9 B8 7B 71 46
+A4 5C A5 C1 16 D2 40 47 F1 4B 48 FB 86 B2 D5 B7
+3C 4C F0 7A B2 8D B2 FC 81 BE 70 6F 77 BC 6E 86
+9E 30 47 39 18 39 C0 A5 C8 A3 56 30 54 30 12 06
+03 55 1D 13 01 01 FF 04 08 30 06 01 01 FF 02 01
+00 30 1D 06 03 55 1D 0E 04 16 04 14 04 F7 C9 9D
+3A 04 27 3D 94 8F 53 94 38 A6 A4 C7 22 8F 63 39
+30 1F 06 03 55 1D 23 04 18 30 16 80 14 37 0A A1
+3A EB EB CF 09 89 70 82 6B 3A B2 74 FB 96 72 68
+D3 30 0A 06 08 2A 86 48 CE 3D 04 03 02 03 48 00
+30 45 02 21 00 A0 47 C1 05 0E 94 50 30 D6 F6 67
+E4 E7 0C 51 EA 5D D7 D5 06 2F 88 FB 3A 61 BC 15
+B7 4A CA 92 9C 02 20 4D DC 8B A3 AE FE 1D 9E B9
+D1 24 A2 C0 32 C7 67 74 2F 90 F0 14 03 09 86 BA
+66 75 BD D5 09 4F 13
+Built Device Certificate:
+30 82 01 A5 30 82 01 4C A0 03 02 01 02 02 0A 40
+01 23 72 49 43 B2 AB 9D EE 30 0A 06 08 2A 86 48
+CE 3D 04 03 02 30 47 31 1D 30 1B 06 03 55 04 0A
+0C 14 45 78 61 6D 70 6C 65 20 4F 72 67 61 6E 69
+7A 61 74 69 6F 6E 31 26 30 24 06 03 55 04 03 0C
+1D 45 78 61 6D 70 6C 65 20 41 54 45 43 43 35 30
+38 41 20 53 69 67 6E 65 72 20 43 34 38 42 30 20
+17 0D 31 35 30 39 30 33 32 31 30 30 30 30 5A 18
+0F 39 39 39 39 31 32 33 31 32 33 35 39 35 39 5A
+30 42 31 1D 30 1B 06 03 55 04 0A 0C 14 45 78 61
+6D 70 6C 65 20 4F 72 67 61 6E 69 7A 61 74 69 6F
+6E 31 21 30 1F 06 03 55 04 03 0C 18 45 78 61 6D
+70 6C 65 20 41 54 45 43 43 35 30 38 41 20 44 65
+76 69 63 65 30 59 30 13 06 07 2A 86 48 CE 3D 02
+01 06 08 2A 86 48 CE 3D 03 01 07 03 42 00 04 34
+E2 87 82 20 26 A6 34 13 37 70 12 50 F2 BE 94 CF
+A3 26 89 F0 B8 3E 89 74 9C 39 DA 5C C6 E9 84 6C
+87 3A B7 29 01 47 E1 EB 6B 33 6E AC 1F 9F 7C 31
+7C 0F 88 8B 26 92 2F 03 B3 D7 BC CA F2 EB 35 A3
+23 30 21 30 1F 06 03 55 1D 23 04 18 30 16 80 14
+04 F7 C9 9D 3A 04 27 3D 94 8F 53 94 38 A6 A4 C7
+22 8F 63 39 30 0A 06 08 2A 86 48 CE 3D 04 03 02
+03 47 00 30 44 02 20 5D 1F F6 12 7B CA F2 DB B3
+58 4D A7 87 F3 7F 67 F8 8C E3 23 8A C5 F7 82 8A
+86 55 C5 C6 F1 F2 25 02 20 32 D7 91 C4 41 6D C1
+16 AC AF 59 78 1C 3D 71 B7 D1 2F CA 51 B7 35 0B
+55 98 2C 90 EC FF 23 95 68
+wolfSSL Entering wolfSSL_Init
+wolfSSL Entering WOLFSSL_CTX_new
+wolfSSL Entering wolfSSL_CertManagerNew
+wolfSSL Leaving WOLFSSL_CTX_new, return 0
+wolfSSL Entering wolfSSL_CTX_use_PrivateKey_buffer
+wolfSSL Entering GetMyVersion
+wolfSSL Entering wolfSSL_CTX_use_certificate_buffer
+wolfSSL Entering wolfSSL_CTX_set_verify
+wolfSSL Entering wolfSSL_CTX_set_cipher_list
+wolfSSL Entering SSL_new
+Generated random number:
+38 49 CC DA 78 46 C6 4F AA A8 B6 48 6B 1F 40 15
+A7 95 CE 78 8E DA C2 77 6F E9 75 C3 4B A5 3B 13
+wolfSSL Leaving SSL_new, return 0
+wolfSSL Entering SSL_set_fd
+wolfSSL Leaving SSL_set_fd, return 1
+wolfSSL Entering SSL_accept()
+socket callback : recv success!
+RECEIVED PACKET:
+16 03 03 00 39
+RECEIVED PACKET:
+01 00 00 35 03 03 66 FE D3 F5 90 71 58 5D 97 9D
+9E C7 70 4A AD D4 AE 11 61 22 29 F1 0A F9 6C C8
+78 31 8F 20 E6 25 00 00 02 C0 2D 01 00 00 0A 00
+0D 00 06 00 04 04 03 02 03
+received record layer msg
+wolfSSL Entering DoHandShakeMsg()
+wolfSSL Entering DoHandShakeMsgType
+processing client hello
+DoClientHello
+wolfSSL Entering MatchSuite
+wolfSSL Entering VerifyServerSuite
+Requires static ECC
+Verified suite validity
+wolfSSL Leaving DoHandShakeMsgType(), return 0
+wolfSSL Leaving DoHandShakeMsg(), return 0
+accept state ACCEPT_CLIENT_HELLO_DONE
+accept state HELLO_VERIFY_SENT
+accept state ACCEPT_FIRST_REPLY_DONE
+socket callback : send success!
+SENT PACKET:
+16 03 03 00 4A 02 00 00 46 03 03 EF 74 A0 51 59
+47 09 C6 CA B5 6F ED 9F 0B E4 5E 1B F6 B1 39 65
+7E 26 55 DD DB D9 D7 6B 1B 75 15 20 A7 A0 44 E9
+37 84 0D 50 2C 46 55 FC 07 03 2C DA 31 D0 95 56
+F6 27 A7 0D BA 4A 91 6D 37 FF 02 77 C0 2D 00
+accept state SERVER_HELLO_SENT
+socket callback : send success!
+SENT PACKET:
+16 03 03 04 12 0B 00 04 0E 00 04 0B 00 04 08 D7
+01 00 00 30 82 01 D3 30 82 01 79 A0 03 02 01 02
+02 03 40 C4 8B 30 0A 06 08 2A 86 48 CE 3D 04 03
+02 30 43 31 1D 30 1B 06 03 55 04 0A 0C 14 45 78
+61 6D 70 6C 65 20 4F 72 67 61 6E 69 7A 61 74 69
+6F 6E 31 22 30 20 06 03 55 04 03 0C 19 45 78 61
+6D 70 6C 65 20 41 54 45 43 43 35 30 38 41 20 52
+6F 6F 74 20 43 41 30 20 17 0D 31 34 30 38 30 32
+32 30 30 30 30 30 5A 18 0F 39 39 39 39 31 32 33
+31 32 33 35 39 35 39 5A 30 47 31 1D 30 1B 06 03
+55 04 0A 0C 14 45 78 61 6D 70 6C 65 20 4F 72 67
+61 6E 69 7A 61 74 69 6F 6E 31 26 30 24 06 03 55
+04 03 0C 1D 45 78 61 6D 70 6C 65 20 41 54 45 43
+43 35 30 38 41 20 53 69 67 6E 65 72 20 43 34 38
+42 30 59 30 13 06 07 2A 86 48 CE 3D 02 01 06 08
+2A 86 48 CE 3D 03 01 07 03 42 00 04 83 F9 93 71
+AD D3 71 E3 FB A7 C0 13 97 7B 29 DF C8 AC D9 B8
+7B 71 46 A4 5C A5 C1 16 D2 40 47 F1 4B 48 FB 86
+B2 D5 B7 3C 4C F0 7A B2 8D B2 FC 81 BE 70 6F 77
+BC 6E 86 9E 30 47 39 18 39 C0 A5 C8 A3 56 30 54
+30 12 06 03 55 1D 13 01 01 FF 04 08 30 06 01 01
+FF 02 01 00 30 1D 06 03 55 1D 0E 04 16 04 14 04
+F7 C9 9D 3A 04 27 3D 94 8F 53 94 38 A6 A4 C7 22
+8F 63 39 30 1F 06 03 55 1D 23 04 18 30 16 80 14
+37 0A A1 3A EB EB CF 09 89 70 82 6B 3A B2 74 FB
+96 72 68 D3 30 0A 06 08 2A 86 48 CE 3D 04 03 02
+03 48 00 30 45 02 21 00 A0 47 C1 05 0E 94 50 30
+D6 F6 67 E4 E7 0C 51 EA 5D D7 D5 06 2F 88 FB 3A
+61 BC 15 B7 4A CA 92 9C 02 20 4D DC 8B A3 AE FE
+1D 9E B9 D1 24 A2 C0 32 C7 67 74 2F 90 F0 14 03
+09 86 BA 66 75 BD D5 09 4F 13 FF 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 A9 01 00 00 30 82 01 A5 30 82 01 4C A0
+03 02 01 02 02 0A 40 01 23 72 49 43 B2 AB 9D EE
+30 0A 06 08 2A 86 48 CE 3D 04 03 02 30 47 31 1D
+30 1B 06 03 55 04 0A 0C 14 45 78 61 6D 70 6C 65
+20 4F 72 67 61 6E 69 7A 61 74 69 6F 6E 31 26 30
+24 06 03 55 04 03 0C 1D 45 78 61 6D 70 6C 65 20
+41 54 45 43 43 35 30 38 41 20 53 69 67 6E 65 72
+20 43 34 38 42 30 20 17 0D 31 35 30 39 30 33 32
+31 30 30 30 30 5A 18 0F 39 39 39 39 31 32 33 31
+32 33 35 39 35 39 5A 30 42 31 1D 30 1B 06 03 55
+04 0A 0C 14 45 78 61 6D 70 6C 65 20 4F 72 67 61
+6E 69 7A 61 74 69 6F 6E 31 21 30 1F 06 03 55 04
+03 0C 18 45 78 61 6D 70 6C 65 20 41 54 45 43 43
+35 30 38 41 20 44 65 76 69 63 65 30 59 30 13 06
+07 2A 86 48 CE 3D 02 01 06 08 2A 86 48 CE 3D 03
+01 07 03 42 00 04 34 E2 87 82 20 26 A6 34 13 37
+70 12 50 F2 BE 94 CF A3 26 89 F0 B8 3E 89 74 9C
+39 DA 5C C6 E9 84 6C 87 3A B7 29 01 47 E1 EB 6B
+33 6E AC 1F 9F 7C 31 7C 0F 88 8B 26 92 2F 03 B3
+D7 BC CA F2 EB 35 A3 23 30 21 30 1F 06 03 55 1D
+23 04 18 30 16 80 14 04 F7 C9 9D 3A 04 27 3D 94
+8F 53 94 38 A6 A4 C7 22 8F 63 39 30 0A 06 08 2A
+86 48 CE 3D 04 03 02 03 47 00 30 44 02 20 5D 1F
+F6 12 7B CA F2 DB B3 58 4D A7 87 F3 7F 67 F8 8C
+E3 23 8A C5 F7 82 8A 86 55 C5 C6 F1 F2 25 02 20
+32 D7 91 C4 41 6D C1 16 AC AF 59 78 1C 3D 71 B7
+D1 2F CA 51 B7 35 0B 55 98 2C 90 EC FF 23 95 68
+FF
+accept state CERT_SENT
+Using Static ECDH, not sending ServerKeyExchagne
+accept state KEY_EXCHANGE_SENT
+socket callback : send success!
+SENT PACKET:
+16 03 03 00 0E 0D 00 00 0A 01 40 00 04 04 03 02
+03 00 00
+accept state CERT_REQ_SENT
+socket callback : send success!
+SENT PACKET:
+16 03 03 00 04 0E 00 00 00
+accept state SERVER_HELLO_DONE
+socket callback : recv success!
+RECEIVED PACKET:
+16 03 03 04 12
+RECEIVED PACKET:
+0B 00 04 0E 00 04 0B 00 04 08 D7 01 00 00 30 82
+01 D3 30 82 01 79 A0 03 02 01 02 02 03 40 C4 8B
+30 0A 06 08 2A 86 48 CE 3D 04 03 02 30 43 31 1D
+30 1B 06 03 55 04 0A 0C 14 45 78 61 6D 70 6C 65
+20 4F 72 67 61 6E 69 7A 61 74 69 6F 6E 31 22 30
+20 06 03 55 04 03 0C 19 45 78 61 6D 70 6C 65 20
+41 54 45 43 43 35 30 38 41 20 52 6F 6F 74 20 43
+41 30 20 17 0D 31 34 30 38 30 32 32 30 30 30 30
+30 5A 18 0F 39 39 39 39 31 32 33 31 32 33 35 39
+35 39 5A 30 47 31 1D 30 1B 06 03 55 04 0A 0C 14
+45 78 61 6D 70 6C 65 20 4F 72 67 61 6E 69 7A 61
+74 69 6F 6E 31 26 30 24 06 03 55 04 03 0C 1D 45
+78 61 6D 70 6C 65 20 41 54 45 43 43 35 30 38 41
+20 53 69 67 6E 65 72 20 43 34 38 42 30 59 30 13
+06 07 2A 86 48 CE 3D 02 01 06 08 2A 86 48 CE 3D
+03 01 07 03 42 00 04 AB 27 B8 FE 58 74 B9 B8 D9
+4C EC FA C0 27 3B 09 5A 20 AD 33 AD B5 25 4F 18
+58 AB 4E 03 D6 5A 0E 59 E2 8B 43 14 A2 A3 6F C6
+BE 09 07 E7 2F 42 3A 73 F6 0A 5F 71 94 79 FA EC
+CB 91 30 16 E7 38 7D A3 56 30 54 30 12 06 03 55
+1D 13 01 01 FF 04 08 30 06 01 01 FF 02 01 00 30
+1D 06 03 55 1D 0E 04 16 04 14 2D 6C DA 83 DB E4
+BA F0 F7 2B F4 83 19 00 34 51 52 19 3B A2 30 1F
+06 03 55 1D 23 04 18 30 16 80 14 37 0A A1 3A EB
+EB CF 09 89 70 82 6B 3A B2 74 FB 96 72 68 D3 30
+0A 06 08 2A 86 48 CE 3D 04 03 02 03 48 00 30 45
+02 20 72 E4 05 3A 26 AE 2E 99 B0 60 27 C0 6E 75
+3D 38 D3 FE D8 0C 41 34 4D 1A EE CB D6 AB 1C 77
+49 B2 02 21 00 93 B1 A1 BD 7B 5C BE C5 1B 02 CB
+DB CC D0 47 3E CC B6 F7 23 CD 7E 7F 16 01 0A 93
+18 54 E0 04 B9 FF 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 AA 01
+00 00 30 82 01 A6 30 82 01 4C A0 03 02 01 02 02
+0A 40 01 23 14 51 43 B2 AB 9D EE 30 0A 06 08 2A
+86 48 CE 3D 04 03 02 30 47 31 1D 30 1B 06 03 55
+04 0A 0C 14 45 78 61 6D 70 6C 65 20 4F 72 67 61
+6E 69 7A 61 74 69 6F 6E 31 26 30 24 06 03 55 04
+03 0C 1D 45 78 61 6D 70 6C 65 20 41 54 45 43 43
+35 30 38 41 20 53 69 67 6E 65 72 20 43 34 38 42
+30 20 17 0D 31 35 30 39 30 33 32 31 30 30 30 30
+5A 18 0F 39 39 39 39 31 32 33 31 32 33 35 39 35
+39 5A 30 42 31 1D 30 1B 06 03 55 04 0A 0C 14 45
+78 61 6D 70 6C 65 20 4F 72 67 61 6E 69 7A 61 74
+69 6F 6E 31 21 30 1F 06 03 55 04 03 0C 18 45 78
+61 6D 70 6C 65 20 41 54 45 43 43 35 30 38 41 20
+44 65 76 69 63 65 30 59 30 13 06 07 2A 86 48 CE
+3D 02 01 06 08 2A 86 48 CE 3D 03 01 07 03 42 00
+04 2E 2A 48 A0 1C D0 AB 8C 11 CD 19 58 47 85 1E
+12 62 22 75 92 F5 5C 98 91 0E A3 7A C2 14 91 2A
+F5 4F BA 1B 8C 8A 72 FE CD 5B 22 25 66 99 27 89
+B4 EF 60 9D 53 7A AF 56 09 92 D4 69 79 BD 82 38
+5E A3 23 30 21 30 1F 06 03 55 1D 23 04 18 30 16
+80 14 2D 6C DA 83 DB E4 BA F0 F7 2B F4 83 19 00
+34 51 52 19 3B A2 30 0A 06 08 2A 86 48 CE 3D 04
+03 02 03 48 00 30 45 02 20 70 4A 5D ED AE A6 D3
+C4 05 A5 50 D4 20 A0 1B F9 A3 51 00 1C F8 FA A8
+5D D1 0C 87 C9 AD 58 3B 34 02 21 00 D5 FA 9F 7C
+E3 62 95 E5 58 8F 40 11 13 71 B2 5B 89 DF E9 E6
+15 53 31 C0 73 DB 6A C0 D5 BA A3 08 FF 00 00 00
+00
+received record layer msg
+wolfSSL Entering DoHandShakeMsg()
+wolfSSL Entering DoHandShakeMsgType
+processing certificate
+wolfSSL Entering DoCertificate
+Loading Peer's cert chain
+    Put another cert into chain
+Verifying Peer's cert
+Signer certificate:
+30 82 01 D3 30 82 01 79 A0 03 02 01 02 02 03 40
+C4 8B 30 0A 06 08 2A 86 48 CE 3D 04 03 02 30 43
+31 1D 30 1B 06 03 55 04 0A 0C 14 45 78 61 6D 70
+6C 65 20 4F 72 67 61 6E 69 7A 61 74 69 6F 6E 31
+22 30 20 06 03 55 04 03 0C 19 45 78 61 6D 70 6C
+65 20 41 54 45 43 43 35 30 38 41 20 52 6F 6F 74
+20 43 41 30 20 17 0D 31 34 30 38 30 32 32 30 30
+30 30 30 5A 18 0F 39 39 39 39 31 32 33 31 32 33
+35 39 35 39 5A 30 47 31 1D 30 1B 06 03 55 04 0A
+0C 14 45 78 61 6D 70 6C 65 20 4F 72 67 61 6E 69
+7A 61 74 69 6F 6E 31 26 30 24 06 03 55 04 03 0C
+1D 45 78 61 6D 70 6C 65 20 41 54 45 43 43 35 30
+38 41 20 53 69 67 6E 65 72 20 43 34 38 42 30 59
+30 13 06 07 2A 86 48 CE 3D 02 01 06 08 2A 86 48
+CE 3D 03 01 07 03 42 00 04 AB 27 B8 FE 58 74 B9
+B8 D9 4C EC FA C0 27 3B 09 5A 20 AD 33 AD B5 25
+4F 18 58 AB 4E 03 D6 5A 0E 59 E2 8B 43 14 A2 A3
+6F C6 BE 09 07 E7 2F 42 3A 73 F6 0A 5F 71 94 79
+FA EC CB 91 30 16 E7 38 7D A3 56 30 54 30 12 06
+03 55 1D 13 01 01 FF 04 08 30 06 01 01 FF 02 01
+00 30 1D 06 03 55 1D 0E 04 16 04 14 2D 6C DA 83
+DB E4 BA F0 F7 2B F4 83 19 00 34 51 52 19 3B A2
+30 1F 06 03 55 1D 23 04 18 30 16 80 14 37 0A A1
+3A EB EB CF 09 89 70 82 6B 3A B2 74 FB 96 72 68
+D3 30 0A 06 08 2A 86 48 CE 3D 04 03 02 03 48 00
+30 45 02 20 72 E4 05 3A 26 AE 2E 99 B0 60 27 C0
+6E 75 3D 38 D3 FE D8 0C 41 34 4D 1A EE CB D6 AB
+1C 77 49 B2 02 21 00 93 B1 A1 BD 7B 5C BE C5 1B
+02 CB DB CC D0 47 3E CC B6 F7 23 CD 7E 7F 16 01
+0A 93 18 54 E0 04 B9
+Verified signer's certificate!
+Device certificate:
+30 82 01 A6 30 82 01 4C A0 03 02 01 02 02 0A 40
+01 23 14 51 43 B2 AB 9D EE 30 0A 06 08 2A 86 48
+CE 3D 04 03 02 30 47 31 1D 30 1B 06 03 55 04 0A
+0C 14 45 78 61 6D 70 6C 65 20 4F 72 67 61 6E 69
+7A 61 74 69 6F 6E 31 26 30 24 06 03 55 04 03 0C
+1D 45 78 61 6D 70 6C 65 20 41 54 45 43 43 35 30
+38 41 20 53 69 67 6E 65 72 20 43 34 38 42 30 20
+17 0D 31 35 30 39 30 33 32 31 30 30 30 30 5A 18
+0F 39 39 39 39 31 32 33 31 32 33 35 39 35 39 5A
+30 42 31 1D 30 1B 06 03 55 04 0A 0C 14 45 78 61
+6D 70 6C 65 20 4F 72 67 61 6E 69 7A 61 74 69 6F
+6E 31 21 30 1F 06 03 55 04 03 0C 18 45 78 61 6D
+70 6C 65 20 41 54 45 43 43 35 30 38 41 20 44 65
+76 69 63 65 30 59 30 13 06 07 2A 86 48 CE 3D 02
+01 06 08 2A 86 48 CE 3D 03 01 07 03 42 00 04 2E
+2A 48 A0 1C D0 AB 8C 11 CD 19 58 47 85 1E 12 62
+22 75 92 F5 5C 98 91 0E A3 7A C2 14 91 2A F5 4F
+BA 1B 8C 8A 72 FE CD 5B 22 25 66 99 27 89 B4 EF
+60 9D 53 7A AF 56 09 92 D4 69 79 BD 82 38 5E A3
+23 30 21 30 1F 06 03 55 1D 23 04 18 30 16 80 14
+2D 6C DA 83 DB E4 BA F0 F7 2B F4 83 19 00 34 51
+52 19 3B A2 30 0A 06 08 2A 86 48 CE 3D 04 03 02
+03 48 00 30 45 02 20 70 4A 5D ED AE A6 D3 C4 05
+A5 50 D4 20 A0 1B F9 A3 51 00 1C F8 FA A8 5D D1
+0C 87 C9 AD 58 3B 34 02 21 00 D5 FA 9F 7C E3 62
+95 E5 58 8F 40 11 13 71 B2 5B 89 DF E9 E6 15 53
+31 C0 73 DB 6A C0 D5 BA A3 08
+Verified device certificate!
+Verified Peer's cert
+wolfSSL Leaving DoCertificate, return 0
+finished verifying host's certificate
+wolfSSL Leaving DoHandShakeMsgType(), return 0
+wolfSSL Leaving DoHandShakeMsg(), return 0
+socket callback : recv success!
+RECEIVED PACKET:
+16 03 03 00 44
+RECEIVED PACKET:
+10 00 00 40 2E 2A 48 A0 1C D0 AB 8C 11 CD 19 58
+47 85 1E 12 62 22 75 92 F5 5C 98 91 0E A3 7A C2
+14 91 2A F5 4F BA 1B 8C 8A 72 FE CD 5B 22 25 66
+99 27 89 B4 EF 60 9D 53 7A AF 56 09 92 D4 69 79
+BD 82 38 5E
+received record layer msg
+wolfSSL Entering DoHandShakeMsg()
+wolfSSL Entering DoHandShakeMsgType
+processing client key exchange
+DoClientKeyExchange spec : 7
+Pre Master Secret:
+83 F9 27 0C 0E FA EB 8F D9 44 79 88 28 5A D0 DA
+7E B8 47 0D 6F 93 A6 96 7C 43 8D 20 3F A8 A6 DB
+Server's premaster secret is generated successfully
+Client write key:
+A5 98 6F 07 E9 6D 7D F1 2B ED 77 CC B7 A9 10 4C
+Server write key:
+73 6E 59 6B C4 28 26 4D D8 D9 C3 9E B9 4A 5B AD
+Client write IV:
+F8 64 1B C8
+Server write IV:
+F3 B1 BF FE
+TLS Master secret:
+AA 8E E7 A9 E0 05 48 AE F3 01 21 94 E4 9A 23 20
+EC B7 56 BD 54 22 29 13 91 9B 54 3C E6 6A 75 14
+8E 85 F6 0D B4 3B E2 ED 77 96 E5 53 4D 7B 23 C2
+wolfSSL Leaving DoHandShakeMsgType(), return 0
+wolfSSL Leaving DoHandShakeMsg(), return 0
+socket callback : recv success!
+RECEIVED PACKET:
+16 03 03 00 48
+RECEIVED PACKET:
+0F 00 00 44 04 03 00 40 07 42 54 0B 8C 3A 23 E6
+AE FB 30 AE 6D 5E D4 6E 94 7E F5 1E 9F 31 03 A6
+8C C8 77 25 FB 58 53 64 5A 36 0D 4F FD 8B 32 EA
+63 30 E9 9A ED E9 55 32 70 CD 58 E0 26 65 FA 20
+A9 6F 62 C6 0C 67 A2 6F
+received record layer msg
+wolfSSL Entering DoHandShakeMsg()
+wolfSSL Entering DoHandShakeMsgType
+processing certificate verify
+DoCertificateVerify
+Verified : Client's signed certificate!
+wolfSSL Leaving DoHandShakeMsgType(), return 0
+wolfSSL Leaving DoHandShakeMsg(), return 0
+socket callback : recv success!
+RECEIVED PACKET:
+14 03 03 00 01
+RECEIVED PACKET:
+01
+received record layer msg
+got CHANGE CIPHER SPEC
+socket callback : recv success!
+RECEIVED PACKET:
+16 03 03 00 28
+RECEIVED PACKET:
+00 00 00 00 00 00 00 00 B3 EC 32 28 39 A3 29 BF
+91 D3 9F F1 F4 3D A8 39 F5 81 BC 4C 4F 25 93 6C
+CE F1 68 FC 40 51 2F 2B
+wolfSSL Entering AesGcmDecrypt
+AES Gcm Decrypted:
+14 00 00 0C 2B 89 3A 2D 99 0D A3 6B 67 2E 81 F0
+received record layer msg
+wolfSSL Entering DoHandShakeMsg()
+wolfSSL Entering DoHandShakeMsgType
+processing finished
+wolfSSL Leaving DoHandShakeMsgType(), return 0
+wolfSSL Leaving DoHandShakeMsg(), return 0
+accept state  ACCEPT_SECOND_REPLY_DONE
+socket callback : send success!
+SENT PACKET:
+14 03 03 00 01 01
+accept state  CHANGE_CIPHER_SENT
+wolfSSL Entering AesGcmEncrypt
+AES Gcm Encrypted:
+EA 72 D4 C7 40 2E E4 D2 59 4F 5A FE 4B FA 96 E2
+socket callback : send success!
+SENT PACKET:
+16 03 03 00 28 00 00 00 00 00 00 00 00 EA 72 D4
+C7 40 2E E4 D2 59 4F 5A FE 4B FA 96 E2 73 EA 95
+47 49 E9 4F 59 21 BA E7 25 11 9D 74 8F
+accept state ACCEPT_FINISHED_DONE
+accept state ACCEPT_THIRD_REPLY_DONE
+wolfSSL Leaving SSL_accept(), return 1
+wolfSSL Entering wolfSSL_read()
+wolfSSL Entering wolfSSL_read_internal()
+wolfSSL Entering ReceiveData()
+socket callback : recv success!
+RECEIVED PACKET:
+17 03 03 00 22
+RECEIVED PACKET:
+00 00 00 00 00 00 00 01 A6 B2 A3 90 64 BF 01 08
+D2 B5 20 22 CC F8 A5 7C B0 4A 5E 85 CD AB 2A 73
+EC C3
+wolfSSL Entering AesGcmDecrypt
+AES Gcm Decrypted:
+48 65 6C 6C 6F 20 42 6F 62 21
+received record layer msg
+got app DATA
+wolfSSL Leaving ReceiveData(), return 10
+wolfSSL Leaving wolfSSL_read_internal(), return 10
+Received message : Hello Bob!, length : 10
+wolfSSL Entering SSL_write()
+wolfSSL Entering AesGcmEncrypt
+AES Gcm Encrypted:
+CB 41 DB 79 25 EA 60 FD 95 69 C5 BD
+socket callback : send success!
+SENT PACKET:
+17 03 03 00 24 00 00 00 00 00 00 00 01 CB 41 DB
+79 25 EA 60 FD 95 69 C5 BD 3B 5A FF BF 87 E5 FC
+D0 03 4E 9F 25 D2 89 90 23
+wolfSSL Leaving SSL_write(), return 12
+wolfSSL Entering SSL_shutdown()
+wolfSSL Entering AesGcmEncrypt
+AES Gcm Encrypted:
+29 64
+socket callback : send success!
+SENT PACKET:
+15 03 03 00 1A 00 00 00 00 00 00 00 02 29 64 EB
+0C 1B DC 38 13 41 9F C8 56 EF 29 33 C9 1E B3
+wolfSSL Leaving SSL_shutdown(), return 2
+wolfSSL Entering SSL_CTX_free
+CTX ref count not 0 yet, no free
+wolfSSL Leaving SSL_CTX_free, return 0
+Released server objects!
+-- TLS server communicated with follwing cipher suite --
+-- TLS-ECDH-ECDSA-AES128-GCM-SHA256 --
+```
