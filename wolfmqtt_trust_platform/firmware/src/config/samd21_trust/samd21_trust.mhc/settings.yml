@@ -2,12 +2,12 @@ configName: samd21_trust
 folderName: ''
 format_version: v1.0
 frameworkPath: ../../../Harmony3
-processor: ATSAMD21E18A
+processor: ATSAMD21G18A
 projectName: ''
 settings:
-  PackageFilter: crypto;net;core;csp_apps_pic32mz_ef;core_apps_pic32mz_ef;csp_apps_sam_d10;bsp;quick_docs;cryptoauthlib;wireless_wifi;csp;cryptoauthlib_apps;wireless_apps_winc1500;net_apps_pic32mz
+  PackageFilter: crypto;dev_packs;net;core;csp_apps_pic32mz_ef;core_apps_pic32mz_ef;csp_apps_sam_d10;bsp;quick_docs;cryptoauthlib;wireless_wifi;csp;cryptoauthlib_apps;wireless_apps_winc1500;net_apps_pic32mz
   FORCE_OPTIMIZATION: 'false'
   GENERATE_BACKUP: 'true'
-  CMSISPath: ./dev_packs/arm/CMSIS/5.7.0
+  CMSISPath: ./dev_packs/arm/CMSIS/5.8.0
   MERGE_STRATEGY: OVERWRITE
-  DFPPath: ./dev_packs/Microchip/SAMD21_DFP/3.4.116/samd21a/atdf/ATSAMD21E18A.atdf
+  DFPPath: ./dev_packs/Microchip/SAMD21_DFP/3.4.116/samd21a/atdf/ATSAMD21G18A.atdf
