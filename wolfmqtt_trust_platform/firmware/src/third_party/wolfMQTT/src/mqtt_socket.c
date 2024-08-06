@@ -27,7 +27,7 @@
 #ifdef WOLFMQTT_NONBLOCK
     /* need EWOULDBLOCK and EAGAIN */
     #ifdef MICROCHIP_MPLAB_HARMONY
-        #include <sys/errno.h>
+        #include <errno.h>
     #endif
     #include <errno.h>
 #endif
