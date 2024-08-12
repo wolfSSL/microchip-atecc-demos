@@ -148,12 +148,11 @@ unsigned int LowResTimer(void)
 /* This is used by wolfCrypt benchmark tool only */
 double current_time(int reset)
 {
-    double time;
-	int timeMs = RTC_Timer32CounterGet();
+    uint32_t period = RTC_Timer32FrequencyGet();
+    uint32_t counter = RTC_Timer32CounterGet();
     (void)reset;
-    time = (timeMs / 1000); // sec
-    time += (double)(timeMs % 1000) / 1000; // ms
-    return time;
+    /* return seconds as a double */
+    return ((double)counter / period);
 }
 #endif
 

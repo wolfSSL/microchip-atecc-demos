@@ -57,3 +57,4 @@ wolfssl_client_trust_platform/firmware/wolfssl_client_trust_platform.X/nbproject
 wolfmqtt_trust_platform/firmware/wolfmqtt_trust_platform.X/build/
 wolfmqtt_trust_platform/firmware/wolfmqtt_trust_platform.X/dist/
 wolfmqtt_trust_platform/firmware/wolfmqtt_trust_platform.X/nbproject/private
+.generated_files
