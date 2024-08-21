@@ -1,6 +1,6 @@
 /* mqtt_packet.h
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2022 wolfSSL Inc.
  *
  * This file is part of wolfMQTT.
  *
@@ -40,7 +40,12 @@
 #define MQTT_DATA_INT_SIZE   4
 
 #ifndef MAX_PACKET_ID
-#define MAX_PACKET_ID           ((1 << 16) - 1)
+#define MAX_PACKET_ID        ((1 << 16) - 1)
+#endif
+
+/* maximum list of topics to subscribe at once */
+#ifndef MAX_MQTT_TOPICS
+#define MAX_MQTT_TOPICS      12
 #endif
 
 #ifdef WOLFMQTT_V5
@@ -176,7 +181,8 @@ typedef enum _MqttQoS {
     MQTT_QOS_0 = 0, /* At most once delivery */
     MQTT_QOS_1 = 1, /* At least once delivery */
     MQTT_QOS_2 = 2, /* Exactly once delivery */
-    MQTT_QOS_3 = 3, /* Reserved - must not be used */
+    MQTT_QOS_3 = 3, /* MQTT - Reserved - must not be used
+                       MQTT-SN - QoS -1 allows publish without connection */
 } MqttQoS;
 
 
@@ -188,7 +194,6 @@ typedef struct _MqttTopic {
     MqttQoS     qos; /* Bits 0-1 = MqttQoS */
     byte        return_code; /* MqttSubscribeAckReturnCodes */
 #ifdef WOLFMQTT_V5
-    byte        sub_id;
     word16      alias;
 #endif
 } MqttTopic;
@@ -272,16 +277,24 @@ typedef struct _MqttPacket {
 
 
 /* Generic Message */
-typedef enum _MqttMsgStat {
+typedef enum _MqttMsgState {
     MQTT_MSG_BEGIN = 0, /* must be zero, so memset will setup state */
-#ifdef WOLFMQTT_V5
-    MQTT_MSG_AUTH,
-#endif
     MQTT_MSG_WAIT,
-    MQTT_MSG_WRITE,
-    MQTT_MSG_WRITE_PAYLOAD,
-    MQTT_MSG_READ,
-    MQTT_MSG_READ_PAYLOAD,
+    MQTT_MSG_AUTH,
+    MQTT_MSG_HEADER,
+    MQTT_MSG_PAYLOAD,
+    MQTT_MSG_ACK,
+} MqttMsgState;
+
+/* Generic message status tracking */
+typedef struct _MqttMsgStat {
+    MqttMsgState read;
+    MqttMsgState write;
+
+#ifdef WOLFMQTT_MULTITHREAD
+    byte isReadLocked:1;
+    byte isWriteLocked:1;
+#endif
 } MqttMsgStat;
 
 #ifdef WOLFMQTT_MULTITHREAD
@@ -443,8 +456,9 @@ typedef struct _MqttPublishResp {
 #ifdef WOLFMQTT_MULTITHREAD
     MqttPendResp pendResp;
 #endif
-
     word16      packet_id;
+    byte        packet_type; /* type to send */
+    
 #ifdef WOLFMQTT_V5
     byte reason_code;
     MqttProp* props;
@@ -508,7 +522,7 @@ typedef struct _MqttSubscribeAck {
     MqttMsgStat stat; /* must be first member at top */
 
     word16      packet_id;
-    byte       *return_codes; /* MqttSubscribeAckReturnCodes */
+    byte        return_codes[MAX_MQTT_TOPICS];
 #ifdef WOLFMQTT_V5
     MqttProp* props;
     byte protocol_level;
@@ -611,6 +625,7 @@ typedef struct _MqttAuth {
 
 /* Generic MQTT struct for packet types */
 typedef union _MqttObject {
+    MqttMsgStat        stat; /* all objects types have this at top of struct */
     MqttConnect        connect;
     MqttConnectAck     connect_ack;
     MqttPublish        publish;
@@ -650,7 +665,7 @@ WOLFMQTT_LOCAL int MqttEncode_String(byte *buf, const char *str);
 WOLFMQTT_LOCAL int MqttEncode_Data(byte *buf, const byte *data,
     word16 data_len);
 
-WOLFMQTT_LOCAL int MqttDecode_Vbi(byte *buf, word32 *value);
+WOLFMQTT_LOCAL int MqttDecode_Vbi(byte *buf, word32 *value, word32 buf_len);
 WOLFMQTT_LOCAL int MqttEncode_Vbi(byte *buf, word32 x);
 
 /* Packet Encoders/Decoders */
@@ -689,7 +704,7 @@ WOLFMQTT_LOCAL int MqttEncode_Auth(byte *tx_buf, int tx_buf_len,
 WOLFMQTT_LOCAL int MqttEncode_Props(MqttPacketType packet, MqttProp* props,
     byte* buf);
 WOLFMQTT_LOCAL int MqttDecode_Props(MqttPacketType packet, MqttProp** props,
-    byte* buf, word32 prop_len);
+    byte* buf, word32 buf_len, word32 prop_len);
 WOLFMQTT_LOCAL int MqttProps_Init(void);
 WOLFMQTT_LOCAL int MqttProps_ShutDown(void);
 WOLFMQTT_LOCAL MqttProp* MqttProps_Add(MqttProp **head);
@@ -766,7 +781,8 @@ typedef enum _SN_MsgType {
     /* 0x1E - 0xFD reserved */
     SN_MSG_TYPE_ENCAPMSG        = 0xFE,    /* Encapsulated message */
     /* 0xFF reserved */
-    SN_MSG_TYPE_RESERVED        = 0xFF
+    SN_MSG_TYPE_RESERVED        = 0xFF,
+    SN_MSG_TYPE_ANY     = 0xFF
 } SN_MsgType;
 
 /* Topic ID types */
@@ -813,6 +829,9 @@ typedef struct _SN_GwInfo {
 
 typedef struct _SN_SearchGw {
     MqttMsgStat stat;
+#ifdef WOLFMQTT_MULTITHREAD
+    MqttPendResp pendResp;
+#endif
 
     byte radius; /* Broadcast radius (in hops) */
     SN_GwInfo gwInfo;
@@ -834,6 +853,9 @@ typedef struct _SN_ConnectAck {
 /* WILL TOPIC */
 typedef struct _SN_WillTopicUpd {
     MqttMsgStat stat;
+#ifdef WOLFMQTT_MULTITHREAD
+    MqttPendResp pendResp;
+#endif
 
     byte flags;
     char* willTopic; /* contains the Will topic name */
@@ -841,6 +863,9 @@ typedef struct _SN_WillTopicUpd {
 
 typedef struct _SN_WillMsgUpd {
     MqttMsgStat stat;
+#ifdef WOLFMQTT_MULTITHREAD
+    MqttPendResp pendResp;
+#endif
 
     char* willMsg;
 } SN_WillMsgUpd;
@@ -862,6 +887,9 @@ typedef union _SN_WillResp {
 
 typedef struct _SN_Will {
     MqttMsgStat stat;
+#ifdef WOLFMQTT_MULTITHREAD
+    MqttPendResp pendResp;
+#endif
 
     byte qos;
     byte retain;
@@ -875,6 +903,9 @@ typedef struct _SN_Will {
 /* Connect */
 typedef struct _SN_Connect {
     MqttMsgStat stat;
+#ifdef WOLFMQTT_MULTITHREAD
+    MqttPendResp pendResp;
+#endif
 
     word16 keep_alive_sec;
     byte clean_session;
@@ -902,6 +933,9 @@ typedef struct _SN_RegAck {
 
 typedef struct _SN_Register {
     MqttMsgStat stat;
+#ifdef WOLFMQTT_MULTITHREAD
+    MqttPendResp pendResp;
+#endif
 
     word16 topicId;
     word16 packet_id;
@@ -929,6 +963,9 @@ typedef struct _SN_PublishResp {
 /* PUBLISH protocol */
 typedef struct _SN_Publish {
     MqttMsgStat stat; /* must be first member at top */
+#ifdef WOLFMQTT_MULTITHREAD
+    MqttPendResp pendResp;
+#endif
 
     /* BEGIN: THIS SECTION NEEDS TO MATCH MqttMessage */
     word16      packet_id;
@@ -971,6 +1008,9 @@ typedef struct _SN_SubAck {
 /* SUBSCRIBE */
 typedef struct _SN_Subscribe {
     MqttMsgStat stat;
+#ifdef WOLFMQTT_MULTITHREAD
+    MqttPendResp pendResp;
+#endif
 
     byte duplicate;
     byte qos;
@@ -994,6 +1034,9 @@ typedef struct _SN_UnsubscribeAck {
 /* UNSUBSCRIBE */
 typedef struct _SN_Unsubscribe {
     MqttMsgStat stat;
+#ifdef WOLFMQTT_MULTITHREAD
+    MqttPendResp pendResp;
+#endif
 
     byte duplicate;
     byte qos;
@@ -1007,12 +1050,15 @@ typedef struct _SN_Unsubscribe {
     SN_UnsubscribeAck ack;
 } SN_Unsubscribe;
 
-/* PING / PING RESPONSE */
+/* PING REQUEST / PING RESPONSE */
 typedef struct _SN_PingReq {
     MqttMsgStat stat;
+#ifdef WOLFMQTT_MULTITHREAD
+    MqttPendResp pendResp;
+#endif
 
-    /* clientId is optional and is included by a “sleeping” client when it
-       goes to the “awake” state and is waiting for messages sent by the
+    /* clientId is optional and is included by a ?sleeping? client when it
+       goes to the ?awake? state and is waiting for messages sent by the
        server/gateway. */
     char *clientId;
 } SN_PingReq;
@@ -1020,9 +1066,14 @@ typedef struct _SN_PingReq {
 /* DISCONNECT */
 typedef struct _SN_Disconnect {
     MqttMsgStat stat;
+#ifdef WOLFMQTT_MULTITHREAD
+    MqttPendResp pendResp;
+#endif
 
-    /* sleepTmr is optional and is included by a “sleeping” client
-       that wants to go the “asleep” state. */
+    /* sleepTmr is optional and is included by a ?sleeping? client
+       that wants to go the ?asleep? state. The receipt of this message
+       is also acknowledged by the gateway by means of a DISCONNECT message
+       (without a duration field).*/
     word16 sleepTmr;
 } SN_Disconnect;
 
@@ -1061,7 +1112,7 @@ typedef union _SN_Object {
 // TODO
 
 WOLFMQTT_LOCAL int SN_Decode_Header(byte *rx_buf, int rx_buf_len,
-    SN_MsgType* p_packet_type);
+    SN_MsgType* p_packet_type, word16* p_packet_id);
 WOLFMQTT_LOCAL int SN_Decode_Advertise(byte *rx_buf, int rx_buf_len,
         SN_Advertise *gw_info);
 WOLFMQTT_LOCAL int SN_Encode_SearchGW(byte *tx_buf, int tx_buf_len, byte hops);
@@ -1079,12 +1130,18 @@ WOLFMQTT_LOCAL int SN_Encode_WillMsg(byte *tx_buf, int tx_buf_len,
         SN_Will *willMsg);
 WOLFMQTT_LOCAL int SN_Encode_WillTopicUpdate(byte *tx_buf, int tx_buf_len,
         SN_Will *willTopic);
-WOLFMQTT_LOCAL int SN_Decode_WillTopicResponse(byte *rx_buf, int rx_buf_len);
+WOLFMQTT_LOCAL int SN_Decode_WillTopicResponse(byte *rx_buf, int rx_buf_len,
+        byte *ret_code);
 WOLFMQTT_LOCAL int SN_Encode_WillMsgUpdate(byte *tx_buf, int tx_buf_len,
         SN_Will *willMsg);
-WOLFMQTT_LOCAL int SN_Decode_WillMsgResponse(byte *rx_buf, int rx_buf_len);
+WOLFMQTT_LOCAL int SN_Decode_WillMsgResponse(byte *rx_buf, int rx_buf_len,
+        byte *ret_code);
 WOLFMQTT_LOCAL int SN_Encode_Register(byte *tx_buf, int tx_buf_len,
         SN_Register *regist);
+WOLFMQTT_LOCAL int SN_Decode_Register(byte *rx_buf, int rx_buf_len,
+        SN_Register *regist);
+WOLFMQTT_LOCAL int SN_Encode_RegAck(byte *tx_buf, int tx_buf_len,
+        SN_RegAck *regack);
 WOLFMQTT_LOCAL int SN_Decode_RegAck(byte *rx_buf, int rx_buf_len,
         SN_RegAck *regack);
 WOLFMQTT_LOCAL int SN_Encode_Subscribe(byte *tx_buf, int tx_buf_len,
@@ -1105,12 +1162,19 @@ WOLFMQTT_LOCAL int SN_Decode_UnsubscribeAck(byte *rx_buf, int rx_buf_len,
         SN_UnsubscribeAck *unsubscribe_ack);
 WOLFMQTT_LOCAL int SN_Encode_Disconnect(byte *tx_buf, int tx_buf_len,
         SN_Disconnect* disconnect);
+WOLFMQTT_LOCAL int SN_Decode_Disconnect(byte *rx_buf, int rx_buf_len);
 WOLFMQTT_LOCAL int SN_Encode_Ping(byte *tx_buf, int tx_buf_len,
-        SN_PingReq *ping);
+        SN_PingReq *ping, byte type);
 WOLFMQTT_LOCAL int SN_Decode_Ping(byte *rx_buf, int rx_buf_len);
 WOLFMQTT_LOCAL int SN_Packet_Read(struct _MqttClient *client, byte* rx_buf,
         int rx_buf_len, int timeout_ms);
+
+#ifndef WOLFMQTT_NO_ERROR_STRINGS
+    WOLFMQTT_LOCAL const char* SN_Packet_TypeDesc(SN_MsgType packet_type);
+#else
+    #define SN_Packet_TypeDesc(x) "not compiled in"
 #endif
+#endif /* WOLFMQTT_SN */
 
 #ifdef __cplusplus
     } /* extern "C" */

@@ -39,3 +39,7 @@ atca_plib_i2c_api_t sercom2_plib_i2c_api = {
     .error_get = SERCOM2_I2C_ErrorGet,
     .transfer_setup = SERCOM2_I2C_TransferSetup
 };
+
+
+
+

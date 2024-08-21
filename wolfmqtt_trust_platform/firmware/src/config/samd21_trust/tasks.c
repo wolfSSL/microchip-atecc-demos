@@ -52,6 +52,51 @@
 
 #include "configuration.h"
 #include "definitions.h"
+#include "sys_tasks.h"
+
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: RTOS "Tasks" Routine
+// *****************************************************************************
+// *****************************************************************************
+static void _WDRV_WINC_Tasks(void *pvParameters)
+{
+    while(1)
+    {
+        SYS_STATUS status;
+
+        WDRV_WINC_Tasks(sysObj.drvWifiWinc);
+
+        status = WDRV_WINC_Status(sysObj.drvWifiWinc);
+
+        if ((SYS_STATUS_ERROR == status) || (SYS_STATUS_UNINITIALIZED == status))
+        {
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+        }
+    }
+}
+
+
+void _NET_PRES_Tasks(  void *pvParameters  )
+{
+    while(1)
+    {
+        NET_PRES_Tasks(sysObj.netPres);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+    }
+}
+
+/* Handle for the APP_Tasks. */
+TaskHandle_t xAPP_Tasks;
+
+static void lAPP_Tasks(  void *pvParameters  )
+{   
+    while(true)
+    {
+        APP_Tasks();
+    }
+}
 
 
 
@@ -75,20 +120,48 @@ void SYS_Tasks ( void )
     
 
     /* Maintain Device Drivers */
-    WDRV_WINC_Tasks(sysObj.drvWifiWinc); 
+        xTaskCreate( _WDRV_WINC_Tasks,
+        "WDRV_WINC_Tasks",
+        DRV_WIFI_WINC_RTOS_STACK_SIZE,
+        (void*)NULL,
+        DRV_WIFI_WINC_RTOS_TASK_PRIORITY,
+        (TaskHandle_t*)NULL
+    );
 
 
 
 
     /* Maintain Middleware & Other Libraries */
     
+    xTaskCreate( _NET_PRES_Tasks,
+        "NET_PRES_Tasks",
+        NET_PRES_RTOS_STACK_SIZE,
+        (void*)NULL,
+        NET_PRES_RTOS_TASK_PRIORITY,
+        (TaskHandle_t*)NULL
+    );
+
+
+
 
     /* Maintain the application's state machine. */
-        /* Call Application task APP. */
-    APP_Tasks();
+        /* Create OS Thread for APP_Tasks. */
+    (void) xTaskCreate((TaskFunction_t) lAPP_Tasks,
+                "APP_Tasks",
+                128,
+                NULL,
+                1,
+                &xAPP_Tasks);
 
 
 
+
+    /* Start RTOS Scheduler. */
+    
+     /**********************************************************************
+     * Create all Threads for APP Tasks before starting FreeRTOS Scheduler *
+     ***********************************************************************/
+    vTaskStartScheduler(); /* This function never returns. */
 
 }
 

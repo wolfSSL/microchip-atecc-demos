@@ -1,6 +1,6 @@
 /* md2.c
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2023 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -107,7 +107,7 @@ void wc_Md2Update(Md2* md2, const byte* data, word32 len)
                     t = md2->X[j+6] ^= S[t];
                     t = md2->X[j+7] ^= S[t];
                 }
-                t = (t + i) & 0xFF;
+                t = (byte)((t + i) & 0xFF);
             }
         }
     }

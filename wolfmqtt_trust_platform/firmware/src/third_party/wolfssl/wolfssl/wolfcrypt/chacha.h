@@ -1,6 +1,6 @@
 /* chacha.h
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2023 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -61,7 +61,7 @@ Block counter is located at index 12.
 
 /* Size of ChaCha chunks */
 #define CHACHA_CHUNK_WORDS 16
-#define CHACHA_CHUNK_BYTES (CHACHA_CHUNK_WORDS * sizeof(word32))
+#define CHACHA_CHUNK_BYTES (CHACHA_CHUNK_WORDS * (word32)sizeof(word32))
 
 #ifdef WOLFSSL_X86_64_BUILD
 #if defined(USE_INTEL_SPEEDUP) && !defined(NO_CHACHA_ASM)
@@ -71,8 +71,8 @@ Block counter is located at index 12.
 #endif
 
 enum {
-	CHACHA_ENC_TYPE = WC_CIPHER_CHACHA,    /* cipher unique type */
-    CHACHA_MAX_KEY_SZ = 32,
+    CHACHA_ENC_TYPE = WC_CIPHER_CHACHA,    /* cipher unique type */
+    CHACHA_MAX_KEY_SZ = 32
 };
 
 typedef struct ChaCha {
@@ -102,8 +102,8 @@ WOLFSSL_API int wc_Chacha_SetKey(ChaCha* ctx, const byte* key, word32 keySz);
 
 #ifdef HAVE_XCHACHA
 WOLFSSL_API int wc_XChacha_SetKey(ChaCha *ctx, const byte *key, word32 keySz,
-				  const byte *nonce, word32 nonceSz,
-				  word32 counter);
+                                  const byte *nonce, word32 nonceSz,
+                                  word32 counter);
 #endif
 
 #ifdef __cplusplus

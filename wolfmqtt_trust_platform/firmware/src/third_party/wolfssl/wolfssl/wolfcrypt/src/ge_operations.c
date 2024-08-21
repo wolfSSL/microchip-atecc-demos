@@ -1,6 +1,6 @@
 /* ge_operations.c
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2023 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -56,21 +56,25 @@
 #endif
 
 
-static void ge_p2_0(ge_p2 *);
+static void ge_p2_0(ge_p2 *h);
 #ifndef CURVED25519_ASM
-static void ge_precomp_0(ge_precomp *);
+#if defined(HAVE_ED25519_SIGN) || defined(HAVE_ED25519_MAKE_KEY)
+static void ge_precomp_0(ge_precomp *h);
 #endif
-static void ge_p3_to_p2(ge_p2 *,const ge_p3 *);
-static void ge_p3_to_cached(ge_cached *,const ge_p3 *);
-static void ge_p1p1_to_p2(ge_p2 *,const ge_p1p1 *);
-static void ge_p1p1_to_p3(ge_p3 *,const ge_p1p1 *);
-static void ge_p2_dbl(ge_p1p1 *,const ge_p2 *);
-static void ge_p3_dbl(ge_p1p1 *,const ge_p3 *);
+static void ge_p3_to_p2(ge_p2 *r,const ge_p3 *p);
+#endif
+static WC_INLINE void ge_p3_to_cached(ge_cached *r,const ge_p3 *p);
 
-static void ge_madd(ge_p1p1 *,const ge_p3 *,const ge_precomp *);
-static void ge_msub(ge_p1p1 *,const ge_p3 *,const ge_precomp *);
-static void ge_add(ge_p1p1 *,const ge_p3 *,const ge_cached *);
-static void ge_sub(ge_p1p1 *,const ge_p3 *,const ge_cached *);
+#ifndef CURVED25519_ASM
+static void ge_p1p1_to_p2(ge_p2 *r,const ge_p1p1 *p);
+static WC_INLINE void ge_p1p1_to_p3(ge_p3 *r,const ge_p1p1 *p);
+static WC_INLINE void ge_p2_dbl(ge_p1p1 *r,const ge_p2 *p);
+static void ge_p3_dbl(ge_p1p1 *r,const ge_p3 *p);
+static WC_INLINE void ge_madd(ge_p1p1 *r,const ge_p3 *p,const ge_precomp *q);
+static WC_INLINE void ge_msub(ge_p1p1 *r,const ge_p3 *p,const ge_precomp *q);
+static WC_INLINE void ge_add(ge_p1p1 *r,const ge_p3 *p,const ge_cached *q);
+static WC_INLINE void ge_sub(ge_p1p1 *r,const ge_p3 *p,const ge_cached *q);
+#endif
 
 /*
 ge means group element.
@@ -95,28 +99,6 @@ Representations:
 #define ORDER_4     0x1dea2f
 #define ORDER_5     0xa6f7c
 
-#ifdef CURVED25519_ASM_32BIT
-word64 load_3(const unsigned char *in)
-{
-  word64 result;
-  result = (word64) in[0];
-  result |= ((word64) in[1]) << 8;
-  result |= ((word64) in[2]) << 16;
-  return result;
-}
-
-
-word64 load_4(const unsigned char *in)
-{
-  word64 result;
-  result = (word64) in[0];
-  result |= ((word64) in[1]) << 8;
-  result |= ((word64) in[2]) << 16;
-  result |= ((word64) in[3]) << 24;
-  return result;
-}
-#endif
-
 /*
 Input:
   s[0]+256*s[1]+...+256^63*s[63] = s
@@ -126,6 +108,7 @@ Output:
   where l = 2^252 + 27742317777372353535851937790883648493.
   Overwrites s in place.
 */
+#ifndef CURVED25519_ASM
 void sc_reduce(byte* s)
 {
     sword64 t[24];
@@ -638,7 +621,9 @@ void sc_muladd(byte* s, const byte* a, const byte* b, const byte* c)
     s[30] = (byte)(t[11] >>  9);
     s[31] = (byte)(t[11] >> 17);
 }
+#endif
 #else
+#ifndef CURVED25519_ASM
 static word64 load_6(const byte* a)
 {
     word64 n;
@@ -744,38 +729,38 @@ void sc_reduce(byte* s)
     carry = t[ 3] >> 42; t[ 4] += carry; t[ 3] &= MASK_42;
     carry = t[ 4] >> 42; t[ 5] += carry; t[ 4] &= MASK_42;
 
-    s[ 0] = (t[ 0] >>  0);
-    s[ 1] = (t[ 0] >>  8);
-    s[ 2] = (t[ 0] >> 16);
-    s[ 3] = (t[ 0] >> 24);
-    s[ 4] = (t[ 0] >> 32);
-    s[ 5] = (t[ 0] >> 40) | (t[ 1] <<  2);
-    s[ 6] = (t[ 1] >>  6);
-    s[ 7] = (t[ 1] >> 14);
-    s[ 8] = (t[ 1] >> 22);
-    s[ 9] = (t[ 1] >> 30);
-    s[10] = (t[ 1] >> 38) | (t[ 2] <<  4);
-    s[11] = (t[ 2] >>  4);
-    s[12] = (t[ 2] >> 12);
-    s[13] = (t[ 2] >> 20);
-    s[14] = (t[ 2] >> 28);
-    s[15] = (t[ 2] >> 36) | (t[ 3] <<  6);
-    s[16] = (t[ 3] >>  2);
-    s[17] = (t[ 3] >> 10);
-    s[18] = (t[ 3] >> 18);
-    s[19] = (t[ 3] >> 26);
-    s[20] = (t[ 3] >> 34);
-    s[21] = (t[ 4] >>  0);
-    s[22] = (t[ 4] >>  8);
-    s[23] = (t[ 4] >> 16);
-    s[24] = (t[ 4] >> 24);
-    s[25] = (t[ 4] >> 32);
-    s[26] = (t[ 4] >> 40) | (t[ 5] <<  2);
-    s[27] = (t[ 5] >>  6);
-    s[28] = (t[ 5] >> 14);
-    s[29] = (t[ 5] >> 22);
-    s[30] = (t[ 5] >> 30);
-    s[31] = (t[ 5] >> 38);
+    s[ 0] = (byte)(t[ 0] >>  0);
+    s[ 1] = (byte)(t[ 0] >>  8);
+    s[ 2] = (byte)(t[ 0] >> 16);
+    s[ 3] = (byte)(t[ 0] >> 24);
+    s[ 4] = (byte)(t[ 0] >> 32);
+    s[ 5] = (byte)(t[ 0] >> 40) | (byte)(t[ 1] <<  2);
+    s[ 6] = (byte)(t[ 1] >>  6);
+    s[ 7] = (byte)(t[ 1] >> 14);
+    s[ 8] = (byte)(t[ 1] >> 22);
+    s[ 9] = (byte)(t[ 1] >> 30);
+    s[10] = (byte)(t[ 1] >> 38) | (byte)(t[ 2] <<  4);
+    s[11] = (byte)(t[ 2] >>  4);
+    s[12] = (byte)(t[ 2] >> 12);
+    s[13] = (byte)(t[ 2] >> 20);
+    s[14] = (byte)(t[ 2] >> 28);
+    s[15] = (byte)(t[ 2] >> 36) | (byte)(t[ 3] <<  6);
+    s[16] = (byte)(t[ 3] >>  2);
+    s[17] = (byte)(t[ 3] >> 10);
+    s[18] = (byte)(t[ 3] >> 18);
+    s[19] = (byte)(t[ 3] >> 26);
+    s[20] = (byte)(t[ 3] >> 34);
+    s[21] = (byte)(t[ 4] >>  0);
+    s[22] = (byte)(t[ 4] >>  8);
+    s[23] = (byte)(t[ 4] >> 16);
+    s[24] = (byte)(t[ 4] >> 24);
+    s[25] = (byte)(t[ 4] >> 32);
+    s[26] = (byte)(t[ 4] >> 40) | (byte)(t[ 5] <<  2);
+    s[27] = (byte)(t[ 5] >>  6);
+    s[28] = (byte)(t[ 5] >> 14);
+    s[29] = (byte)(t[ 5] >> 22);
+    s[30] = (byte)(t[ 5] >> 30);
+    s[31] = (byte)(t[ 5] >> 38);
 }
 
 /*
@@ -896,59 +881,57 @@ void sc_muladd(byte* s, const byte* a, const byte* b, const byte* c)
     carry = t[ 3] >> 42; t[ 4] += carry; t[ 3] &= MASK_42;
     carry = t[ 4] >> 42; t[ 5] += carry; t[ 4] &= MASK_42;
 
-    s[ 0] = (t[ 0] >>  0);
-    s[ 1] = (t[ 0] >>  8);
-    s[ 2] = (t[ 0] >> 16);
-    s[ 3] = (t[ 0] >> 24);
-    s[ 4] = (t[ 0] >> 32);
-    s[ 5] = (t[ 0] >> 40) | (t[ 1] <<  2);
-    s[ 6] = (t[ 1] >>  6);
-    s[ 7] = (t[ 1] >> 14);
-    s[ 8] = (t[ 1] >> 22);
-    s[ 9] = (t[ 1] >> 30);
-    s[10] = (t[ 1] >> 38) | (t[ 2] <<  4);
-    s[11] = (t[ 2] >>  4);
-    s[12] = (t[ 2] >> 12);
-    s[13] = (t[ 2] >> 20);
-    s[14] = (t[ 2] >> 28);
-    s[15] = (t[ 2] >> 36) | (t[ 3] <<  6);
-    s[16] = (t[ 3] >>  2);
-    s[17] = (t[ 3] >> 10);
-    s[18] = (t[ 3] >> 18);
-    s[19] = (t[ 3] >> 26);
-    s[20] = (t[ 3] >> 34);
-    s[21] = (t[ 4] >>  0);
-    s[22] = (t[ 4] >>  8);
-    s[23] = (t[ 4] >> 16);
-    s[24] = (t[ 4] >> 24);
-    s[25] = (t[ 4] >> 32);
-    s[26] = (t[ 4] >> 40) | (t[ 5] <<  2);
-    s[27] = (t[ 5] >>  6);
-    s[28] = (t[ 5] >> 14);
-    s[29] = (t[ 5] >> 22);
-    s[30] = (t[ 5] >> 30);
-    s[31] = (t[ 5] >> 38);
+    s[ 0] = (byte)(t[ 0] >>  0);
+    s[ 1] = (byte)(t[ 0] >>  8);
+    s[ 2] = (byte)(t[ 0] >> 16);
+    s[ 3] = (byte)(t[ 0] >> 24);
+    s[ 4] = (byte)(t[ 0] >> 32);
+    s[ 5] = (byte)(t[ 0] >> 40) | (byte)(t[ 1] <<  2);
+    s[ 6] = (byte)(t[ 1] >>  6);
+    s[ 7] = (byte)(t[ 1] >> 14);
+    s[ 8] = (byte)(t[ 1] >> 22);
+    s[ 9] = (byte)(t[ 1] >> 30);
+    s[10] = (byte)(t[ 1] >> 38) | (byte)(t[ 2] <<  4);
+    s[11] = (byte)(t[ 2] >>  4);
+    s[12] = (byte)(t[ 2] >> 12);
+    s[13] = (byte)(t[ 2] >> 20);
+    s[14] = (byte)(t[ 2] >> 28);
+    s[15] = (byte)(t[ 2] >> 36) | (byte)(t[ 3] <<  6);
+    s[16] = (byte)(t[ 3] >>  2);
+    s[17] = (byte)(t[ 3] >> 10);
+    s[18] = (byte)(t[ 3] >> 18);
+    s[19] = (byte)(t[ 3] >> 26);
+    s[20] = (byte)(t[ 3] >> 34);
+    s[21] = (byte)(t[ 4] >>  0);
+    s[22] = (byte)(t[ 4] >>  8);
+    s[23] = (byte)(t[ 4] >> 16);
+    s[24] = (byte)(t[ 4] >> 24);
+    s[25] = (byte)(t[ 4] >> 32);
+    s[26] = (byte)(t[ 4] >> 40) | (byte)(t[ 5] <<  2);
+    s[27] = (byte)(t[ 5] >>  6);
+    s[28] = (byte)(t[ 5] >> 14);
+    s[29] = (byte)(t[ 5] >> 22);
+    s[30] = (byte)(t[ 5] >> 30);
+    s[31] = (byte)(t[ 5] >> 38);
 }
+#endif /* !CURVED25519_ASM */
 #endif /* !HAVE___UINT128_T || NO_CURVED25519_128BIT */
 
 int ge_compress_key(byte* out, const byte* xIn, const byte* yIn, word32 keySz)
 {
-    ge     x,y,z;
-    ge_p3  g;
-    byte   bArray[ED25519_KEY_SIZE];
+    ge_p2  g;
+    ALIGN16 byte bArray[ED25519_KEY_SIZE];
+    ALIGN16 byte x[ED25519_PUB_KEY_SIZE];
+    ALIGN16 byte y[ED25519_PUB_KEY_SIZE];
     word32 i;
 
-    fe_0(x);
-    fe_0(y);
-    fe_1(z);
-    fe_frombytes(x, xIn);
-    fe_frombytes(y, yIn);
+    XMEMCPY(x, xIn, ED25519_PUB_KEY_SIZE);
+    XMEMCPY(y, yIn, ED25519_PUB_KEY_SIZE);
+    fe_frombytes(g.X, x);
+    fe_frombytes(g.Y, y);
+    fe_1(g.Z);
 
-    fe_copy(g.X, x);
-    fe_copy(g.Y, y);
-    fe_copy(g.Z, z);
-
-    ge_p3_tobytes(bArray, &g);
+    ge_tobytes(bArray, &g);
 
     for (i = 0; i < keySz; i++) {
         out[keySz - 1 - i] = bArray[i];
@@ -961,9 +944,9 @@ int ge_compress_key(byte* out, const byte* xIn, const byte* yIn, word32 keySz)
 /*
 r = p + q
 */
+#ifndef CURVED25519_ASM
 static WC_INLINE void ge_add(ge_p1p1 *r,const ge_p3 *p,const ge_cached *q)
 {
-#ifndef CURVED25519_ASM
     ge t0;
     fe_add(r->X,p->Y,p->X);
     fe_sub(r->Y,p->Y,p->X);
@@ -976,31 +959,27 @@ static WC_INLINE void ge_add(ge_p1p1 *r,const ge_p3 *p,const ge_cached *q)
     fe_add(r->Y,r->Z,r->Y);
     fe_add(r->Z,t0,r->T);
     fe_sub(r->T,t0,r->T);
-#else
-    fe_ge_add(r->X, r->Y, r->Z, r->T, p->X, p->Y, p->Z, p->T, q->Z, q->T2d,
-              q->YplusX, q->YminusX);
-#endif
 }
+#endif
 
 
 #ifndef CURVED25519_ASM
 /* ge_scalar mult base */
-static unsigned char equal(signed char b,signed char c)
+static unsigned char equal(unsigned char b,unsigned char c)
 {
-  unsigned char ub = b;
-  unsigned char uc = c;
-  unsigned char x = ub ^ uc; /* 0: yes; 1..255: no */
+  unsigned char x = b ^ c; /* 0: yes; 1..255: no */
   word32 y = x; /* 0: yes; 1..255: no */
   y -= 1; /* 4294967295: yes; 0..254: no */
   y >>= 31; /* 1: yes; 0: no */
   return (unsigned char)y;
 }
 
-
+#if defined(HAVE_ED25519_SIGN) || defined(HAVE_ED25519_MAKE_KEY)
 static unsigned char negative(signed char b)
 {
   return ((unsigned char)b) >> 7;
 }
+#endif
 
 
 static WC_INLINE void cmov(ge_precomp *t,const ge_precomp *u,unsigned char b,
@@ -1013,6 +992,7 @@ static WC_INLINE void cmov(ge_precomp *t,const ge_precomp *u,unsigned char b,
 }
 #endif
 
+#if defined(HAVE_ED25519_SIGN) || defined(HAVE_ED25519_MAKE_KEY)
 #ifdef CURVED25519_ASM_64BIT
 static const ge_precomp base[64][8] = {
 {
@@ -9098,7 +9078,7 @@ static void ge_select(ge_precomp *t,int pos,signed char b)
 #ifndef CURVED25519_ASM
   ge_precomp minust;
   unsigned char bnegative = negative(b);
-  unsigned char babs = b - (((-bnegative) & b) << 1);
+  unsigned char babs = (unsigned char)(b - (((-bnegative) & b) << 1));
 
   ge_precomp_0(t);
   cmov(t,&base[pos][0],babs,1);
@@ -9148,7 +9128,7 @@ void ge_scalarmult_base(ge_p3 *h,const unsigned char *a)
     e[i] += carry;
     carry = e[i] + 8;
     carry >>= 4;
-    e[i] -= carry << 4;
+    e[i] -= (signed char)(carry << 4);
   }
   e[63] += carry;
   /* each e[i] is between -8 and 8 */
@@ -9190,7 +9170,10 @@ void ge_scalarmult_base(ge_p3 *h,const unsigned char *a)
   }
 #endif
 }
+#endif /* HAVE_ED25519_SIGN || HAVE_ED25519_MAKE_KEY */
 
+
+#define SLIDE_SIZE 256
 
 /* ge double scalar mult */
 static void slide(signed char *r,const unsigned char *a)
@@ -9199,18 +9182,18 @@ static void slide(signed char *r,const unsigned char *a)
   int b;
   int k;
 
-  for (i = 0;i < 256;++i)
+  for (i = 0;i < SLIDE_SIZE;++i)
     r[i] = 1 & (a[i >> 3] >> (i & 7));
 
-  for (i = 0;i < 256;++i)
+  for (i = 0;i < SLIDE_SIZE;++i)
     if (r[i]) {
-      for (b = 1;b <= 6 && i + b < 256;++b) {
+      for (b = 1;b <= 6 && i + b < SLIDE_SIZE;++b) {
         if (r[i + b]) {
           if (r[i] + (r[i + b] << b) <= 15) {
-            r[i] += r[i + b] << b; r[i + b] = 0;
+            r[i] += (signed char)(r[i + b] << b); r[i + b] = 0;
           } else if (r[i] - (r[i + b] << b) >= -15) {
-            r[i] -= r[i + b] << b;
-            for (k = i + b;k < 256;++k) {
+            r[i] -= (signed char)(r[i + b] << b);
+            for (k = i + b;k < SLIDE_SIZE;++k) {
               if (!r[k]) {
                 r[k] = 1;
                 break;
@@ -9408,26 +9391,53 @@ B is the Ed25519 base point (x,4/5) with x positive.
 int ge_double_scalarmult_vartime(ge_p2 *r, const unsigned char *a,
                                  const ge_p3 *A, const unsigned char *b)
 {
-  signed char aslide[256];
-  signed char bslide[256];
+#if defined(WOLFSSL_SMALL_STACK) && !defined(WOLFSSL_SP_NO_MALLOC)
+  signed char *aslide = NULL;
+  signed char *bslide = NULL;
+  ge_cached *Ai = NULL; /* A,3A,5A,7A,9A,11A,13A,15A */
+
+  ge_p1p1 *t = NULL;
+  ge_p3 *u = NULL;
+  ge_p3 *A2 = NULL;
+
+  int ret;
+#else
+  signed char aslide[SLIDE_SIZE];
+  signed char bslide[SLIDE_SIZE];
   ge_cached Ai[8]; /* A,3A,5A,7A,9A,11A,13A,15A */
-  ge_p1p1 t;
-  ge_p3 u;
-  ge_p3 A2;
+
+  ge_p1p1 t[1];
+  ge_p3 u[1];
+  ge_p3 A2[1];
+#endif
   int i;
+
+#if defined(WOLFSSL_SMALL_STACK) && !defined(WOLFSSL_SP_NO_MALLOC)
+  if (((aslide = (signed char *)XMALLOC(SLIDE_SIZE, NULL, DYNAMIC_TYPE_TMP_BUFFER))== NULL) ||
+      ((bslide = (signed char *)XMALLOC(SLIDE_SIZE, NULL, DYNAMIC_TYPE_TMP_BUFFER))== NULL) ||
+      ((Ai = (ge_cached *)XMALLOC(8 * sizeof(*Ai), NULL, DYNAMIC_TYPE_TMP_BUFFER))== NULL) ||
+      ((t = (ge_p1p1 *)XMALLOC(sizeof(*t), NULL, DYNAMIC_TYPE_TMP_BUFFER))== NULL) ||
+      ((u = (ge_p3 *)XMALLOC(sizeof(*u), NULL, DYNAMIC_TYPE_TMP_BUFFER))== NULL) ||
+      ((A2 = (ge_p3 *)XMALLOC(sizeof(*A2), NULL, DYNAMIC_TYPE_TMP_BUFFER))== NULL))
+  {
+      ret = MEMORY_E;
+      goto out;
+  } else
+      ret = 0;
+#endif
 
   slide(aslide,a);
   slide(bslide,b);
 
   ge_p3_to_cached(&Ai[0],A);
-  ge_p3_dbl(&t,A); ge_p1p1_to_p3(&A2,&t);
-  ge_add(&t,&A2,&Ai[0]); ge_p1p1_to_p3(&u,&t); ge_p3_to_cached(&Ai[1],&u);
-  ge_add(&t,&A2,&Ai[1]); ge_p1p1_to_p3(&u,&t); ge_p3_to_cached(&Ai[2],&u);
-  ge_add(&t,&A2,&Ai[2]); ge_p1p1_to_p3(&u,&t); ge_p3_to_cached(&Ai[3],&u);
-  ge_add(&t,&A2,&Ai[3]); ge_p1p1_to_p3(&u,&t); ge_p3_to_cached(&Ai[4],&u);
-  ge_add(&t,&A2,&Ai[4]); ge_p1p1_to_p3(&u,&t); ge_p3_to_cached(&Ai[5],&u);
-  ge_add(&t,&A2,&Ai[5]); ge_p1p1_to_p3(&u,&t); ge_p3_to_cached(&Ai[6],&u);
-  ge_add(&t,&A2,&Ai[6]); ge_p1p1_to_p3(&u,&t); ge_p3_to_cached(&Ai[7],&u);
+  ge_p3_dbl(t,A); ge_p1p1_to_p3(A2,t);
+  ge_add(t,A2,&Ai[0]); ge_p1p1_to_p3(u,t); ge_p3_to_cached(&Ai[1],u);
+  ge_add(t,A2,&Ai[1]); ge_p1p1_to_p3(u,t); ge_p3_to_cached(&Ai[2],u);
+  ge_add(t,A2,&Ai[2]); ge_p1p1_to_p3(u,t); ge_p3_to_cached(&Ai[3],u);
+  ge_add(t,A2,&Ai[3]); ge_p1p1_to_p3(u,t); ge_p3_to_cached(&Ai[4],u);
+  ge_add(t,A2,&Ai[4]); ge_p1p1_to_p3(u,t); ge_p3_to_cached(&Ai[5],u);
+  ge_add(t,A2,&Ai[5]); ge_p1p1_to_p3(u,t); ge_p3_to_cached(&Ai[6],u);
+  ge_add(t,A2,&Ai[6]); ge_p1p1_to_p3(u,t); ge_p3_to_cached(&Ai[7],u);
 
   ge_p2_0(r);
 
@@ -9436,28 +9446,47 @@ int ge_double_scalarmult_vartime(ge_p2 *r, const unsigned char *a,
   }
 
   for (;i >= 0;--i) {
-    ge_p2_dbl(&t,r);
+    ge_p2_dbl(t,r);
 
     if (aslide[i] > 0) {
-      ge_p1p1_to_p3(&u,&t);
-      ge_add(&t,&u,&Ai[aslide[i]/2]);
+      ge_p1p1_to_p3(u,t);
+      ge_add(t,u,&Ai[aslide[i]/2]);
     } else if (aslide[i] < 0) {
-      ge_p1p1_to_p3(&u,&t);
-      ge_sub(&t,&u,&Ai[(-aslide[i])/2]);
+      ge_p1p1_to_p3(u,t);
+      ge_sub(t,u,&Ai[(-aslide[i])/2]);
     }
 
     if (bslide[i] > 0) {
-      ge_p1p1_to_p3(&u,&t);
-      ge_madd(&t,&u,&Bi[bslide[i]/2]);
+      ge_p1p1_to_p3(u,t);
+      ge_madd(t,u,&Bi[bslide[i]/2]);
     } else if (bslide[i] < 0) {
-      ge_p1p1_to_p3(&u,&t);
-      ge_msub(&t,&u,&Bi[(-bslide[i])/2]);
+      ge_p1p1_to_p3(u,t);
+      ge_msub(t,u,&Bi[(-bslide[i])/2]);
     }
 
-    ge_p1p1_to_p2(r,&t);
+    ge_p1p1_to_p2(r,t);
   }
 
+#if defined(WOLFSSL_SMALL_STACK) && !defined(WOLFSSL_SP_NO_MALLOC)
+  out:
+
+  if (aslide != NULL)
+      XFREE(aslide, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+  if (bslide != NULL)
+      XFREE(bslide, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+  if (Ai != NULL)
+      XFREE(Ai, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+  if (t != NULL)
+      XFREE(t, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+  if (u != NULL)
+      XFREE(u, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+  if (A2 != NULL)
+      XFREE(A2, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+
+  return ret;
+#else
   return 0;
+#endif
 }
 
 #ifdef CURVED25519_ASM_64BIT
@@ -9550,9 +9579,9 @@ int ge_frombytes_negate_vartime(ge_p3 *h,const unsigned char *s)
 r = p + q
 */
 
+#ifndef CURVED25519_ASM
 static WC_INLINE void ge_madd(ge_p1p1 *r,const ge_p3 *p,const ge_precomp *q)
 {
-#ifndef CURVED25519_ASM
     ge t0;
     fe_add(r->X,p->Y,p->X);
     fe_sub(r->Y,p->Y,p->X);
@@ -9564,11 +9593,8 @@ static WC_INLINE void ge_madd(ge_p1p1 *r,const ge_p3 *p,const ge_precomp *q)
     fe_add(r->Y,r->Z,r->Y);
     fe_add(r->Z,t0,r->T);
     fe_sub(r->T,t0,r->T);
-#else
-    fe_ge_madd(r->X, r->Y, r->Z, r->T, p->X, p->Y, p->Z, p->T, q->xy2d,
-              q->yplusx, q->yminusx);
-#endif
 }
+#endif
 
 
 /* ge msub */
@@ -9577,9 +9603,9 @@ static WC_INLINE void ge_madd(ge_p1p1 *r,const ge_p3 *p,const ge_precomp *q)
 r = p - q
 */
 
+#ifndef CURVED25519_ASM
 static WC_INLINE void ge_msub(ge_p1p1 *r,const ge_p3 *p,const ge_precomp *q)
 {
-#ifndef CURVED25519_ASM
     ge t0;
     fe_add(r->X,p->Y,p->X);
     fe_sub(r->Y,p->Y,p->X);
@@ -9591,11 +9617,8 @@ static WC_INLINE void ge_msub(ge_p1p1 *r,const ge_p3 *p,const ge_precomp *q)
     fe_add(r->Y,r->Z,r->Y);
     fe_sub(r->Z,t0,r->T);
     fe_add(r->T,t0,r->T);
-#else
-    fe_ge_msub(r->X, r->Y, r->Z, r->T, p->X, p->Y, p->Z, p->T, q->xy2d,
-              q->yplusx, q->yminusx);
-#endif
 }
+#endif
 
 
 /* ge p1p1 to p2 */
@@ -9603,16 +9626,14 @@ static WC_INLINE void ge_msub(ge_p1p1 *r,const ge_p3 *p,const ge_precomp *q)
 r = p
 */
 
+#ifndef CURVED25519_ASM
 static void ge_p1p1_to_p2(ge_p2 *r,const ge_p1p1 *p)
 {
-#ifndef CURVED25519_ASM
   fe_mul(r->X,p->X,p->T);
   fe_mul(r->Y,p->Y,p->Z);
   fe_mul(r->Z,p->Z,p->T);
-#else
-  fe_ge_to_p2(r->X, r->Y, r->Z, p->X, p->Y, p->Z, p->T);
-#endif
 }
+#endif
 
 
 /* ge p1p1 to p3 */
@@ -9621,17 +9642,15 @@ static void ge_p1p1_to_p2(ge_p2 *r,const ge_p1p1 *p)
 r = p
 */
 
+#ifndef CURVED25519_ASM
 static WC_INLINE void ge_p1p1_to_p3(ge_p3 *r,const ge_p1p1 *p)
 {
-#ifndef CURVED25519_ASM
   fe_mul(r->X,p->X,p->T);
   fe_mul(r->Y,p->Y,p->Z);
   fe_mul(r->Z,p->Z,p->T);
   fe_mul(r->T,p->X,p->Y);
-#else
-  fe_ge_to_p3(r->X, r->Y, r->Z, r->T, p->X, p->Y, p->Z, p->T);
-#endif
 }
+#endif
 
 
 /* ge p2 0 */
@@ -9650,9 +9669,9 @@ static void ge_p2_0(ge_p2 *h)
 r = 2 * p
 */
 
+#ifndef CURVED25519_ASM
 static WC_INLINE void ge_p2_dbl(ge_p1p1 *r,const ge_p2 *p)
 {
-#ifndef CURVED25519_ASM
     ge t0;
     fe_sq(r->X,p->X);
     fe_sq(r->Z,p->Y);
@@ -9663,10 +9682,8 @@ static WC_INLINE void ge_p2_dbl(ge_p1p1 *r,const ge_p2 *p)
     fe_sub(r->Z,r->Z,r->X);
     fe_sub(r->X,t0,r->Y);
     fe_sub(r->T,r->T,r->Z);
-#else
-    fe_ge_dbl(r->X, r->Y, r->Z, r->T, p->X, p->Y, p->Z);
-#endif
 }
+#endif
 
 
 /* ge p3 dble */
@@ -9675,12 +9692,14 @@ static WC_INLINE void ge_p2_dbl(ge_p1p1 *r,const ge_p2 *p)
 r = 2 * p
 */
 
+#ifndef CURVED25519_ASM
 static void ge_p3_dbl(ge_p1p1 *r,const ge_p3 *p)
 {
-  ge_p2 q;
-  ge_p3_to_p2(&q,p);
-  ge_p2_dbl(r,&q);
+    ge_p2 q;
+    ge_p3_to_p2(&q,p);
+    ge_p2_dbl(r,&q);
 }
+#endif
 
 
 /* ge p3 to cached */
@@ -9724,14 +9743,17 @@ static WC_INLINE void ge_p3_to_cached(ge_cached *r,const ge_p3 *p)
 r = p
 */
 
+#ifndef CURVED25519_ASM
 static void ge_p3_to_p2(ge_p2 *r,const ge_p3 *p)
 {
   fe_copy(r->X,p->X);
   fe_copy(r->Y,p->Y);
   fe_copy(r->Z,p->Z);
 }
+#endif
 
 
+#ifdef GE_P3_TOBYTES_IMPL
 /* ge p3 tobytes */
 void ge_p3_tobytes(unsigned char *s,const ge_p3 *h)
 {
@@ -9743,11 +9765,13 @@ void ge_p3_tobytes(unsigned char *s,const ge_p3 *h)
   fe_mul(x,h->X,recip);
   fe_mul(y,h->Y,recip);
   fe_tobytes(s,y);
-  s[31] ^= fe_isnegative(x) << 7;
+  s[31] ^= (unsigned char)(fe_isnegative(x) << 7);
 }
+#endif
 
 
 #ifndef CURVED25519_ASM
+#if defined(HAVE_ED25519_SIGN) || defined(HAVE_ED25519_MAKE_KEY)
 /* ge_precomp_0 */
 static void ge_precomp_0(ge_precomp *h)
 {
@@ -9756,6 +9780,7 @@ static void ge_precomp_0(ge_precomp *h)
   fe_0(h->xy2d);
 }
 #endif
+#endif
 
 
 /* ge_sub */
@@ -9763,9 +9788,9 @@ static void ge_precomp_0(ge_precomp *h)
 r = p - q
 */
 
+#ifndef CURVED25519_ASM
 static WC_INLINE void ge_sub(ge_p1p1 *r,const ge_p3 *p,const ge_cached *q)
 {
-#ifndef CURVED25519_ASM
     ge t0;
     fe_add(r->X,p->Y,p->X);
     fe_sub(r->Y,p->Y,p->X);
@@ -9778,12 +9803,8 @@ static WC_INLINE void ge_sub(ge_p1p1 *r,const ge_p3 *p,const ge_cached *q)
     fe_add(r->Y,r->Z,r->Y);
     fe_sub(r->Z,t0,r->T);
     fe_add(r->T,t0,r->T);
-#else
-    fe_ge_sub(r->X, r->Y, r->Z, r->T, p->X, p->Y, p->Z, p->T, q->Z, q->T2d,
-              q->YplusX, q->YminusX);
-#endif
 }
-
+#endif
 
 /* ge tobytes */
 void ge_tobytes(unsigned char *s,const ge_p2 *h)
@@ -9796,7 +9817,7 @@ void ge_tobytes(unsigned char *s,const ge_p2 *h)
   fe_mul(x,h->X,recip);
   fe_mul(y,h->Y,recip);
   fe_tobytes(s,y);
-  s[31] ^= fe_isnegative(x) << 7;
+  s[31] ^= (unsigned char)(fe_isnegative(x) << 7);
 }
 
 #endif /* !ED25519_SMALL */

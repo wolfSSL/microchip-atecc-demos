@@ -1,6 +1,6 @@
 /* wolfmath.c
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2023 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -19,8 +19,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
+/* common functions between all math libraries */
 
-/* common functions for either math library */
+/* HAVE_WOLF_BIGINT: Used with asynchronous crypto hardware where "raw" math
+ *                   buffers are required.
+ * NO_BIG_INT: Disable support for all multi-precision math libraries
+ */
 
 #ifdef HAVE_CONFIG_H
     #include <config.h>
@@ -28,13 +32,9 @@
 
 /* in case user set USE_FAST_MATH there */
 #include <wolfssl/wolfcrypt/settings.h>
-
-#include <wolfssl/wolfcrypt/integer.h>
-
+#include <wolfssl/wolfcrypt/wolfmath.h>
 #include <wolfssl/wolfcrypt/error-crypt.h>
 #include <wolfssl/wolfcrypt/logging.h>
-
-#if defined(USE_FAST_MATH) || !defined(NO_BIG_INT)
 
 #ifdef WOLFSSL_ASYNC_CRYPT
     #include <wolfssl/wolfcrypt/async.h>
@@ -47,6 +47,7 @@
     #include <wolfcrypt/src/misc.c>
 #endif
 
+#if !defined(NO_BIG_INT) || defined(WOLFSSL_SP_MATH)
 
 #if !defined(WC_NO_CACHE_RESISTANT) && \
     ((defined(HAVE_ECC) && defined(ECC_TIMING_RESISTANT)) || \
@@ -54,7 +55,7 @@
 
     /* all off / all on pointer addresses for constant calculations */
     /* ecc.c uses same table */
-    const wolfssl_word wc_off_on_addr[2] =
+    const wc_ptr_t wc_off_on_addr[2] =
     {
     #if defined(WC_64BIT_CPU)
         W64LIT(0x0000000000000000),
@@ -71,20 +72,39 @@
 #endif
 
 
-int get_digit_count(mp_int* a)
+/* reverse an array, used for radix code */
+void mp_reverse(unsigned char *s, int len)
 {
-    if (a == NULL)
-        return 0;
+    int ix, iy;
 
-    return a->used;
+    if (s == NULL)
+        return;
+
+    ix = 0;
+    iy = len - 1;
+    while (ix < iy) {
+        unsigned char t = s[ix];
+        s[ix] = s[iy];
+        s[iy] = t;
+        ++ix;
+        --iy;
+    }
 }
 
-mp_digit get_digit(mp_int* a, int n)
+int get_digit_count(const mp_int* a)
 {
     if (a == NULL)
         return 0;
 
-    return (n >= a->used || n < 0) ? 0 : a->dp[n];
+    return (int)a->used;
+}
+
+mp_digit get_digit(const mp_int* a, int n)
+{
+    if (a == NULL)
+        return 0;
+
+    return (n < 0 || (unsigned int)n >= (unsigned int)a->used) ? 0 : a->dp[n];
 }
 
 #if defined(HAVE_ECC) || defined(WOLFSSL_MP_COND_COPY)
@@ -99,11 +119,10 @@ mp_digit get_digit(mp_int* a, int n)
 int mp_cond_copy(mp_int* a, int copy, mp_int* b)
 {
     int err = MP_OKAY;
-    int i;
 #if defined(SP_WORD_SIZE) && SP_WORD_SIZE == 8
     unsigned int mask = (unsigned int)0 - copy;
 #else
-    mp_digit mask = (mp_digit)0 - copy;
+    mp_digit mask = (mp_digit)0 - (mp_digit)copy;
 #endif
 
     if (a == NULL || b == NULL)
@@ -111,30 +130,36 @@ int mp_cond_copy(mp_int* a, int copy, mp_int* b)
 
     /* Ensure b has enough space to copy a into */
     if (err == MP_OKAY)
-        err = mp_grow(b, a->used + 1);
+        err = mp_grow(b, (int)a->used + 1);
     if (err == MP_OKAY) {
+    #if defined(WOLFSSL_SP_MATH) || defined(WOLFSSL_SP_MATH_ALL)
+        unsigned int i;
+    #else
+        int i;
+    #endif
         /* When mask 0, b is unchanged2
          * When mask all set, b ^ b ^ a = a
          */
-        /* Conditionaly copy all digits and then number of used diigits.
+        /* Conditionally copy all digits and then number of used digits.
          * get_digit() returns 0 when index greater than available digit.
          */
         for (i = 0; i < a->used; i++) {
-            b->dp[i] ^= (get_digit(a, i) ^ get_digit(b, i)) & mask;
+            b->dp[i] ^= (get_digit(a, (int)i) ^ get_digit(b, (int)i)) & mask;
         }
         for (; i < b->used; i++) {
-            b->dp[i] ^= (get_digit(a, i) ^ get_digit(b, i)) & mask;
+            b->dp[i] ^= (get_digit(a, (int)i) ^ get_digit(b, (int)i)) & mask;
         }
-        b->used ^= (a->used ^ b->used) & (int)mask;
+        b->used ^= (a->used ^ b->used) & (unsigned int)mask;
 #if (!defined(WOLFSSL_SP_MATH) && !defined(WOLFSSL_SP_MATH_ALL)) || \
     defined(WOLFSSL_SP_INT_NEGATIVE)
-        b->sign ^= (a->sign ^ b->sign) & (int)mask;
+        b->sign ^= (a->sign ^ b->sign) & (unsigned int)mask;
 #endif
     }
 
     return err;
 }
-#endif
+#endif /* HAVE_ECC || WOLFSSL_MP_COND_COPY */
+
 
 #ifndef WC_NO_RNG
 int get_rand_digit(WC_RNG* rng, mp_digit* d)
@@ -142,30 +167,27 @@ int get_rand_digit(WC_RNG* rng, mp_digit* d)
     return wc_RNG_GenerateBlock(rng, (byte*)d, sizeof(mp_digit));
 }
 
-#ifdef WC_RSA_BLINDING
+#if defined(WC_RSA_BLINDING) || defined(WOLFCRYPT_HAVE_SAKKE)
 int mp_rand(mp_int* a, int digits, WC_RNG* rng)
 {
     int ret = 0;
-    int cnt = digits * sizeof(mp_digit);
-#if !defined(USE_FAST_MATH) && !defined(WOLFSSL_SP_MATH)
-    int i;
-#endif
+    int cnt = digits * (int)sizeof(mp_digit);
 
     if (rng == NULL) {
         ret = MISSING_RNG_E;
     }
-    else if (a == NULL || digits == 0) {
+    else if (a == NULL || digits <= 0) {
         ret = BAD_FUNC_ARG;
     }
 
-#if !defined(USE_FAST_MATH) && !defined(WOLFSSL_SP_MATH)
+#ifdef USE_INTEGER_HEAP_MATH
     /* allocate space for digits */
     if (ret == MP_OKAY) {
         ret = mp_set_bit(a, digits * DIGIT_BIT - 1);
     }
 #else
 #if defined(WOLFSSL_SP_MATH) || defined(WOLFSSL_SP_MATH_ALL)
-    if ((ret == MP_OKAY) && (digits > SP_INT_DIGITS))
+    if ((ret == MP_OKAY) && ((unsigned int)digits > a->size))
 #else
     if ((ret == MP_OKAY) && (digits > FP_SIZE))
 #endif
@@ -173,15 +195,16 @@ int mp_rand(mp_int* a, int digits, WC_RNG* rng)
         ret = BAD_FUNC_ARG;
     }
     if (ret == MP_OKAY) {
-        a->used = digits;
+        a->used = (word32)digits;
     }
 #endif
     /* fill the data with random bytes */
     if (ret == MP_OKAY) {
-        ret = wc_RNG_GenerateBlock(rng, (byte*)a->dp, cnt);
+        ret = wc_RNG_GenerateBlock(rng, (byte*)a->dp, (word32)cnt);
     }
     if (ret == MP_OKAY) {
-#if !defined(USE_FAST_MATH) && !defined(WOLFSSL_SP_MATH)
+#ifdef USE_INTEGER_HEAP_MATH
+        int i;
         /* Mask down each digit to only bits used */
         for (i = 0; i < a->used; i++) {
             a->dp[i] &= MP_MASK;
@@ -190,7 +213,7 @@ int mp_rand(mp_int* a, int digits, WC_RNG* rng)
         /* ensure top digit is not zero */
         while ((ret == MP_OKAY) && (a->dp[a->used - 1] == 0)) {
             ret = get_rand_digit(rng, &a->dp[a->used - 1]);
-#if !defined(USE_FAST_MATH) && !defined(WOLFSSL_SP_MATH)
+#ifdef USE_INTEGER_HEAP_MATH
             a->dp[a->used - 1] &= MP_MASK;
 #endif
         }
@@ -198,8 +221,8 @@ int mp_rand(mp_int* a, int digits, WC_RNG* rng)
 
     return ret;
 }
-#endif /* WC_RSA_BLINDING */
-#endif
+#endif /* WC_RSA_BLINDING || WOLFCRYPT_HAVE_SAKKE */
+#endif /* !WC_NO_RNG */
 
 #if defined(HAVE_ECC) || defined(WOLFSSL_EXPORT_INT)
 /* export an mp_int as unsigned char or hex string
@@ -210,33 +233,44 @@ int wc_export_int(mp_int* mp, byte* buf, word32* len, word32 keySz,
 {
     int err;
 
-    if (mp == NULL)
+    if (mp == NULL || buf == NULL || len == NULL)
         return BAD_FUNC_ARG;
 
-    /* check buffer size */
-    if (*len < keySz) {
-        *len = keySz;
-        return BUFFER_E;
-    }
-
-    *len = keySz;
-    XMEMSET(buf, 0, *len);
-
     if (encType == WC_TYPE_HEX_STR) {
+        /* for WC_TYPE_HEX_STR the keySz is not used.
+         * The size is computed via mp_radix_size and checked with len input */
     #ifdef WC_MP_TO_RADIX
-        err = mp_tohex(mp, (char*)buf);
+        int size = 0;
+        err = mp_radix_size(mp, MP_RADIX_HEX, &size);
+        if (err == MP_OKAY) {
+            /* make sure we can fit result */
+            if (*len < (word32)size) {
+                *len = (word32)size;
+                return BUFFER_E;
+            }
+            *len = (word32)size;
+            err = mp_tohex(mp, (char*)buf);
+        }
     #else
         err = NOT_COMPILED_IN;
     #endif
     }
     else {
-        err = mp_to_unsigned_bin(mp, buf + (keySz - mp_unsigned_bin_size(mp)));
+        /* for WC_TYPE_UNSIGNED_BIN keySz is used to zero pad.
+         * The key size is always returned as the size */
+        if (*len < keySz) {
+            *len = keySz;
+            return BUFFER_E;
+        }
+        *len = keySz;
+        XMEMSET(buf, 0, *len);
+        err = mp_to_unsigned_bin(mp, buf +
+            (keySz - (word32)mp_unsigned_bin_size(mp)));
     }
 
     return err;
 }
 #endif
-
 
 #ifdef HAVE_WOLF_BIGINT
 void wc_bigint_init(WC_BIGINT* a)
@@ -333,12 +367,12 @@ void wc_bigint_free(WC_BIGINT* a)
 
 /* sz: make sure the buffer is at least that size and zero padded.
  *     A `sz == 0` will use the size of `src`.
- *     The calulcates sz is stored into dst->len in `wc_bigint_alloc`.
+ *     The calculated sz is stored into dst->len in `wc_bigint_alloc`.
  */
 int wc_mp_to_bigint_sz(mp_int* src, WC_BIGINT* dst, word32 sz)
 {
     int err;
-    word32 x, y;
+    word32 x;
 
     if (src == NULL || dst == NULL)
         return BAD_FUNC_ARG;
@@ -350,10 +384,9 @@ int wc_mp_to_bigint_sz(mp_int* src, WC_BIGINT* dst, word32 sz)
 
     /* make sure destination is allocated and large enough */
     err = wc_bigint_alloc(dst, sz);
-    if (err == MP_OKAY) {
-
+    if (err == MP_OKAY && sz > 0) {
         /* leading zero pad */
-        y = sz - x;
+        word32 y = sz - x;
         XMEMSET(dst->buf, 0, y);
 
         /* export src as unsigned bin to destination buf */
@@ -388,4 +421,104 @@ int wc_bigint_to_mp(WC_BIGINT* src, mp_int* dst)
 }
 #endif /* HAVE_WOLF_BIGINT */
 
-#endif /* USE_FAST_MATH || !NO_BIG_INT */
+#endif /* !NO_BIG_INT || WOLFSSL_SP_MATH */
+
+#ifdef HAVE_WC_INTROSPECTION
+const char *wc_GetMathInfo(void)
+{
+    return
+        "\tMulti-Precision: "
+    #ifdef WOLFSSL_SP_MATH_ALL
+        "Wolf(SP)"
+        #ifdef WOLFSSL_SP_NO_DYN_STACK
+            " no-dyn-stack"
+        #endif
+        " word-size=" WC_STRINGIFY(SP_WORD_SIZE)
+        " bits=" WC_STRINGIFY(SP_INT_BITS)
+        " sp_int.c"
+    #elif defined(USE_FAST_MATH)
+        "Fast"
+        " max-bits=" WC_STRINGIFY(FP_MAX_BITS)
+        #ifndef TFM_TIMING_RESISTANT
+        " not-constant-time"
+        #endif
+        " tfm.c"
+    #elif defined(USE_INTEGER_HEAP_MATH)
+        "Heap"
+        " not-constant-time"
+        " integer.c"
+    #elif defined(NO_BIG_INT) || defined(WOLFSSL_SP_MATH)
+        "Disabled"
+    #else
+        "Unknown"
+    #endif
+
+    #if defined(WOLFSSL_HAVE_SP_ECC) || defined(WOLFSSL_HAVE_SP_DH) || \
+        defined(WOLFSSL_HAVE_SP_RSA)
+         "\n\tSingle Precision:"
+        #ifdef WOLFSSL_HAVE_SP_ECC
+            " ecc"
+            #ifndef WOLFSSL_SP_NO_256
+                " 256"
+            #endif
+            #ifdef WOLFSSL_SP_384
+                " 384"
+            #endif
+            #ifdef WOLFSSL_SP_521
+                " 521"
+            #endif
+        #endif
+        #if defined(WOLFSSL_HAVE_SP_RSA) && defined(WOLFSSL_HAVE_SP_DH)
+            " rsa/dh"
+        #elif defined(WOLFSSL_HAVE_SP_RSA)
+            " rsa"
+        #elif defined(WOLFSSL_HAVE_SP_DH)
+            " dh"
+        #endif
+        #ifndef WOLFSSL_SP_NO_2048
+            " 2048"
+        #endif
+        #ifndef WOLFSSL_SP_NO_3072
+            " 3072"
+        #endif
+        #ifdef WOLFSSL_SP_4096
+            " 4096"
+        #endif
+        #ifdef WOLFSSL_SP_ASM
+            " asm"
+        #endif
+
+        #if !defined(WOLFSSL_SP_ASM)
+            #if defined(SP_WORD_SIZE) && SP_WORD_SIZE == 32
+            " sp_c32.c"
+            #else
+            " sp_c64.c"
+            #endif
+        #elif defined(WOLFSSL_SP_ARM32_ASM)
+            " sp_arm32.c"
+        #elif defined(WOLFSSL_SP_ARM64_ASM)
+            " sp_arm64.c"
+        #elif defined(WOLFSSL_SP_ARM_THUMB_ASM)
+            " sp_armthumb.c"
+        #elif defined(WOLFSSL_SP_ARM_CORTEX_M_ASM)
+            " sp_cortexm.c"
+        #elif defined(WOLFSSL_SP_X86_64_ASM)
+            " sp_x86_64.c"
+        #else
+            " sp_[arch].c"
+        #endif
+    #endif
+
+    /* other SP math options */
+    #if defined(WOLFSSL_SP_MATH_ALL) || defined(WOLFSSL_HAVE_SP_ECC) || \
+        defined(WOLFSSL_HAVE_SP_DH) || defined(WOLFSSL_HAVE_SP_RSA)
+        #ifdef WOLFSSL_SP_SMALL
+            " small"
+        #endif
+        #ifdef WOLFSSL_SP_NO_MALLOC
+            " no-malloc"
+        #endif
+    #endif
+    ;
+}
+#endif /* HAVE_WC_INTROSPECTION */

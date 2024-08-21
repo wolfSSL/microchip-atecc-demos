@@ -4,8 +4,8 @@
   <defaultConf>0</defaultConf>
   <confs>
     <conf name="pic32mz_ef_curiosity_2" type="2">
-      <platformToolSN>:=MPLABComm-USB-Microchip:=&lt;vid>04D8:=&lt;pid>810B:=&lt;rev>0100:=&lt;man>Microchip Technology Incorporated:=&lt;prod>MPLAB PKoB 4:=&lt;sn>BUR194219172:=&lt;drv>x:=&lt;xpt>b:=end</platformToolSN>
-      <languageToolchainDir>/Applications/microchip/xc32/v2.30/bin</languageToolchainDir>
+      <platformToolSN>noToolString</platformToolSN>
+      <languageToolchainDir>/Applications/microchip/xc32/v2.50/bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>

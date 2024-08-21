@@ -1,6 +1,6 @@
 /* srp.h
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2023 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -32,7 +32,7 @@
 #include <wolfssl/wolfcrypt/sha.h>
 #include <wolfssl/wolfcrypt/sha256.h>
 #include <wolfssl/wolfcrypt/sha512.h>
-#include <wolfssl/wolfcrypt/integer.h>
+#include <wolfssl/wolfcrypt/wolfmath.h>
 
 #ifdef __cplusplus
     extern "C" {
@@ -65,7 +65,7 @@
  */
 typedef enum {
     SRP_CLIENT_SIDE  = 0,
-    SRP_SERVER_SIDE  = 1,
+    SRP_SERVER_SIDE  = 1
 } SrpSide;
 
 /**
@@ -75,7 +75,7 @@ typedef enum {
         SRP_TYPE_SHA    = 1,
         SRP_TYPE_SHA256 = 2,
         SRP_TYPE_SHA384 = 3,
-        SRP_TYPE_SHA512 = 4,
+        SRP_TYPE_SHA512 = 4
 } SrpType;
 
 
@@ -137,6 +137,8 @@ typedef struct Srp {
  * @return 0 on success, {@literal <} 0 on error. @see error-crypt.h
  */
 WOLFSSL_API int wc_SrpInit(Srp* srp, SrpType type, SrpSide side);
+WOLFSSL_API int wc_SrpInit_ex(Srp* srp, SrpType type, SrpSide side,
+    void* heap, int devId);
 
 /**
  * Releases the Srp struct resources after usage.
@@ -246,7 +248,7 @@ WOLFSSL_API int wc_SrpSetPrivate(Srp* srp, const byte* priv, word32 size);
  *
  * The public ephemeral value is known as:
  *   A at the client side. A = g ^ a % N
- *   B at the server side. B = (k * v + (g ˆ b % N)) % N
+ *   B at the server side. B = (k * v + (g ^ b % N)) % N
  * This function MUST be called after wc_SrpSetPassword or wc_SrpSetVerifier.
  *
  * @param[in,out] srp       the Srp structure.

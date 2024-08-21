@@ -1,6 +1,6 @@
 /* des3.h
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2023 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -30,16 +30,10 @@
 
 #ifndef NO_DES3
 
-#if defined(HAVE_FIPS) && \
-    defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2)
+#if defined(HAVE_FIPS) && defined(HAVE_FIPS_VERSION) && \
+        (HAVE_FIPS_VERSION == 2 || HAVE_FIPS_VERSION == 3)
     #include <wolfssl/wolfcrypt/fips.h>
 #endif /* HAVE_FIPS_VERSION >= 2 */
-
-#if defined(HAVE_FIPS) && \
-	(!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-/* included for fips @wc_fips */
-#include <cyassl/ctaocrypt/des3.h>
-#endif
 
 #ifdef __cplusplus
     extern "C" {
@@ -49,16 +43,21 @@
 enum {
     DES_KEY_SIZE        =  8,  /* des                     */
     DES3_KEY_SIZE       = 24,  /* 3 des ede               */
-    DES_IV_SIZE         =  8,  /* should be the same as DES_BLOCK_SIZE */
+    DES_IV_SIZE         =  8   /* should be the same as DES_BLOCK_SIZE */
 };
 
 
 /* avoid redefinition of structs */
-#if !defined(HAVE_FIPS) || \
-    (defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2))
+#if !defined(HAVE_FIPS) || (defined(HAVE_FIPS_VERSION) && \
+    HAVE_FIPS_VERSION >= 2)
 
 #ifdef WOLFSSL_ASYNC_CRYPT
     #include <wolfssl/wolfcrypt/async.h>
+#endif
+
+#ifdef WOLFSSL_SE050
+    /* SE050 SDK also defines DES_BLOCK_SIZE */
+    #undef DES_BLOCK_SIZE
 #endif
 
 enum {
@@ -79,6 +78,9 @@ enum {
 
 
 #if defined(STM32_CRYPTO)
+
+#include <wolfssl/wolfcrypt/port/st/stm32.h>
+
 enum {
     DES_CBC = 0,
     DES_ECB = 1
@@ -117,7 +119,7 @@ struct Des3 {
     typedef struct Des3 Des3;
     #define WC_DES3_TYPE_DEFINED
 #endif
-#endif /* HAVE_FIPS */
+#endif /* HAVE_FIPS && HAVE_FIPS_VERSION >= 2 */
 
 
 WOLFSSL_API int  wc_Des_SetKey(Des* des, const byte* key,
@@ -146,8 +148,8 @@ WOLFSSL_API int  wc_Des3_CbcDecrypt(Des3* des, byte* out,
 
 /* These are only required when using either:
   static memory (WOLFSSL_STATIC_MEMORY) or asynchronous (WOLFSSL_ASYNC_CRYPT) */
-WOLFSSL_API int  wc_Des3Init(Des3*, void*, int);
-WOLFSSL_API void wc_Des3Free(Des3*);
+WOLFSSL_API int  wc_Des3Init(Des3* des3, void* heap, int devId);
+WOLFSSL_API void wc_Des3Free(Des3* des3);
 
 #ifdef __cplusplus
     } /* extern "C" */

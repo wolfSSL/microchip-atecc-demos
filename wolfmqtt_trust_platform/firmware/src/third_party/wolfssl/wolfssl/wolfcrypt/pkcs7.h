@@ -1,6 +1,6 @@
 /* pkcs7.h
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2023 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -75,6 +75,12 @@
     #define MAX_UNAUTH_ATTRIBS_SZ 7
 #endif
 
+/* bitmap flag for attributes */
+#define WOLFSSL_NO_ATTRIBUTES 0x1
+#define WOLFSSL_CONTENT_TYPE_ATTRIBUTE 0x2
+#define WOLFSSL_SIGNING_TIME_ATTRIBUTE 0x4
+#define WOLFSSL_MESSAGE_DIGEST_ATTRIBUTE 0x8
+
 /* PKCS#7 content types, ref RFC 2315 (Section 14) */
 enum PKCS7_TYPES {
     PKCS7_MSG                 = 650,  /* 1.2.840.113549.1.7   */
@@ -106,6 +112,7 @@ enum PKCS7_STATE {
     WC_PKCS7_VERIFY_STAGE4,
     WC_PKCS7_VERIFY_STAGE5,
     WC_PKCS7_VERIFY_STAGE6,
+    WC_PKCS7_VERIFY_STAGE7,
 
     /* parse info set */
     WC_PKCS7_INFOSET_START,
@@ -141,7 +148,7 @@ enum PKCS7_STATE {
     WC_PKCS7_DECRYPT_PWRI,
     WC_PKCS7_DECRYPT_ORI,
 
-    WC_PKCS7_DECRYPT_DONE,
+    WC_PKCS7_DECRYPT_DONE
 
 };
 
@@ -156,13 +163,14 @@ enum Pkcs7_Misc {
     MAX_CONTENT_BLOCK_LEN = DES_BLOCK_SIZE,
 #endif
     MAX_RECIP_SZ          = MAX_VERSION_SZ +
-                            MAX_SEQ_SZ + ASN_NAME_MAX + MAX_SN_SZ +
+                            MAX_SEQ_SZ + WC_ASN_NAME_MAX + MAX_SN_SZ +
                             MAX_SEQ_SZ + MAX_ALGO_SZ + 1 + MAX_ENCRYPTED_KEY_SZ,
+    WOLF_ENUM_DUMMY_LAST_ELEMENT(Pkcs7_Misc)
 };
 
 enum Cms_Options {
     CMS_SKID = 1,
-    CMS_ISSUER_AND_SERIAL_NUMBER = 2,
+    CMS_ISSUER_AND_SERIAL_NUMBER = 2
 };
 #define DEGENERATE_SID 3
 
@@ -217,6 +225,11 @@ typedef int (*CallbackWrapCEK)(PKCS7* pkcs7, byte* cek, word32 cekSz,
                                   byte* out, word32 outSz,
                                   int keyWrapAlgo, int type, int dir);
 
+/* Callbacks for supporting different stream cases */
+typedef int (*CallbackGetContent)(PKCS7* pkcs7, byte** content, void* ctx);
+typedef int (*CallbackStreamOut)(PKCS7* pkcs7, const byte* output,
+        word32 outputSz, void* ctx);
+
 #if defined(HAVE_PKCS7_RSA_RAW_SIGN_CALLBACK) && !defined(NO_RSA)
 /* RSA sign raw digest callback, user builds DigestInfo */
 typedef int (*CallbackRsaSignRawDigest)(PKCS7* pkcs7, byte* digest,
@@ -240,8 +253,16 @@ struct PKCS7 {
 #ifdef ASN_BER_TO_DER
     byte*  der;                   /* DER encoded version of message       */
     word32 derSz;
+    CallbackGetContent getContentCb;
+    CallbackStreamOut  streamOutCb;
+    void*  streamCtx; /* passed to getcontentCb and streamOutCb */
 #endif
-    byte*  cert[MAX_PKCS7_CERTS];
+    byte   encodeStream:1;        /* use BER when encoding */
+    byte   noCerts:1;             /* if certificates should be added into bundle
+                                     during creation */
+    byte*  cert[MAX_PKCS7_CERTS]; /* array of certs parsed from bundle */
+    byte*  verifyCert;            /* cert from array used for verify */
+    word32 verifyCertSz;
 
     /* Encrypted-data Content Type */
     byte*        encryptionKey;         /* block cipher encryption key */
@@ -309,7 +330,7 @@ struct PKCS7 {
 #endif
     word32 state;
 
-    word16 skipDefaultSignedAttribs:1; /* skip adding default signed attribs */
+    word16 defaultSignedAttribs; /* set which default signed attribs */
 
     byte version; /* 1 for RFC 2315 and 3 for RFC 4108 */
     PKCS7SignerInfo* signerInfo;
@@ -331,6 +352,8 @@ struct PKCS7 {
     /* used by DecodeEnvelopedData with multiple encrypted contents */
     byte*  cachedEncryptedContent;
     word32 cachedEncryptedContentSz;
+    word16 contentCRLF:1; /* have content line endings been converted to CRLF */
+    word16 contentIsPkcs7Type:1; /* eContent follows PKCS#7 RFC not CMS */
     /* !! NEW DATA MEMBERS MUST BE ADDED AT END !! */
 };
 
@@ -357,6 +380,7 @@ WOLFSSL_API int  wc_PKCS7_EncodeData(PKCS7* pkcs7, byte* output,
 /* CMS/PKCS#7 SignedData */
 WOLFSSL_API int  wc_PKCS7_SetDetached(PKCS7* pkcs7, word16 flag);
 WOLFSSL_API int  wc_PKCS7_NoDefaultSignedAttribs(PKCS7* pkcs7);
+WOLFSSL_API int  wc_PKCS7_SetDefaultSignedAttribs(PKCS7* pkcs7, word16 flag);
 WOLFSSL_API int  wc_PKCS7_EncodeSignedData(PKCS7* pkcs7,
                                           byte* output, word32 outputSz);
 WOLFSSL_API int  wc_PKCS7_EncodeSignedData_ex(PKCS7* pkcs7, const byte* hashBuf,
@@ -482,6 +506,15 @@ WOLFSSL_API int  wc_PKCS7_SetDecodeEncryptedCb(PKCS7* pkcs7,
         CallbackDecryptContent decryptionCb);
 WOLFSSL_API int  wc_PKCS7_SetDecodeEncryptedCtx(PKCS7* pkcs7, void* ctx);
 #endif /* NO_PKCS7_ENCRYPTED_DATA */
+
+/* stream and certs */
+WOLFSSL_LOCAL int wc_PKCS7_WriteOut(PKCS7* pkcs7, byte* output,
+    const byte* input, word32 inputSz);
+WOLFSSL_API int wc_PKCS7_SetStreamMode(PKCS7* pkcs7, byte flag,
+    CallbackGetContent getContentCb, CallbackStreamOut streamOutCb, void* ctx);
+WOLFSSL_API int wc_PKCS7_GetStreamMode(PKCS7* pkcs7);
+WOLFSSL_API int wc_PKCS7_SetNoCerts(PKCS7* pkcs7, byte flag);
+WOLFSSL_API int wc_PKCS7_GetNoCerts(PKCS7* pkcs7);
 
 /* CMS/PKCS#7 CompressedData */
 #if defined(HAVE_LIBZ) && !defined(NO_PKCS7_COMPRESSED_DATA)

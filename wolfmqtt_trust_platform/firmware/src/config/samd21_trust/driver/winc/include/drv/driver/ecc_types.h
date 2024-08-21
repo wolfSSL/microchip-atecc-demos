@@ -1,25 +1,25 @@
-/*******************************************************************************
-* Copyright (C) 2019 Microchip Technology Inc. and its subsidiaries.
-*
-* Subject to your compliance with these terms, you may use Microchip software
-* and any derivatives exclusively with Microchip products. It is your
-* responsibility to comply with third party license terms applicable to your
-* use of third party software (including open source software) that may
-* accompany Microchip software.
-*
-* THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
-* EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
-* WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
-* PARTICULAR PURPOSE.
-*
-* IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
-* INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
-* WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
-* BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
-* FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
-* ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
-* THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
-*******************************************************************************/
+/*
+Copyright (C) 2022, Microchip Technology Inc., and its subsidiaries. All rights reserved.
+
+The software and documentation is provided by microchip and its contributors
+"as is" and any express, implied or statutory warranties, including, but not
+limited to, the implied warranties of merchantability, fitness for a particular
+purpose and non-infringement of third party intellectual property rights are
+disclaimed to the fullest extent permitted by law. In no event shall microchip
+or its contributors be liable for any direct, indirect, incidental, special,
+exemplary, or consequential damages (including, but not limited to, procurement
+of substitute goods or services; loss of use, data, or profits; or business
+interruption) however caused and on any theory of liability, whether in contract,
+strict liability, or tort (including negligence or otherwise) arising in any way
+out of the use of the software and documentation, even if advised of the
+possibility of such damage.
+
+Except as expressly permitted hereunder and subject to the applicable license terms
+for any third-party software incorporated in the software and any applicable open
+source software license terms, no license or other rights, whether express or
+implied, are granted under any patent or other intellectual property rights of
+Microchip or any third party.
+*/
 
 /*!
 @file
@@ -74,7 +74,9 @@ MACROS
 DATA TYPES
 *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 
-
+/**@addtogroup  SSLEnums
+ * @{
+ */
 /*!
 @enum \
     tenuEcNamedCurve
@@ -83,7 +85,7 @@ DATA TYPES
 
     Defines a list of supported ECC named curves.
 */
-typedef enum EcNamedCurve{
+typedef enum{
     EC_SECP192R1        = 19,
     /*!<
         It is defined by NIST as P192 and by the SEC Group as secp192r1.
@@ -111,14 +113,22 @@ typedef enum EcNamedCurve{
 @brief  Elliptic Curve point representation
 */
 typedef struct EcPoint{
-    uint8_t     X[ECC_POINT_MAX_SIZE];
-    /*!<
-        The X-coordinate of the ec point.
-    */
-    uint8_t     Y[ECC_POINT_MAX_SIZE];
-    /*!<
-        The Y-coordinate of the ec point.
-    */
+    union {
+        uint8_t XY[2*ECC_POINT_MAX_SIZE];
+        /*!<
+            Concatenation of X and Y coordinates of the ec point.
+        */
+        struct {
+            uint8_t X[ECC_POINT_MAX_SIZE];
+            /*!<
+                The X-coordinate of the ec point.
+            */
+            uint8_t Y[ECC_POINT_MAX_SIZE];
+            /*!<
+                The Y-coordinate of the ec point.
+            */
+        };
+    };
     uint16_t    u16Size;
     /*!<
         Point size in bytes (for each of the coordinates).
@@ -158,44 +168,139 @@ typedef struct{
     tstrECDomainParam   strParam;
 }tstrEllipticCurve;
 
+/*!
+@enum \
+    tenuEccREQ
 
+@brief  ECC operations that may be requested by WINC.
+
+    These are passed in the u16REQ field of @ref tstrEccReqInfo, which is used in both the request
+    from the WINC and the response to the WINC.
+*/
 typedef enum{
     ECC_REQ_NONE,
+    /*!< */
     ECC_REQ_CLIENT_ECDH,
+    /*!<
+        Derive the shared secret from ECDHE key exchange as client.
+    */
     ECC_REQ_SERVER_ECDH,
+    /*!<
+        Derive the shared secret from ECDHE key exchange as server.
+    */
     ECC_REQ_GEN_KEY,
+    /*!<
+        Generate a key pair to be used in ECDHE key exchange as server.
+    */
     ECC_REQ_SIGN_GEN,
+    /*!<
+        Generate the signature for a given curve and value. The value needs to be retrieved via
+        @ref m2m_ssl_retrieve_hash.
+    */
     ECC_REQ_SIGN_VERIFY
+    /*!<
+        Verify a list of signatures. Each set of value/signature/key/curve information needs to be
+        retrieved via @ref m2m_ssl_retrieve_next_for_verifying.
+    */
 }tenuEccREQ;
 
+/*!
+@struct \
+    tstrEcdhReqInfo
 
+@brief  Information relating to operations of type @ref ECC_REQ_CLIENT_ECDH, @ref ECC_REQ_GEN_KEY
+        and @ref ECC_REQ_SERVER_ECDH.
+*/
 typedef struct{
     tstrECPoint strPubKey;
+    /*!<
+        Public key. Usage depends on type of operation.
+    */
     uint8_t     au8Key[ECC_POINT_MAX_SIZE];
+    /*!<
+        Pre master secret generated during operations of type @ref ECC_REQ_CLIENT_ECDH and
+        @ref ECC_REQ_SERVER_ECDH.
+    */
 }tstrEcdhReqInfo;
 
+/*!
+@struct \
+    tstrEcdsaVerifyReqInfo
 
+@brief  Information relating to requests of type @ref ECC_REQ_SIGN_VERIFY.
+*/
 typedef struct{
     uint32_t    u32nSig;
+    /*!<
+        Number of sets of value/signature/key/curve information for verifying. Each set needs to be
+        retrieved via @ref m2m_ssl_retrieve_next_for_verifying.
+    */
 }tstrEcdsaVerifyReqInfo;
 
+/*!
+@struct \
+    tstrEcdsaSignReqInfo
 
+@brief  Information relating to requests of type @ref ECC_REQ_SIGN_GEN.
+*/
 typedef struct{
     uint16_t    u16CurveType;
+    /*!<
+        The named curve to be used for signing, to be cast to type @ref tenuEcNamedCurve.
+    */
     uint16_t    u16HashSz;
+    /*!<
+        The size of the value to be signed. The value needs to be retrieved via
+        @ref m2m_ssl_retrieve_hash.
+    */
 }tstrEcdsaSignReqInfo;
 
+/*!
+@struct \
+    tstrEccReqInfo
 
+@brief  Information relating to ECC operations.
+
+    This is used in both the request from the WINC and the response to the WINC.
+*/
 typedef struct{
     uint16_t    u16REQ;
+    /*!<
+        The requested ECC operation, to be cast to type @ref tenuEccREQ.
+    */
     uint16_t    u16Status;
+    /*!<
+        The status of the operation: zero for success; non-zero for failure.
+        This field should be used in responses and ignored in requests.
+    */
     uint32_t    u32UserData;
+    /*!<
+        This value is used internally. The value set in the response must match the value received
+        in the request.
+    */
     uint32_t    u32SeqNo;
+    /*!<
+        This value is used internally. The value set in the response must match the value received
+        in the request.
+    */
     union{
         tstrEcdhReqInfo         strEcdhREQ;
+        /*!<
+            Information relating to an operation of type @ref ECC_REQ_CLIENT_ECDH,
+            @ref ECC_REQ_GEN_KEY or @ref ECC_REQ_SERVER_ECDH.
+        */
         tstrEcdsaSignReqInfo    strEcdsaSignREQ;
+        /*!<
+            Information relating to an operation of type @ref ECC_REQ_SIGN_GEN.
+            This field is used in requests and ignored in responses.
+        */
         tstrEcdsaVerifyReqInfo  strEcdsaVerifyREQ;
+        /*!<
+            Information relating to an operation of type @ref ECC_REQ_SIGN_VERIFY.
+            This field is used in requests and ignored in responses.
+        */
     };
 }tstrEccReqInfo;
+/**@}*/     //SSLEnums
 
 #endif /* __ECC_TYPES_H__ */

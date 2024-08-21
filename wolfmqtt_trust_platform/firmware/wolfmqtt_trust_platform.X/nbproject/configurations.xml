@@ -9,6 +9,9 @@
       </logicalFolder>
       <logicalFolder name="f1" displayName="config" projectFiles="true">
         <logicalFolder name="f1" displayName="samd21_trust" projectFiles="true">
+          <logicalFolder name="crypto" displayName="crypto" projectFiles="true">
+            <itemPath>../src/config/samd21_trust/crypto/crypto.h</itemPath>
+          </logicalFolder>
           <logicalFolder name="f4" displayName="driver" projectFiles="true">
             <logicalFolder name="f2" displayName="spi" projectFiles="true">
               <itemPath>../src/config/samd21_trust/driver/spi/drv_spi.h</itemPath>
@@ -72,6 +75,7 @@
                 <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_sta.h</itemPath>
                 <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_systime.h</itemPath>
                 <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_wps.h</itemPath>
+                <itemPath>../src/config/samd21_trust/driver/winc/include/wdrv_winc_enterprise.h</itemPath>
               </logicalFolder>
             </logicalFolder>
             <itemPath>../src/config/samd21_trust/driver/driver.h</itemPath>
@@ -79,6 +83,26 @@
           </logicalFolder>
           <logicalFolder name="f2" displayName="library" projectFiles="true">
             <logicalFolder name="f1" displayName="cryptoauthlib" projectFiles="true">
+              <logicalFolder name="atcacert" displayName="atcacert" projectFiles="true">
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atcacert/atcacert_check_config.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="calib" displayName="calib" projectFiles="true">
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_config_check.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_device.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="crypto" displayName="crypto" projectFiles="true">
+                <logicalFolder name="hashes" displayName="hashes" projectFiles="true">
+                </logicalFolder>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/crypto_sw_config_check.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/crypto_hw_config_check.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="hal" displayName="hal" projectFiles="true">
+              </logicalFolder>
+              <logicalFolder name="host" displayName="host" projectFiles="true">
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/host/atca_host_config_check.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="jwt" displayName="jwt" projectFiles="true">
+              </logicalFolder>
               <logicalFolder name="f1" displayName="tng" projectFiles="true">
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tngtls_cert_def_2_device.h</itemPath>
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tngtls_cert_def_3_device.h</itemPath>
@@ -91,13 +115,36 @@
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tnglora_cert_def_4_device.h</itemPath>
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/tng/tng_root_cert.h</itemPath>
               </logicalFolder>
+              <logicalFolder name="wolfssl" displayName="wolfssl" projectFiles="true">
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/wolfssl/atca_wolfssl_internal.h</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/wolfssl/atca_wolfssl_interface.h</itemPath>
+              </logicalFolder>
               <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_config.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/cal_internal.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_platform.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_config_check.h</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/cal_buffer.h</itemPath>
+            </logicalFolder>
+          </logicalFolder>
+          <logicalFolder name="net_pres" displayName="net_pres" projectFiles="true">
+            <logicalFolder name="pres" displayName="pres" projectFiles="true">
+              <logicalFolder name="src" displayName="src" projectFiles="true">
+                <itemPath>../src/config/samd21_trust/net_pres/pres/src/net_pres_local.h</itemPath>
+              </logicalFolder>
+              <itemPath>../src/config/samd21_trust/net_pres/pres/net_pres_socketapiconversion.h</itemPath>
+              <itemPath>../src/config/samd21_trust/net_pres/pres/net_pres.h</itemPath>
+              <itemPath>../src/config/samd21_trust/net_pres/pres/net_pres_certstore.h</itemPath>
+              <itemPath>../src/config/samd21_trust/net_pres/pres/net_pres_transportapi.h</itemPath>
+              <itemPath>../src/config/samd21_trust/net_pres/pres/net_pres_socketapi.h</itemPath>
+              <itemPath>../src/config/samd21_trust/net_pres/pres/net_pres_encryptionproviderapi.h</itemPath>
+              <itemPath>../src/config/samd21_trust/net_pres/pres/net_pres_enc_glue.h</itemPath>
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f5" displayName="osal" projectFiles="true">
             <itemPath>../src/config/samd21_trust/osal/osal.h</itemPath>
             <itemPath>../src/config/samd21_trust/osal/osal_definitions.h</itemPath>
             <itemPath>../src/config/samd21_trust/osal/osal_impl_basic.h</itemPath>
+            <itemPath>../src/config/samd21_trust/osal/osal_freertos.h</itemPath>
           </logicalFolder>
           <logicalFolder name="f1" displayName="peripheral" projectFiles="true">
             <logicalFolder name="f7" displayName="clock" projectFiles="true">
@@ -178,6 +225,37 @@
           <itemPath>../src/config/samd21_trust/user_settings.h</itemPath>
           <itemPath>../src/config/samd21_trust/interrupts.h</itemPath>
           <itemPath>../src/config/samd21_trust/device_vectors.h</itemPath>
+          <itemPath>../src/config/samd21_trust/FreeRTOSConfig.h</itemPath>
+          <itemPath>../src/config/samd21_trust/sys_tasks.h</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="FreeRTOS" displayName="FreeRTOS" projectFiles="true">
+        <logicalFolder name="Source" displayName="Source" projectFiles="true">
+          <logicalFolder name="include" displayName="include" projectFiles="true">
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/croutine.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/stream_buffer.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/event_groups.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/timers.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/semphr.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/deprecated_definitions.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/queue.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/stack_macros.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/projdefs.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/mpu_wrappers.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/FreeRTOS.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/portable.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/message_buffer.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/task.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/mpu_prototypes.h</itemPath>
+            <itemPath>../src/third_party/rtos/FreeRTOS/Source/include/list.h</itemPath>
+          </logicalFolder>
+          <logicalFolder name="portable" displayName="portable" projectFiles="true">
+            <logicalFolder name="GCC" displayName="GCC" projectFiles="true">
+              <logicalFolder name="ARM_CM0" displayName="ARM_CM0" projectFiles="true">
+                <itemPath>../src/third_party/rtos/FreeRTOS/Source/portable/GCC/ARM_CM0/portmacro.h</itemPath>
+              </logicalFolder>
+            </logicalFolder>
+          </logicalFolder>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f5" displayName="packs" projectFiles="true">
@@ -206,6 +284,7 @@
             <itemPath>../src/packs/ATSAMD21E18A_DFP/component/nvmctrl.h</itemPath>
             <itemPath>../src/packs/ATSAMD21E18A_DFP/component/tcc.h</itemPath>
             <itemPath>../src/packs/ATSAMD21E18A_DFP/component/wdt.h</itemPath>
+            <itemPath>../src/packs/ATSAMD21E18A_DFP/component/fuses.h</itemPath>
           </logicalFolder>
           <logicalFolder name="f3" displayName="instance" projectFiles="true">
             <itemPath>../src/packs/ATSAMD21E18A_DFP/instance/tc6.h</itemPath>
@@ -244,6 +323,7 @@
             <itemPath>../src/packs/ATSAMD21E18A_DFP/instance/tcc2.h</itemPath>
             <itemPath>../src/packs/ATSAMD21E18A_DFP/instance/sercom3.h</itemPath>
             <itemPath>../src/packs/ATSAMD21E18A_DFP/instance/wdt.h</itemPath>
+            <itemPath>../src/packs/ATSAMD21E18A_DFP/instance/fuses.h</itemPath>
           </logicalFolder>
           <logicalFolder name="f2" displayName="pio" projectFiles="true">
             <itemPath>../src/packs/ATSAMD21E18A_DFP/pio/samd21e18a.h</itemPath>
@@ -267,6 +347,11 @@
               </logicalFolder>
             </logicalFolder>
           </logicalFolder>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="system" displayName="system" projectFiles="true">
+        <logicalFolder name="tmr" displayName="tmr" projectFiles="true">
+          <itemPath>../src/config/samd21_trust/system/tmr/sys_tmr.h</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f2" displayName="third_party" projectFiles="true">
@@ -418,6 +503,26 @@
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/sha256.h</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/sha512.h</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/wc_port.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/wc_kyber.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/sakke.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/ext_kyber.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/wc_lms.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/dilithium.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/ext_lms.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/eccsi.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/xmss.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/falcon.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/wc_xmss.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/sphincs.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/siphash.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/sm2.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/lms.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/ext_xmss.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/hpke.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/kdf.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/sm4.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/sm3.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/kyber.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f4" displayName="wolfssl" projectFiles="true">
         <itemPath>../src/third_party/wolfssl/wolfssl/options.h</itemPath>
@@ -433,9 +538,50 @@
         <itemPath>../src/third_party/wolfssl/wolfssl/ocsp.h</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/sniffer_error.h</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/error-ssl.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/quic.h</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/openssl/compat_types.h</itemPath>
       </logicalFolder>
       <itemPath>../src/app_mqtt_task.h</itemPath>
       <itemPath>../src/app.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="true">
+      <logicalFolder name="f2" displayName="samd21_trust.mhc" projectFiles="true">
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/HarmonyCore.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/drvWifiWinc.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/drv_spi.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/core.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/cmsis.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/tc3.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/lib_wolfmqtt.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/project.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/lib_wolfcrypt.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/lib_wolfssl.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/GraphSettings.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/dfp.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/stdio.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/cryptoauthlib.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/sys_time.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/rtc.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/atecc608.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/evsys.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/nvmctrl.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/cryptoauthlib_tng.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/sercom2.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/sercom3.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/settings.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/sercom1.yml</itemPath>
+        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/eic.yml</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="wolfcrypt" projectFiles="true">
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/misc.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/evp.c</itemPath>
+      </logicalFolder>
+      <itemPath>Makefile</itemPath>
+      <itemPath>../src/config/samd21_trust/harmony-manifest-success.yml</itemPath>
+      <itemPath>../src/config/samd21_trust/harmony-manifest-failure.yml</itemPath>
+      <itemPath>wolfmqtt_trust_platform.mc3</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -454,6 +600,9 @@
       </logicalFolder>
       <logicalFolder name="f1" displayName="config" projectFiles="true">
         <logicalFolder name="f1" displayName="samd21_trust" projectFiles="true">
+          <logicalFolder name="crypto" displayName="crypto" projectFiles="true">
+            <itemPath>../src/config/samd21_trust/crypto/src/crypto.c</itemPath>
+          </logicalFolder>
           <logicalFolder name="f4" displayName="driver" projectFiles="true">
             <logicalFolder name="f1" displayName="spi" projectFiles="true">
               <itemPath>../src/config/samd21_trust/driver/spi/src/drv_spi.c</itemPath>
@@ -513,6 +662,7 @@
               <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_sta.c</itemPath>
               <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_systime.c</itemPath>
               <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_wps.c</itemPath>
+              <itemPath>../src/config/samd21_trust/driver/winc/wdrv_winc_enterprise.c</itemPath>
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f2" displayName="library" projectFiles="true">
@@ -567,6 +717,7 @@
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_aes.c</itemPath>
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_basic.h</itemPath>
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_helpers.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/calib/calib_delete.c</itemPath>
               </logicalFolder>
               <logicalFolder name="f3" displayName="crypto" projectFiles="true">
                 <logicalFolder name="f1" displayName="hashes" projectFiles="true">
@@ -591,6 +742,8 @@
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_pbkdf2.c</itemPath>
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_hw_aes_ccm.c</itemPath>
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_hw_aes_cbcmac.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_pad.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/crypto/atca_crypto_sw_aes_gcm.c</itemPath>
               </logicalFolder>
               <logicalFolder name="f2" displayName="hal" projectFiles="true">
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/ATECC608_0.c</itemPath>
@@ -601,6 +754,8 @@
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/hal_i2c_harmony.c</itemPath>
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/hal_harmony_init.c</itemPath>
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/hal_cortex_m_delay.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/hal_freertos.c</itemPath>
+                <itemPath>../src/config/samd21_trust/library/cryptoauthlib/hal/hal_gpio_harmony.c</itemPath>
               </logicalFolder>
               <logicalFolder name="f7" displayName="host" projectFiles="true">
                 <itemPath>../src/config/samd21_trust/library/cryptoauthlib/host/atca_host.c</itemPath>
@@ -644,7 +799,20 @@
               <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_device.c</itemPath>
               <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_version.h</itemPath>
               <itemPath>../src/config/samd21_trust/library/cryptoauthlib/atca_utils_sizes.c</itemPath>
+              <itemPath>../src/config/samd21_trust/library/cryptoauthlib/cal_buffer.c</itemPath>
             </logicalFolder>
+          </logicalFolder>
+          <logicalFolder name="net_pres" displayName="net_pres" projectFiles="true">
+            <logicalFolder name="pres" displayName="pres" projectFiles="true">
+              <logicalFolder name="src" displayName="src" projectFiles="true">
+                <itemPath>../src/config/samd21_trust/net_pres/pres/src/net_pres.c</itemPath>
+              </logicalFolder>
+              <itemPath>../src/config/samd21_trust/net_pres/pres/net_pres_enc_glue.c</itemPath>
+              <itemPath>../src/config/samd21_trust/net_pres/pres/net_pres_cert_store.c</itemPath>
+            </logicalFolder>
+          </logicalFolder>
+          <logicalFolder name="osal" displayName="osal" projectFiles="true">
+            <itemPath>../src/config/samd21_trust/osal/osal_freertos.c</itemPath>
           </logicalFolder>
           <logicalFolder name="f1" displayName="peripheral" projectFiles="true">
             <logicalFolder name="f7" displayName="clock" projectFiles="true">
@@ -707,6 +875,28 @@
           <itemPath>../src/config/samd21_trust/exceptions.c</itemPath>
           <itemPath>../src/config/samd21_trust/startup_xc32.c</itemPath>
           <itemPath>../src/config/samd21_trust/libc_syscalls.c</itemPath>
+          <itemPath>../src/config/samd21_trust/freertos_hooks.c</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="FreeRTOS" displayName="FreeRTOS" projectFiles="true">
+        <logicalFolder name="Source" displayName="Source" projectFiles="true">
+          <logicalFolder name="portable" displayName="portable" projectFiles="true">
+            <logicalFolder name="GCC" displayName="GCC" projectFiles="true">
+              <logicalFolder name="ARM_CM0" displayName="ARM_CM0" projectFiles="true">
+                <itemPath>../src/third_party/rtos/FreeRTOS/Source/portable/GCC/ARM_CM0/port.c</itemPath>
+              </logicalFolder>
+            </logicalFolder>
+            <logicalFolder name="MemMang" displayName="MemMang" projectFiles="true">
+              <itemPath>../src/third_party/rtos/FreeRTOS/Source/portable/MemMang/heap_1.c</itemPath>
+            </logicalFolder>
+          </logicalFolder>
+          <itemPath>../src/third_party/rtos/FreeRTOS/Source/event_groups.c</itemPath>
+          <itemPath>../src/third_party/rtos/FreeRTOS/Source/timers.c</itemPath>
+          <itemPath>../src/third_party/rtos/FreeRTOS/Source/croutine.c</itemPath>
+          <itemPath>../src/third_party/rtos/FreeRTOS/Source/list.c</itemPath>
+          <itemPath>../src/third_party/rtos/FreeRTOS/Source/queue.c</itemPath>
+          <itemPath>../src/third_party/rtos/FreeRTOS/Source/stream_buffer.c</itemPath>
+          <itemPath>../src/third_party/rtos/FreeRTOS/Source/FreeRTOS_tasks.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f2" displayName="third_party" projectFiles="true">
@@ -813,6 +1003,31 @@
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sha.c</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sha256.c</itemPath>
         <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sha512.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sakke.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sp_sm2_x86_64.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/wc_lms.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/falcon.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/kdf.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sp_sm2_arm64.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sp_sm2_arm32.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sm4.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/dilithium.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/hpke.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sm3.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/ext_xmss.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/wc_lms_impl.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sm2.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/eccsi.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sp_sm2_c64.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/wc_kyber.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sp_sm2_cortexm.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sp_sm2_c32.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sphincs.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/ext_lms.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/wc_xmss_impl.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/ext_kyber.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/siphash.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/sp_sm2_armthumb.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f4" displayName="wolfssl" projectFiles="true">
         <itemPath>../src/third_party/wolfssl/src/crl.c</itemPath>
@@ -824,48 +1039,23 @@
         <itemPath>../src/third_party/wolfssl/src/tls13.c</itemPath>
         <itemPath>../src/third_party/wolfssl/src/wolfio.c</itemPath>
         <itemPath>../src/third_party/wolfssl/src/internal.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/ssl_asn1.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/pk.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/ssl_bn.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/x509.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/dtls13.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/ssl_certman.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/dtls.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/x509_str.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/ssl_misc.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/quic.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/ssl_crypto.c</itemPath>
+        <itemPath>../src/third_party/wolfssl/src/conf.c</itemPath>
       </logicalFolder>
       <itemPath>../src/app_mqtt_task.c</itemPath>
       <itemPath>../src/app.c</itemPath>
       <itemPath>../src/main.c</itemPath>
-    </logicalFolder>
-    <logicalFolder name="ExternalFiles"
-                   displayName="Important Files"
-                   projectFiles="false">
-      <logicalFolder name="f2" displayName="samd21_trust.mhc" projectFiles="true">
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/HarmonyCore.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/drvWifiWinc.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/drv_spi.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/core.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/cmsis.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/tc3.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/lib_wolfmqtt.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/project.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/lib_wolfcrypt.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/lib_wolfssl.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/GraphSettings.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/dfp.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/stdio.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/cryptoauthlib.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/sys_time.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/rtc.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/atecc608.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/evsys.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/nvmctrl.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/cryptoauthlib_tng.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/sercom2.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/sercom3.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/settings.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/sercom1.yml</itemPath>
-        <itemPath>../src/config/samd21_trust/samd21_trust.mhc/eic.yml</itemPath>
-      </logicalFolder>
-      <logicalFolder name="f1" displayName="wolfcrypt" projectFiles="true">
-        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/misc.c</itemPath>
-        <itemPath>../src/third_party/wolfssl/wolfssl/wolfcrypt/src/evp.c</itemPath>
-      </logicalFolder>
-      <itemPath>Makefile</itemPath>
-      <itemPath>../src/config/samd21_trust/harmony-manifest-success.yml</itemPath>
-      <itemPath>../src/config/samd21_trust/harmony-manifest-failure.yml</itemPath>
+      <itemPath>../src/config/samd21_trust/pin_configurations.csv</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
@@ -943,13 +1133,14 @@
       <C32>
         <property key="additional-warnings" value="true"/>
         <property key="addresss-attribute-use" value="false"/>
+        <property key="appendMe" value=""/>
         <property key="enable-app-io" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../../../common;../src;../src/common;../src/common/paho_mqtt_embedded_c;../src/common/paho_mqtt_embedded_c/MQTTClient-C;../src/common/paho_mqtt_embedded_c/MQTTPacket;../src/common/paho_mqtt_embedded_c/platform;../src/common/parson_json;../src/common/utilities;../src/config/samd21_trust;../src/config/samd21_trust/driver/winc/include/;../src/config/samd21_trust/driver/winc/include/dev;../src/config/samd21_trust/driver/winc/include/drv/bsp;../src/config/samd21_trust/driver/winc/include/drv/bsp/include;../src/config/samd21_trust/driver/winc/include/drv/common;../src/config/samd21_trust/driver/winc/include/drv/driver;../src/config/samd21_trust/driver/winc/include/drv/socket;../src/config/samd21_trust/driver/winc/include/drv/spi_flash;../src/config/samd21_trust/library/cryptoauthlib;../src/config/samd21_trust/library/cryptoauthlib/crypto;../src/config/samd21_trust/library/cryptoauthlib/pkcs11;../src/config/samd21_trust/library/cryptoauthlib/tng;../src/config/samd21_trust/third_party_adapter/wolfMQTT/src/;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/;../src/packs/CMSIS/CMSIS/Core/Include;../src/third_party/wolfmqtt;../src/third_party/wolfssl;../src/third_party/wolfssl/wolfssl"/>
+                  value="../../../common;../src;../src/common;../src/common/paho_mqtt_embedded_c;../src/common/paho_mqtt_embedded_c/MQTTClient-C;../src/common/paho_mqtt_embedded_c/MQTTPacket;../src/common/paho_mqtt_embedded_c/platform;../src/common/parson_json;../src/common/utilities;../src/config/samd21_trust;../src/config/samd21_trust/driver/winc/include/;../src/config/samd21_trust/driver/winc/include/dev;../src/config/samd21_trust/driver/winc/include/drv/bsp;../src/config/samd21_trust/driver/winc/include/drv/bsp/include;../src/config/samd21_trust/driver/winc/include/drv/common;../src/config/samd21_trust/driver/winc/include/drv/driver;../src/config/samd21_trust/driver/winc/include/drv/socket;../src/config/samd21_trust/driver/winc/include/drv/spi_flash;../src/config/samd21_trust/library/cryptoauthlib;../src/config/samd21_trust/library/cryptoauthlib/crypto;../src/config/samd21_trust/library/cryptoauthlib/pkcs11;../src/config/samd21_trust/library/cryptoauthlib/tng;../src/config/samd21_trust/third_party_adapter/wolfMQTT/src/;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/;../src/packs/CMSIS/CMSIS/Core/Include;../src/third_party/rtos/FreeRTOS/Source/include;../src/third_party/rtos/FreeRTOS/Source/portable/GCC/ARM_CM0;../src/third_party/wolfMQTT;../src/third_party/wolfmqtt;../src/third_party/wolfssl;../src/third_party/wolfssl/wolfssl"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="true"/>
@@ -1000,6 +1191,7 @@
         <property key="additional-options-use-response-files" value="false"/>
         <property key="additional-options-write-sla" value="false"/>
         <property key="allocate-dinit" value="false"/>
+        <property key="appendMe" value=""/>
         <property key="code-dinit" value="false"/>
         <property key="ebase-addr" value=""/>
         <property key="enable-check-sections" value="false"/>
@@ -1039,6 +1231,7 @@
       <C32CPP>
         <property key="additional-warnings" value="false"/>
         <property key="addresss-attribute-use" value="false"/>
+        <property key="appendMe" value=""/>
         <property key="check-new" value="false"/>
         <property key="eh-specs" value="true"/>
         <property key="enable-app-io" value="false"/>
@@ -1048,7 +1241,7 @@
         <property key="exceptions" value="true"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src;../src/config/samd21_trust;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/;../src/packs/CMSIS/CMSIS/Core/Include"/>
+                  value="../src;../src/config/samd21_trust;../src/packs/ATSAMD21E18A_DFP;../src/packs/CMSIS/;../src/packs/CMSIS/CMSIS/Core/Include;../src/third_party/rtos/FreeRTOS/Source/include;../src/third_party/rtos/FreeRTOS/Source/portable/GCC/ARM_CM0"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="true"/>
