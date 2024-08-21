@@ -33,6 +33,7 @@
 #ifndef SHA256_DIGEST_SIZE
 #define SHA256_DIGEST_SIZE (32)
 #endif
+
 #ifndef SHA256_BLOCK_SIZE
 #define SHA256_BLOCK_SIZE  (64)
 #endif

@@ -34,6 +34,12 @@
 
 #include "cryptoauthlib.h"
 
+#if CALIB_SIGN_EN
+
+#if (CA_MAX_PACKET_SIZE < (ATCA_SIG_SIZE + ATCA_PACKET_OVERHEAD))
+#error "Sign response packet cannot be accommodated inside the maximum packet size provided"
+#endif
+
 /** \brief Executes the Sign command, which generates a signature using the
  *          ECDSA algorithm.
  *
@@ -50,7 +56,7 @@
 ATCA_STATUS calib_sign_base(ATCADevice device, uint8_t mode, uint16_t key_id, uint8_t *signature)
 {
     ATCAPacket packet;
-    ATCA_STATUS status = ATCA_GEN_FAIL;
+    ATCA_STATUS status;
 
     if ((device == NULL) || (signature == NULL))
     {
@@ -59,35 +65,34 @@ ATCA_STATUS calib_sign_base(ATCADevice device, uint8_t mode, uint16_t key_id, ui
 
     do
     {
+        (void)memset(&packet, 0x00, sizeof(ATCAPacket));
+
         // Build sign command
         packet.param1 = mode;
         packet.param2 = key_id;
         if ((status = atSign(atcab_get_device_type_ext(device), &packet)) != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "atSign - failed");
+            (void)ATCA_TRACE(status, "atSign - failed");
             break;
         }
 
         if ((status = atca_execute_command(&packet, device)) != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "calib_sign_base - execution failed");
+            (void)ATCA_TRACE(status, "calib_sign_base - execution failed");
             break;
         }
 
-        if (signature != NULL)
-        {
-            if (packet.data[ATCA_COUNT_IDX] == (ATCA_SIG_SIZE + ATCA_PACKET_OVERHEAD))
-            {
-                memcpy(signature, &packet.data[ATCA_RSP_DATA_IDX], ATCA_SIG_SIZE);
-            }
-            else
-            {
-                status = ATCA_RX_FAIL;
-            }
 
+        if (packet.data[ATCA_COUNT_IDX] == (ATCA_SIG_SIZE + ATCA_PACKET_OVERHEAD))
+        {
+            (void)memcpy(signature, &packet.data[ATCA_RSP_DATA_IDX], ATCA_SIG_SIZE);
         }
-    }
-    while (0);
+        else
+        {
+            status = ATCA_RX_FAIL;
+        }
+
+    } while (false);
 
     return status;
 }
@@ -110,19 +115,21 @@ ATCA_STATUS calib_sign_base(ATCADevice device, uint8_t mode, uint16_t key_id, ui
  */
 ATCA_STATUS calib_sign(ATCADevice device, uint16_t key_id, const uint8_t *msg, uint8_t *signature)
 {
-    ATCA_STATUS status = ATCA_GEN_FAIL;
+    ATCA_STATUS status;
     uint8_t nonce_target = NONCE_MODE_TARGET_TEMPKEY;
     uint8_t sign_source = SIGN_MODE_SOURCE_TEMPKEY;
 
     do
     {
+#if CALIB_RANDOM_EN
         // Make sure RNG has updated its seed
         if ((status = calib_random(device, NULL)) != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "calib_random - failed");
+            (void)ATCA_TRACE(status, "calib_random - failed");
             break;
         }
-
+#endif
+#ifdef ATCA_ATECC608_SUPPORT
         // Load message into device
         if (ATECC608 == device->mIface.mIfaceCFG->devtype)
         {
@@ -130,24 +137,59 @@ ATCA_STATUS calib_sign(ATCADevice device, uint16_t key_id, const uint8_t *msg, u
             nonce_target = NONCE_MODE_TARGET_MSGDIGBUF;
             sign_source = SIGN_MODE_SOURCE_MSGDIGBUF;
         }
+#endif
         if ((status = calib_nonce_load(device, nonce_target, msg, 32)) != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "calib_nonce_load - failed");
+            (void)ATCA_TRACE(status, "calib_nonce_load - failed");
             break;
         }
 
         // Sign the message
         if ((status = calib_sign_base(device, SIGN_MODE_EXTERNAL | sign_source, key_id, signature)) != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "calib_sign_base - failed");
+            (void)ATCA_TRACE(status, "calib_sign_base - failed");
             break;
         }
-    }
-    while (0);
+    } while (false);
 
     return status;
 }
+#endif
 
+#if CALIB_SIGN_EN || CALIB_SIGN_CA2_EN
+ATCA_STATUS calib_sign_ext(ATCADevice device, uint16_t key_id, const uint8_t *msg, uint8_t *signature)
+{
+    ATCADeviceType devtype = atcab_get_device_type_ext(device);
+    ATCA_STATUS status;
+
+    switch (devtype)
+    {
+#if CALIB_SIGN_EN
+    case ATECC108A:
+    /* fall-through */
+    case ATECC508A:
+    /* fall-through */
+    case ATECC608:
+        status = calib_sign(device, key_id, msg, signature);
+        break;
+#endif
+
+#if CALIB_SIGN_CA2_EN
+    case ECC204:
+    /* fallthrough */
+    case TA010:
+        status = calib_ca2_sign(device, key_id, msg, signature);
+        break;
+#endif
+    default:
+        status = ATCA_UNIMPLEMENTED;
+        break;
+    }
+    return status;
+}
+#endif
+
+#if CALIB_SIGN_INTERNAL_EN
 /** \brief Executes Sign command to sign an internally generated message.
  *
  *  \param[in]  device         Device context pointer
@@ -166,7 +208,7 @@ ATCA_STATUS calib_sign(ATCADevice device, uint16_t key_id, const uint8_t *msg, u
  */
 ATCA_STATUS calib_sign_internal(ATCADevice device, uint16_t key_id, bool is_invalidate, bool is_full_sn, uint8_t *signature)
 {
-    ATCA_STATUS status = ATCA_GEN_FAIL;
+    ATCA_STATUS status;
     uint8_t mode = SIGN_MODE_INTERNAL;
 
     do
@@ -184,16 +226,17 @@ ATCA_STATUS calib_sign_internal(ATCADevice device, uint16_t key_id, bool is_inva
 
         if ((status = calib_sign_base(device, mode, key_id, signature)) != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "calib_sign_base - failed");
+            (void)ATCA_TRACE(status, "calib_sign_base - failed");
             break;
         }
 
-    }
-    while (0);
+    } while (false);
 
     return status;
 }
+#endif /* CALIB_SIGN_MODE_ENCODING */
 
+#if CALIB_SIGN_CA2_EN
 /** \brief Execute sign command to sign the 32 bytes message digest using private key
  *         mentioned in slot.
  *
@@ -206,10 +249,12 @@ ATCA_STATUS calib_sign_internal(ATCADevice device, uint16_t key_id, bool is_inva
  *
  *  \return ATCA_SUCCESS on success, otherwise an error code
  */
-ATCA_STATUS calib_ecc204_sign(ATCADevice device, uint16_t key_id, const uint8_t* msg, uint8_t* signature)
+ATCA_STATUS calib_ca2_sign(ATCADevice device, uint16_t key_id, const uint8_t* msg, uint8_t* signature)
 {
     ATCA_STATUS status = ATCA_SUCCESS;
     ATCAPacket packet;
+
+    (void)memset(&packet, 0x00, sizeof(ATCAPacket));
 
     packet.param1 = 0x00;
     packet.param2 = key_id;
@@ -222,23 +267,23 @@ ATCA_STATUS calib_ecc204_sign(ATCADevice device, uint16_t key_id, const uint8_t*
     if (ATCA_SUCCESS == status)
     {
         // copy message digest into i/o buffer
-        memcpy(packet.data, msg, ATCA_SHA256_DIGEST_SIZE);
+        (void)memcpy(packet.data, msg, ATCA_SHA256_DIGEST_SIZE);
 
         (void)atSign(atcab_get_device_type_ext(device), &packet);
 
         if (ATCA_SUCCESS != (status = atca_execute_command(&packet, device)))
         {
-            ATCA_TRACE(status, "calib_ecc204_sign - execution failed");
+            (void)ATCA_TRACE(status, "calib_ca2_sign - execution failed");
         }
     }
 
     if (ATCA_SUCCESS == status)
     {
-        if (NULL == signature)
+        if (signature != NULL)
         {
             if (packet.data[ATCA_COUNT_IDX] == (ATCA_SIG_SIZE + ATCA_PACKET_OVERHEAD))
             {
-                memcpy(signature, &packet.data[ATCA_RSP_DATA_IDX], ATCA_SIG_SIZE);
+                (void)memcpy(signature, &packet.data[ATCA_RSP_DATA_IDX], ATCA_SIG_SIZE);
             }
             else
             {
@@ -250,3 +295,4 @@ ATCA_STATUS calib_ecc204_sign(ATCADevice device, uint16_t key_id, const uint8_t*
 
     return status;
 }
+#endif

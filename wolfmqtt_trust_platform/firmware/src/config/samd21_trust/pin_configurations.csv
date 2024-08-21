@@ -1,0 +1,27 @@
+Pin Number,Pin ID,Custom Name,Function,Mode, Direction,Latch,Pull Up,Pull Down,Drive Strength
+1,PA00,,Available,,,,,,NORMAL
+2,PA01,,Available,,,,,,NORMAL
+3,PA02,STATUS_LED,GPIO,Digital,In/Out,Low,,,NORMAL
+4,PA03,WDRV_WINC_RESETN,GPIO,Digital,Out,Low,,,NORMAL
+5,PA04,,Available,,,,,,NORMAL
+6,PA05,,EIC_EXTINT5,Digital,High Impedance,n/a,Yes,No,NORMAL
+7,PA06,,SERCOM0_PAD2,Digital,High Impedance,n/a,No,No,NORMAL
+8,PA07,,SERCOM0_PAD3,Digital,High Impedance,n/a,No,No,NORMAL
+11,PA08,,SERCOM2_PAD0,Digital,High Impedance,n/a,No,No,NORMAL
+12,PA09,,SERCOM2_PAD1,Digital,High Impedance,n/a,No,No,NORMAL
+13,PA10,WDRV_WINC_CHIP_EN,GPIO,Digital,Out,Low,,,NORMAL
+14,PA11,,Available,,,,,,NORMAL
+15,PA14,,Available,,,,,,NORMAL
+16,PA15,,Available,,,,,,NORMAL
+17,PA16,,SERCOM1_PAD0,Digital,High Impedance,n/a,No,No,NORMAL
+18,PA17,,SERCOM1_PAD1,Digital,High Impedance,n/a,No,No,NORMAL
+19,PA18,,SERCOM1_PAD2,Digital,High Impedance,n/a,No,No,NORMAL
+20,PA19,,SERCOM1_PAD3,Digital,Out,High,,,NORMAL
+21,PA22,,SERCOM3_PAD0,Digital,High Impedance,n/a,No,No,NORMAL
+22,PA23,,SERCOM3_PAD1,Digital,High Impedance,n/a,No,No,NORMAL
+23,PA24,,Available,,,,,,NORMAL
+24,PA25,,Available,,,,,,NORMAL
+25,PA27,,Available,,,,,,NORMAL
+27,PA28,,Available,,,,,,NORMAL
+31,PA30,,Available,,,,,,NORMAL
+32,PA31,,Available,,,,,,NORMAL

@@ -33,6 +33,12 @@
 
 #include "cryptoauthlib.h"
 
+#if CALIB_SELFTEST_EN
+
+#if (CA_MAX_PACKET_SIZE < ATCA_CMD_SIZE_MIN)
+#error "Selftest command packet cannot be accommodated inside the maximum packet size provided"
+#endif
+
 /** \brief Executes the SelfTest command, which performs a test of one or more
  *          of the cryptographic engines within the ATECC608 chip.
  *
@@ -50,7 +56,7 @@
 ATCA_STATUS calib_selftest(ATCADevice device, uint8_t mode, uint16_t param2, uint8_t* result)
 {
     ATCAPacket packet;
-    ATCA_STATUS status = ATCA_GEN_FAIL;
+    ATCA_STATUS status;
     uint8_t response = 0;
 
     do
@@ -61,13 +67,15 @@ ATCA_STATUS calib_selftest(ATCADevice device, uint8_t mode, uint16_t param2, uin
             break;
         }
 
+        (void)memset(&packet, 0x00, sizeof(ATCAPacket));
+
         // build a SelfTest command
         packet.param1 = mode;
         packet.param2 = param2;
 
         if ((status = atSelfTest(atcab_get_device_type_ext(device), &packet)) != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "atSelfTest - failed");
+            (void)ATCA_TRACE(status, "atSelfTest - failed");
             break;
         }
 
@@ -79,19 +87,19 @@ ATCA_STATUS calib_selftest(ATCADevice device, uint8_t mode, uint16_t param2, uin
 
         response = packet.data[ATCA_RSP_DATA_IDX];
 
-        if (response & !mode)
+        if ((response & (mode == 0u ? 1u : 0u)) != 0u)
         {
             // The response has bits set outside of the bit field requested by
             // the mode. This indicates an actual error rather than a self test
             // failure.
-            return status; // Return the translated status.
+            return status;  // Return the translated status.
         }
         else
         {
             // Here, we have the possibility of ambiguous results, where some
             // error codes can't be differentiated from self test failures.
             // We assume self-test failures.
-            if (result)
+            if (NULL != result)
             {
                 *result = response;
             }
@@ -100,8 +108,8 @@ ATCA_STATUS calib_selftest(ATCADevice device, uint8_t mode, uint16_t param2, uin
             // the results are returned in result.
             return ATCA_SUCCESS;
         }
-    }
-    while (0);
+    } while (false);
 
     return status;
 }
+#endif /* CALIB_SELFTEST_EN */

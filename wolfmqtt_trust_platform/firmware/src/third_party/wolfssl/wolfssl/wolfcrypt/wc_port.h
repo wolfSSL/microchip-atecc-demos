@@ -201,7 +201,7 @@
 #else /* ! WOLFSSL_LINUXKM */
 
     #ifndef SAVE_VECTOR_REGISTERS
-        #define SAVE_VECTOR_REGISTERS() do{}while(0)
+        #define SAVE_VECTOR_REGISTERS(...) do{}while(0)
     #endif
     #ifndef RESTORE_VECTOR_REGISTERS
         #define RESTORE_VECTOR_REGISTERS() do{}while(0)
@@ -417,6 +417,111 @@
         #error Need a mutex type in multithreaded mode
     #endif /* USE_WINDOWS_API */
 #endif /* SINGLE_THREADED */
+#ifdef WOLFSSL_MUTEX_INITIALIZER
+    #define WOLFSSL_MUTEX_INITIALIZER_CLAUSE(lockname) = WOLFSSL_MUTEX_INITIALIZER(lockname)
+#else
+    #define WOLFSSL_MUTEX_INITIALIZER_CLAUSE(lockname) /* null expansion */
+#endif
+
+#if !defined(WOLFSSL_USE_RWLOCK) || defined(SINGLE_THREADED)
+    typedef wolfSSL_Mutex wolfSSL_RwLock;
+#endif
+
+#ifndef WOLFSSL_NO_ATOMICS
+#ifdef HAVE_C___ATOMIC
+#ifdef __cplusplus
+#if defined(__GNUC__) && defined(__ATOMIC_RELAXED)
+    /* C++ using direct calls to compiler built-in functions */
+    typedef volatile int wolfSSL_Atomic_Int;
+    #define WOLFSSL_ATOMIC_OPS
+#endif
+#else
+    #ifdef WOLFSSL_HAVE_ATOMIC_H
+    /* Default C Implementation */
+    #include <stdatomic.h>
+    typedef atomic_int wolfSSL_Atomic_Int;
+    #define WOLFSSL_ATOMIC_OPS
+    #endif /* WOLFSSL_HAVE_ATOMIC_H */
+#endif
+#elif defined(_MSC_VER)
+    /* Use MSVC compiler intrinsics for atomic ops */
+    #include <intrin.h>
+    typedef volatile long wolfSSL_Atomic_Int;
+    #define WOLFSSL_ATOMIC_OPS
+#endif
+#endif /* WOLFSSL_NO_ATOMICS */
+
+#ifdef WOLFSSL_ATOMIC_OPS
+    WOLFSSL_LOCAL void wolfSSL_Atomic_Int_Init(wolfSSL_Atomic_Int* c, int i);
+    /* Fetch* functions return the value of the counter immediately preceding
+     * the effects of the function. */
+    WOLFSSL_LOCAL int wolfSSL_Atomic_Int_FetchAdd(wolfSSL_Atomic_Int* c, int i);
+    WOLFSSL_LOCAL int wolfSSL_Atomic_Int_FetchSub(wolfSSL_Atomic_Int* c, int i);
+#endif
+
+/* Reference counting. */
+typedef struct wolfSSL_Ref {
+#if !defined(SINGLE_THREADED) && !defined(WOLFSSL_ATOMIC_OPS)
+    wolfSSL_Mutex mutex;
+#endif
+#ifdef WOLFSSL_ATOMIC_OPS
+    wolfSSL_Atomic_Int count;
+#else
+    int count;
+#endif
+} wolfSSL_Ref;
+
+#ifdef SINGLE_THREADED
+
+#define wolfSSL_RefInit(ref, err)            \
+    do {                                     \
+        (ref)->count = 1;                    \
+        *(err) = 0;                          \
+    } while(0)
+#define wolfSSL_RefFree(ref) WC_DO_NOTHING
+    #define wolfSSL_RefInc(ref, err)         \
+    do {                                     \
+        (ref)->count++;                      \
+        *(err) = 0;                          \
+    } while(0)
+#define wolfSSL_RefDec(ref, isZero, err)     \
+    do {                                     \
+        (ref)->count--;                      \
+        *(isZero) = ((ref)->count == 0);     \
+        *(err) = 0;                          \
+    } while(0)
+
+#elif defined(WOLFSSL_ATOMIC_OPS)
+
+#define wolfSSL_RefInit(ref, err)            \
+    do {                                     \
+        wolfSSL_Atomic_Int_Init(&(ref)->count, 1); \
+        *(err) = 0;                          \
+    } while(0)
+#define wolfSSL_RefFree(ref) WC_DO_NOTHING
+#define wolfSSL_RefInc(ref, err)             \
+    do {                                     \
+        (void)wolfSSL_Atomic_Int_FetchAdd(&(ref)->count, 1); \
+        *(err) = 0;                          \
+    } while(0)
+#define wolfSSL_RefDec(ref, isZero, err)     \
+    do {                                     \
+        int __prev = wolfSSL_Atomic_Int_FetchSub(&(ref)->count, 1); \
+        /* __prev holds the value of count before subtracting 1 */ \
+        *(isZero) = (__prev == 1);     \
+        *(err) = 0;                          \
+    } while(0)
+
+#else
+
+#define WOLFSSL_REFCNT_ERROR_RETURN
+
+WOLFSSL_LOCAL void wolfSSL_RefInit(wolfSSL_Ref* ref, int* err);
+WOLFSSL_LOCAL void wolfSSL_RefFree(wolfSSL_Ref* ref);
+WOLFSSL_LOCAL void wolfSSL_RefInc(wolfSSL_Ref* ref, int* err);
+WOLFSSL_LOCAL void wolfSSL_RefDec(wolfSSL_Ref* ref, int* isZero, int* err);
+
+#endif
 
 /* Enable crypt HW mutex for Freescale MMCAU, PIC32MZ or STM32 */
 #if defined(FREESCALE_MMCAU) || defined(WOLFSSL_MICROCHIP_PIC32MZ) || \
@@ -815,7 +920,9 @@ WOLFSSL_API int wolfCrypt_Cleanup(void);
 #elif defined(MICROCHIP_TCPIP_V5) || defined(MICROCHIP_TCPIP)
     #include <time.h>
     extern time_t pic32_time(time_t* timer);
+  	#ifndef XTIME
     #define XTIME(t1)       pic32_time((t1))
+    #endif
     #define XGMTIME(c, t)   gmtime((c))
 
 #elif defined(FREESCALE_MQX) || defined(FREESCALE_KSDK_MQX)

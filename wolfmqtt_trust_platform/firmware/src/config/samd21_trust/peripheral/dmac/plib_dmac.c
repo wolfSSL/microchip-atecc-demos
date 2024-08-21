@@ -53,7 +53,7 @@
 // *****************************************************************************
 // *****************************************************************************
 
-#define DMAC_CHANNELS_NUMBER        4U
+#define DMAC_CHANNELS_NUMBER        2U
 
 #define DMAC_CRC_CHANNEL_OFFSET     0x20U
 
@@ -61,7 +61,6 @@
 typedef struct
 {
     uint8_t                inUse;
-
     DMAC_CHANNEL_CALLBACK  callback;
 
     uintptr_t              context;
@@ -71,13 +70,13 @@ typedef struct
 } DMAC_CH_OBJECT ;
 
 /* Initial write back memory section for DMAC */
- static  dmac_descriptor_registers_t _write_back_section[DMAC_CHANNELS_NUMBER]    __ALIGNED(8);
+ static  dmac_descriptor_registers_t write_back_section[DMAC_CHANNELS_NUMBER]    __ALIGNED(8);
 
 /* Descriptor section for DMAC */
  static  dmac_descriptor_registers_t  descriptor_section[DMAC_CHANNELS_NUMBER]    __ALIGNED(8);
 
 /* DMAC Channels object information structure */
-static DMAC_CH_OBJECT dmacChannelObj[DMAC_CHANNELS_NUMBER];
+volatile static DMAC_CH_OBJECT dmacChannelObj[DMAC_CHANNELS_NUMBER];
 
 // *****************************************************************************
 // *****************************************************************************
@@ -91,7 +90,7 @@ This function initializes the DMAC controller of the device.
 
 void DMAC_Initialize( void )
 {
-    DMAC_CH_OBJECT *dmacChObj = (DMAC_CH_OBJECT *)&dmacChannelObj[0];
+    volatile DMAC_CH_OBJECT *dmacChObj = &dmacChannelObj[0];
     uint16_t channel = 0U;
 
     /* Initialize DMAC Channel objects */
@@ -108,7 +107,7 @@ void DMAC_Initialize( void )
 
     /* Update the Base address and Write Back address register */
     DMAC_REGS->DMAC_BASEADDR = (uint32_t) descriptor_section;
-    DMAC_REGS->DMAC_WRBADDR  = (uint32_t)_write_back_section;
+    DMAC_REGS->DMAC_WRBADDR  = (uint32_t) write_back_section;
 
     /* Update the Priority Control register */
     DMAC_REGS->DMAC_PRICTRL0 = DMAC_PRICTRL0_LVLPRI0(1UL) | DMAC_PRICTRL0_RRLVLEN0_Msk | DMAC_PRICTRL0_LVLPRI1(1UL) | DMAC_PRICTRL0_RRLVLEN1_Msk | DMAC_PRICTRL0_LVLPRI2(1UL) | DMAC_PRICTRL0_RRLVLEN2_Msk | DMAC_PRICTRL0_LVLPRI3(1UL) | DMAC_PRICTRL0_RRLVLEN3_Msk;
@@ -122,7 +121,6 @@ void DMAC_Initialize( void )
     descriptor_section[0].DMAC_BTCTRL = (uint16_t)(DMAC_BTCTRL_BLOCKACT_INT | DMAC_BTCTRL_BEATSIZE_BYTE | DMAC_BTCTRL_VALID_Msk | DMAC_BTCTRL_SRCINC_Msk );
 
     dmacChannelObj[0].inUse = 1U;
-
     DMAC_REGS->DMAC_CHINTENSET = (uint8_t)(DMAC_CHINTENSET_TERR_Msk | DMAC_CHINTENSET_TCMPL_Msk);
 
     /***************** Configure DMA channel 1 ********************/
@@ -134,31 +132,6 @@ void DMAC_Initialize( void )
     descriptor_section[1].DMAC_BTCTRL = (uint16_t)(DMAC_BTCTRL_BLOCKACT_INT | DMAC_BTCTRL_BEATSIZE_BYTE | DMAC_BTCTRL_VALID_Msk | DMAC_BTCTRL_DSTINC_Msk );
 
     dmacChannelObj[1].inUse = 1U;
-
-    DMAC_REGS->DMAC_CHINTENSET = (uint8_t)(DMAC_CHINTENSET_TERR_Msk | DMAC_CHINTENSET_TCMPL_Msk);
-
-    /***************** Configure DMA channel 2 ********************/
-
-    DMAC_REGS->DMAC_CHID = 2U;
-
-    DMAC_REGS->DMAC_CHCTRLB = DMAC_CHCTRLB_TRIGACT(2UL) | DMAC_CHCTRLB_TRIGSRC(4UL) | DMAC_CHCTRLB_LVL(0UL) ;
-
-    descriptor_section[2].DMAC_BTCTRL = (uint16_t)(DMAC_BTCTRL_BLOCKACT_INT | DMAC_BTCTRL_BEATSIZE_BYTE | DMAC_BTCTRL_VALID_Msk | DMAC_BTCTRL_SRCINC_Msk );
-
-    dmacChannelObj[2].inUse = 1U;
-
-    DMAC_REGS->DMAC_CHINTENSET = (uint8_t)(DMAC_CHINTENSET_TERR_Msk | DMAC_CHINTENSET_TCMPL_Msk);
-
-    /***************** Configure DMA channel 3 ********************/
-
-    DMAC_REGS->DMAC_CHID = 3U;
-
-    DMAC_REGS->DMAC_CHCTRLB = DMAC_CHCTRLB_TRIGACT(2UL) | DMAC_CHCTRLB_TRIGSRC(3UL) | DMAC_CHCTRLB_LVL(0UL) ;
-
-    descriptor_section[3].DMAC_BTCTRL = (uint16_t)(DMAC_BTCTRL_BLOCKACT_INT | DMAC_BTCTRL_BEATSIZE_BYTE | DMAC_BTCTRL_VALID_Msk | DMAC_BTCTRL_DSTINC_Msk );
-
-    dmacChannelObj[3].inUse = 1U;
-
     DMAC_REGS->DMAC_CHINTENSET = (uint8_t)(DMAC_CHINTENSET_TERR_Msk | DMAC_CHINTENSET_TCMPL_Msk);
 
     /* Enable the DMAC module & Priority Level x Enable */
@@ -175,32 +148,44 @@ bool DMAC_ChannelTransfer( DMAC_CHANNEL channel, const void *srcAddr, const void
     uint8_t channelId = 0U;
     bool returnStatus = false;
     bool triggerCondition = false;
+    const uint32_t* pu32srcAddr = (const uint32_t*)srcAddr;
+    const uint32_t* pu32dstAddr = (const uint32_t*)destAddr;
+    bool busyStatus = dmacChannelObj[channel].busyStatus;
 
-    if (dmacChannelObj[channel].busyStatus == false)
+    /* Save channel ID */
+    channelId = DMAC_REGS->DMAC_CHID;
+
+    /* Set the DMA channel */
+    DMAC_REGS->DMAC_CHID = (uint8_t)channel;
+
+    if (((DMAC_REGS->DMAC_CHINTFLAG & (DMAC_CHINTENCLR_TCMPL_Msk | DMAC_CHINTENCLR_TERR_Msk)) != 0U) || (busyStatus == false))
     {
-        /* Get a pointer to the module hardware instance */
-        dmac_descriptor_registers_t *const dmacDescReg = &descriptor_section[channel];
+        /* Clear the transfer complete flag */
+        DMAC_REGS->DMAC_CHINTFLAG = DMAC_CHINTENCLR_TCMPL_Msk | DMAC_CHINTENCLR_TERR_Msk;
 
         dmacChannelObj[channel].busyStatus = true;
+
+        /* Get a pointer to the module hardware instance */
+        dmac_descriptor_registers_t *const dmacDescReg = &descriptor_section[channel];
 
         /* Set source address */
         if ((dmacDescReg->DMAC_BTCTRL & DMAC_BTCTRL_SRCINC_Msk) == DMAC_BTCTRL_SRCINC_Msk)
         {
-            dmacDescReg->DMAC_SRCADDR = (uint32_t) ((uintptr_t)srcAddr + blockSize);
+            dmacDescReg->DMAC_SRCADDR = ((uintptr_t)pu32srcAddr + blockSize);
         }
         else
         {
-            dmacDescReg->DMAC_SRCADDR = (uint32_t) (srcAddr);
+            dmacDescReg->DMAC_SRCADDR = (uintptr_t)(pu32srcAddr);
         }
 
         /* Set destination address */
         if ((dmacDescReg->DMAC_BTCTRL & DMAC_BTCTRL_DSTINC_Msk) == DMAC_BTCTRL_DSTINC_Msk)
         {
-            dmacDescReg->DMAC_DSTADDR = (uint32_t) ((uintptr_t)destAddr + blockSize);
+            dmacDescReg->DMAC_DSTADDR = ((uintptr_t)pu32dstAddr + blockSize);
         }
         else
         {
-            dmacDescReg->DMAC_DSTADDR = (uint32_t) (destAddr);
+            dmacDescReg->DMAC_DSTADDR = (uintptr_t)(pu32dstAddr);
         }
 
         /* Calculate the beat size and then set the BTCNT value */
@@ -208,12 +193,6 @@ bool DMAC_ChannelTransfer( DMAC_CHANNEL channel, const void *srcAddr, const void
 
         /* Set Block Transfer Count */
         dmacDescReg->DMAC_BTCNT = (uint16_t)(blockSize / (1UL << beat_size));
-
-        /* Save channel ID */
-        channelId = DMAC_REGS->DMAC_CHID;
-
-        /* Set the DMA channel */
-        DMAC_REGS->DMAC_CHID = (uint8_t)channel;
 
         /* Enable the channel */
         DMAC_REGS->DMAC_CHCTRLA |= (uint8_t)DMAC_CHCTRLA_ENABLE_Msk;
@@ -227,11 +206,11 @@ bool DMAC_ChannelTransfer( DMAC_CHANNEL channel, const void *srcAddr, const void
             DMAC_REGS->DMAC_SWTRIGCTRL |= (1UL << (uint32_t)channel);
         }
 
-        /* Restore channel ID */
-        DMAC_REGS->DMAC_CHID = channelId;
-
         returnStatus = true;
     }
+
+    /* Restore channel ID */
+    DMAC_REGS->DMAC_CHID = channelId;
 
     return returnStatus;
 }
@@ -242,8 +221,60 @@ bool DMAC_ChannelTransfer( DMAC_CHANNEL channel, const void *srcAddr, const void
 
 bool DMAC_ChannelIsBusy ( DMAC_CHANNEL channel )
 {
-    return (bool)dmacChannelObj[channel].busyStatus;
+    uint8_t channelId = 0U;
+    bool busyStatus = dmacChannelObj[channel].busyStatus;
+    bool isBusy = false;
+
+    /* Save channel ID */
+    channelId = (uint8_t)DMAC_REGS->DMAC_CHID;
+
+    /* Set the DMA channel */
+    DMAC_REGS->DMAC_CHID = (uint8_t)channel;
+
+    if (((DMAC_REGS->DMAC_CHINTFLAG & (DMAC_CHINTENCLR_TCMPL_Msk | DMAC_CHINTENCLR_TERR_Msk)) == 0U) && (busyStatus == true))
+    {
+        isBusy = true;
+    }
+
+    /* Restore channel ID */
+    DMAC_REGS->DMAC_CHID = channelId;
+
+    return isBusy;
 }
+
+DMAC_TRANSFER_EVENT DMAC_ChannelTransferStatusGet(DMAC_CHANNEL channel)
+{
+    uint32_t chanIntFlagStatus = 0;
+    uint8_t channelId = 0U;
+
+    DMAC_TRANSFER_EVENT event = DMAC_TRANSFER_EVENT_NONE;
+
+    /* Save channel ID */
+    channelId = (uint8_t)DMAC_REGS->DMAC_CHID;
+
+    /* Set the DMA channel */
+    DMAC_REGS->DMAC_CHID = (uint8_t)channel;
+
+    /* Get the DMAC channel interrupt status */
+    chanIntFlagStatus = DMAC_REGS->DMAC_CHINTFLAG;
+
+    if ((chanIntFlagStatus & DMAC_CHINTENCLR_TCMPL_Msk) != 0U)
+    {
+        event = DMAC_TRANSFER_EVENT_COMPLETE;
+    }
+
+    /* Verify if DMAC Channel Error flag is set */
+    if ((chanIntFlagStatus & DMAC_CHINTENCLR_TERR_Msk) != 0U)
+    {
+        event = DMAC_TRANSFER_EVENT_ERROR;
+    }
+
+    /* Restore channel ID */
+    DMAC_REGS->DMAC_CHID = channelId;
+
+    return event;
+}
+
 
 /*******************************************************************************
     This function disables the specified DMAC channel.
@@ -276,10 +307,44 @@ void DMAC_ChannelDisable ( DMAC_CHANNEL channel )
 uint16_t DMAC_ChannelGetTransferredCount( DMAC_CHANNEL channel )
 {
     uint16_t transferredCount = descriptor_section[channel].DMAC_BTCNT;
-    transferredCount -= _write_back_section[channel].DMAC_BTCNT;
+    transferredCount -= write_back_section[channel].DMAC_BTCNT;
     return(transferredCount);
 }
 
+
+void DMAC_ChannelSuspend ( DMAC_CHANNEL channel )
+{
+    uint8_t channelId = 0;
+
+    /* Save channel ID */
+    channelId = (uint8_t)DMAC_REGS->DMAC_CHID;
+
+    /* Set the DMA Channel ID */
+    DMAC_REGS->DMAC_CHID = (uint8_t)channel;
+
+    /* Suspend the DMA channel */
+    DMAC_REGS->DMAC_CHCTRLB = (DMAC_REGS->DMAC_CHCTRLB & ~DMAC_CHCTRLB_CMD_Msk) | DMAC_CHCTRLB_CMD_SUSPEND;
+
+    /* Restore channel ID */
+    DMAC_REGS->DMAC_CHID = channelId;
+}
+
+void DMAC_ChannelResume ( DMAC_CHANNEL channel )
+{
+    uint8_t channelId = 0;
+
+    /* Save channel ID */
+    channelId = (uint8_t)DMAC_REGS->DMAC_CHID;
+
+    /* Set the DMA Channel ID */
+    DMAC_REGS->DMAC_CHID = (uint8_t)channel;
+
+    /* Suspend the DMA channel */
+    DMAC_REGS->DMAC_CHCTRLB = (DMAC_REGS->DMAC_CHCTRLB & ~DMAC_CHCTRLB_CMD_Msk) | DMAC_CHCTRLB_CMD_RESUME;
+
+    /* Restore channel ID */
+    DMAC_REGS->DMAC_CHID = channelId;
+}
 
 /*******************************************************************************
     This function function allows a DMAC PLIB client to set an event handler.
@@ -446,7 +511,7 @@ uint32_t DMAC_CRCCalculate(void *buffer, uint32_t length, DMAC_CRC_SETUP CRCSetu
         }
 
         /* Clear the busy bit */
-        DMAC_REGS->DMAC_CRCSTATUS = (uint8_t)DMAC_CRCSTATUS_CRCBUSY_Msk; 
+        DMAC_REGS->DMAC_CRCSTATUS = (uint8_t)DMAC_CRCSTATUS_CRCBUSY_Msk;
     }
 
     /* Return the final CRC calculated for the entire buffer */
@@ -456,9 +521,9 @@ uint32_t DMAC_CRCCalculate(void *buffer, uint32_t length, DMAC_CRC_SETUP CRCSetu
 /*******************************************************************************
     This function handles the DMA interrupt events.
 */
-void DMAC_InterruptHandler( void )
+void __attribute__((used)) DMAC_InterruptHandler( void )
 {
-    DMAC_CH_OBJECT  *dmacChObj = NULL;
+    volatile DMAC_CH_OBJECT  *dmacChObj;
     uint8_t channel = 0U;
     uint8_t channelId = 0U;
     volatile uint32_t chanIntFlagStatus = 0U;
@@ -467,7 +532,7 @@ void DMAC_InterruptHandler( void )
     /* Get active channel number */
     channel = (uint8_t)((uint32_t)DMAC_REGS->DMAC_INTPEND & DMAC_INTPEND_ID_Msk);
 
-    dmacChObj = (DMAC_CH_OBJECT *)&dmacChannelObj[channel];
+    dmacChObj = &dmacChannelObj[channel];
 
     /* Save channel ID */
     channelId = (uint8_t)DMAC_REGS->DMAC_CHID;
@@ -503,7 +568,9 @@ void DMAC_InterruptHandler( void )
     /* Execute the callback function */
     if (dmacChObj->callback != NULL)
     {
-        dmacChObj->callback (event, dmacChObj->context);
+        uintptr_t context = dmacChObj->context;
+
+        dmacChObj->callback (event, context);
     }
 
     /* Restore channel ID */

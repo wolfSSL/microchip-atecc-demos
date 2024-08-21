@@ -1,6 +1,6 @@
 /* coding.c
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2023 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -45,7 +45,7 @@ enum {
     BAD         = 0xFF,  /* invalid encoding */
     PAD         = '=',
     BASE64_MIN  = 0x2B,
-    BASE16_MIN  = 0x30,
+    BASE16_MIN  = 0x30
 };
 
 
@@ -100,11 +100,11 @@ static WC_INLINE byte Base64_Char2Val(byte c)
     byte mask;
 
     c -= BASE64_MIN;
-    mask = (((byte)(0x3f - c)) >> 7) - 1;
+    mask = (byte)((((byte)(0x3f - c)) >> 7) - 1);
     /* Load a value from the first cache line and use when mask set. */
-    v  = base64Decode[ c & 0x3f        ] &   mask ;
+    v  = (byte)(base64Decode[ c & 0x3f        ] &   mask);
     /* Load a value from the second cache line and use when mask not set. */
-    v |= base64Decode[(c & 0x0f) | 0x40] & (~mask);
+    v |= (byte)(base64Decode[(c & 0x0f) | 0x40] & (~mask));
 
     return v;
 #else
@@ -113,26 +113,44 @@ static WC_INLINE byte Base64_Char2Val(byte c)
 }
 #endif
 
-static WC_INLINE int Base64_SkipNewline(const byte* in, word32 *inLen, word32 *outJ)
+int Base64_SkipNewline(const byte* in, word32 *inLen,
+  word32 *outJ)
 {
     word32 len = *inLen;
     word32 j = *outJ;
-    if (len && (in[j] == ' ' || in[j] == '\r' || in[j] == '\n')) {
-        byte endLine = in[j++];
+    byte curChar;
+
+    if (len == 0) {
+        return BUFFER_E;
+    }
+    curChar = in[j];
+
+    while (len > 1 && curChar == ' ') {
+        /* skip whitespace in the middle or end of line */
+        curChar = in[++j];
         len--;
-        while (len && endLine == ' ') {   /* allow trailing whitespace */
-            endLine = in[j++];
-            len--;
-        }
-        if (endLine == '\r') {
+    }
+    if (len && (curChar == '\r' || curChar == '\n')) {
+        j++;
+        len--;
+        if (curChar == '\r') {
             if (len) {
-                endLine = in[j++];
+                curChar = in[j++];
                 len--;
             }
         }
-        if (endLine != '\n') {
+        if (curChar != '\n') {
             WOLFSSL_MSG("Bad end of line in Base64 Decode");
             return ASN_INPUT_E;
+        }
+
+        if (len) {
+            curChar = in[j];
+        }
+    }
+    while (len && curChar == ' ') {
+        if (--len > 0) {
+            curChar = in[++j];
         }
     }
     if (!len) {
@@ -218,8 +236,8 @@ int Base64_Decode(const byte* in, word32 inLen, byte* out, word32* outLen)
 
         e1 = Base64_Char2Val(e1);
         e2 = Base64_Char2Val(e2);
-        e3 = (e3 == PAD) ? 0 : Base64_Char2Val(e3);
-        e4 = (e4 == PAD) ? 0 : Base64_Char2Val(e4);
+        e3 = (byte)((e3 == PAD) ? 0 : Base64_Char2Val(e3));
+        e4 = (byte)((e4 == PAD) ? 0 : Base64_Char2Val(e4));
 
         if (e1 == BAD || e2 == BAD || e3 == BAD || e4 == BAD) {
             WOLFSSL_MSG("Bad Base64 Decode bad character");
@@ -540,17 +558,16 @@ int Base16_Encode(const byte* in, word32 inLen, byte* out, word32* outLen)
 {
     word32 outIdx = 0;
     word32 i;
-    byte   hb, lb;
 
     if (in == NULL || out == NULL || outLen == NULL)
         return BAD_FUNC_ARG;
 
-    if (*outLen < (2 * inLen + 1))
+    if (*outLen < (2 * inLen))
         return BAD_FUNC_ARG;
 
     for (i = 0; i < inLen; i++) {
-        hb = in[i] >> 4;
-        lb = in[i] & 0x0f;
+        byte hb = in[i] >> 4;
+        byte lb = in[i] & 0x0f;
 
         /* ASCII value */
         hb += '0';
@@ -566,8 +583,9 @@ int Base16_Encode(const byte* in, word32 inLen, byte* out, word32* outLen)
         out[outIdx++] = lb;
     }
 
-    /* force 0 at this end */
-    out[outIdx++] = 0;
+    /* If the output buffer has a room for an extra byte, add a null terminator */
+    if (*outLen > outIdx)
+        out[outIdx++]= '\0';
 
     *outLen = outIdx;
     return 0;

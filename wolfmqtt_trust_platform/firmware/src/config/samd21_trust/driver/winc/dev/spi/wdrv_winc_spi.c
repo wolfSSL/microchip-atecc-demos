@@ -12,250 +12,211 @@
  *******************************************************************************/
 
 //DOM-IGNORE-BEGIN
-/*******************************************************************************
-* Copyright (C) 2019-20 Microchip Technology Inc. and its subsidiaries.
-*
-* Subject to your compliance with these terms, you may use Microchip software
-* and any derivatives exclusively with Microchip products. It is your
-* responsibility to comply with third party license terms applicable to your
-* use of third party software (including open source software) that may
-* accompany Microchip software.
-*
-* THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
-* EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
-* WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
-* PARTICULAR PURPOSE.
-*
-* IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
-* INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
-* WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
-* BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
-* FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
-* ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
-* THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
-*******************************************************************************/
+/*
+Copyright (C) 2019-22, Microchip Technology Inc., and its subsidiaries. All rights reserved.
+
+The software and documentation is provided by microchip and its contributors
+"as is" and any express, implied or statutory warranties, including, but not
+limited to, the implied warranties of merchantability, fitness for a particular
+purpose and non-infringement of third party intellectual property rights are
+disclaimed to the fullest extent permitted by law. In no event shall microchip
+or its contributors be liable for any direct, indirect, incidental, special,
+exemplary, or consequential damages (including, but not limited to, procurement
+of substitute goods or services; loss of use, data, or profits; or business
+interruption) however caused and on any theory of liability, whether in contract,
+strict liability, or tort (including negligence or otherwise) arising in any way
+out of the use of the software and documentation, even if advised of the
+possibility of such damage.
+
+Except as expressly permitted hereunder and subject to the applicable license terms
+for any third-party software incorporated in the software and any applicable open
+source software license terms, no license or other rights, whether express or
+implied, are granted under any patent or other intellectual property rights of
+Microchip or any third party.
+*/
 
 #include "configuration.h"
 #include "definitions.h"
 #include "osal/osal.h"
 #include "wdrv_winc_common.h"
+#include "wdrv_winc_spi.h"
 
-#if defined(USE_CACHE_MAINTENANCE)
-/* Cache Management to be enabled in core & system components of MHC Project Graph*/
-#include "system/cache/sys_cache.h"
-#include "sys/kmem.h"
-#endif /* defined(USE_CACHE_MAINTENANCE)*/
+// *****************************************************************************
+// *****************************************************************************
+// Section: Data Type Definitions
+// *****************************************************************************
+// *****************************************************************************
 
-#if defined(__PIC32MZ__) && defined(USE_CACHE_MAINTENANCE)
-#define WDRV_DCACHE_CLEAN(addr, size) _DataCacheClean(addr, size)
-#else /* !defined(__PIC32MZ__) */
-#define WDRV_DCACHE_CLEAN(addr, size) do { } while (0)
-#endif /* defined(__PIC32MZ__) */
-
-#ifdef DRV_SPI_DMA_MODE
-#define SPI_DMA_DCACHE_CLEAN(addr, size) WDRV_DCACHE_CLEAN(addr, size)
-#define SPI_DMA_MAX_TX_SIZE 1024
-#define SPI_DMA_MAX_RX_SIZE 1024
-#else /* (DRV_SPI_DMA_MODE != 0) */
-#define SPI_DMA_DCACHE_CLEAN(addr, size) do { } while (0)
-#endif /* (DRV_SPI_DMA != 0) */
-
-static DRV_HANDLE spiHandle = DRV_HANDLE_INVALID;
-static OSAL_SEM_HANDLE_TYPE txSyncSem;
-static OSAL_SEM_HANDLE_TYPE rxSyncSem;
-
-#if defined(__PIC32MZ__) && defined(USE_CACHE_MAINTENANCE)
-/****************************************************************************
- * Function:        _DataCacheClean
- * Summary: Used in Cache management to clean cache based on address.
- * Cache Management to be enabled in core & system components of MHC.
- *****************************************************************************/
-static void _DataCacheClean(unsigned char *address, uint32_t size)
+typedef struct
 {
-    if (IS_KVA0(address))
-    {
-        uint32_t a = (uint32_t)address & 0xfffffff0;
-        uint32_t r = (uint32_t)address & 0x0000000f;
-        uint32_t s = ((size + r + 15) >> 4) << 4;
+    /* This is the SPI configuration. */
+    WDRV_WINC_SPI_CFG       cfg;
+    OSAL_SEM_HANDLE_TYPE    txSyncSem;
+    OSAL_SEM_HANDLE_TYPE    rxSyncSem;
+} WDRV_WINC_SPIDCPT;
 
-        SYS_CACHE_CleanDCache_by_Addr((uint32_t *)a, s);
-    }
+// *****************************************************************************
+// *****************************************************************************
+// Section: Global Data
+// *****************************************************************************
+// *****************************************************************************
+
+static WDRV_WINC_SPIDCPT spiDcpt;
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: File scope functions
+// *****************************************************************************
+// *****************************************************************************
+
+static void _DRV_SPI_PlibCallbackHandler(uintptr_t contextHandle)
+{
+    OSAL_SEM_PostISR((OSAL_SEM_HANDLE_TYPE*)contextHandle);
 }
-#endif /* defined(__PIC32MZ__) && defined(USE_CACHE_MAINTENANCE)*/
 
-static DRV_SPI_TRANSFER_HANDLE transferTxHandle;
-static DRV_SPI_TRANSFER_HANDLE transferRxHandle;
+//*******************************************************************************
+/*
+  Function:
+    bool WDRV_WINC_SPISend(void* pTransmitData, size_t txSize)
 
-static bool _SPI_Tx(unsigned char *buf, uint32_t size)
+  Summary:
+    Sends data out to the module through the SPI bus.
+
+  Description:
+    This function sends data out to the module through the SPI bus.
+
+  Remarks:
+    See wdrv_winc_spi.h for usage information.
+ */
+
+bool WDRV_WINC_SPISend(void* pTransmitData, size_t txSize)
 {
-    SPI_DMA_DCACHE_CLEAN(buf, size);
-    DRV_SPI_WriteTransferAdd(spiHandle, buf, size, &transferTxHandle);
-
-    if(transferTxHandle == DRV_SPI_TRANSFER_HANDLE_INVALID)
+    if ((NULL == spiDcpt.cfg.callbackRegister) || (NULL == spiDcpt.cfg.writeRead))
     {
-        // Error handling here
         return false;
     }
 
-    while (OSAL_RESULT_FALSE == OSAL_SEM_Pend(&txSyncSem, OSAL_WAIT_FOREVER))
-    {
+    spiDcpt.cfg.callbackRegister(_DRV_SPI_PlibCallbackHandler, (uintptr_t)&spiDcpt.txSyncSem);
+    spiDcpt.cfg.writeRead(pTransmitData, txSize, NULL, 0);
 
+    while (OSAL_RESULT_FALSE == OSAL_SEM_Pend(&spiDcpt.txSyncSem, OSAL_WAIT_FOREVER))
+    {
     }
 
     return true;
 }
 
-static bool _SPI_Rx(unsigned char *const buf, uint32_t size)
+//*******************************************************************************
+/*
+  Function:
+    bool WDRV_WINC_SPIReceive(void* pReceiveData, size_t rxSize)
+
+  Summary:
+    Receives data from the module through the SPI bus.
+
+  Description:
+    This function receives data from the module through the SPI bus.
+
+  Remarks:
+    See wdrv_winc_spi.h for usage information.
+ */
+
+bool WDRV_WINC_SPIReceive(void* pReceiveData, size_t rxSize)
 {
     static uint8_t dummy = 0;
 
-    SPI_DMA_DCACHE_CLEAN(buf, size);
-
-    DRV_SPI_WriteReadTransferAdd(spiHandle, &dummy, 1, buf, size, &transferRxHandle);
-
-    if(transferRxHandle == DRV_SPI_TRANSFER_HANDLE_INVALID)
+    if ((NULL == spiDcpt.cfg.callbackRegister) || (NULL == spiDcpt.cfg.writeRead))
     {
-        // Error handling here
         return false;
     }
-    while (OSAL_RESULT_FALSE == OSAL_SEM_Pend(&rxSyncSem, OSAL_WAIT_FOREVER))
+
+    spiDcpt.cfg.callbackRegister(_DRV_SPI_PlibCallbackHandler, (uintptr_t)&spiDcpt.rxSyncSem);
+    spiDcpt.cfg.writeRead(&dummy, 1, pReceiveData, rxSize);
+
+    while (OSAL_RESULT_FALSE == OSAL_SEM_Pend(&spiDcpt.rxSyncSem, OSAL_WAIT_FOREVER))
     {
     }
 
     return true;
 }
 
-static void _WDRV_WINC_SPITransferEventHandler(DRV_SPI_TRANSFER_EVENT event,
-        DRV_SPI_TRANSFER_HANDLE handle, uintptr_t context)
+//*******************************************************************************
+/*
+  Function:
+    bool WDRV_WINC_SPIOpen(void)
+
+  Summary:
+    Opens the SPI object for the WiFi driver.
+
+  Description:
+    This function opens the SPI object for the WiFi driver.
+
+  Remarks:
+    See wdrv_winc_spi.h for usage information.
+ */
+
+bool WDRV_WINC_SPIOpen(void)
 {
-    // The context handle was set to an application specific
-    // object. It is now retrievable easily in the event handler.
-   // MY_APP_OBJ myAppObj = (MY_APP_OBJ *) context;
-
-    switch(event)
+    if (OSAL_RESULT_TRUE != OSAL_SEM_Create(&spiDcpt.txSyncSem, OSAL_SEM_TYPE_COUNTING, 10, 0))
     {
-        case DRV_SPI_TRANSFER_EVENT_COMPLETE:
-            // This means the data was transferred.
-            if (transferTxHandle == handle)
-            {
-                OSAL_SEM_PostISR(&txSyncSem);
-            }
-            else if (transferRxHandle == handle)
-            {
-                OSAL_SEM_PostISR(&rxSyncSem);
-            }
-
-            break;
-
-        case DRV_SPI_TRANSFER_EVENT_ERROR:
-            // Error handling here.
-            break;
-
-        default:
-            break;
+        return false;
     }
+
+    if (OSAL_RESULT_TRUE != OSAL_SEM_Create(&spiDcpt.rxSyncSem, OSAL_SEM_TYPE_COUNTING, 10, 0))
+    {
+        return false;
+    }
+
+    return true;
 }
 
-/****************************************************************************
- * Function:        WDRV_WINC_SPISend
- * Summary: Sends data out to the module through the SPI bus.
- *****************************************************************************/
-bool WDRV_WINC_SPISend(unsigned char *const buf, uint32_t size)
+//*******************************************************************************
+/*
+  Function:
+    void WDRV_WINC_SPIInitialize(const WDRV_WINC_SPI_CFG *const pInitData)
+
+  Summary:
+    Initializes the SPI object for the WiFi driver.
+
+  Description:
+    This function initializes the SPI object for the WiFi driver.
+
+  Remarks:
+    See wdrv_winc_spi.h for usage information.
+ */
+
+void WDRV_WINC_SPIInitialize(const WDRV_WINC_SPI_CFG *const pInitData)
 {
-    bool ret = true;
-    unsigned char *pData;
-
-    pData = buf;
-
-#ifdef DRV_SPI_DMA_MODE
-    while ((true == ret) && (size > SPI_DMA_MAX_TX_SIZE))
-    {
-        ret = _SPI_Tx(pData, SPI_DMA_MAX_TX_SIZE);
-        size -= SPI_DMA_MAX_TX_SIZE;
-        pData += SPI_DMA_MAX_TX_SIZE;
-    }
-#endif
-
-    if ((true == ret) && (size > 0))
-    {
-        ret = _SPI_Tx(pData, size);
-    }
-
-    return ret;
-}
-
-/****************************************************************************
- * Function:        WDRV_WINC_SPIReceive
- * Summary: Receives data from the module through the SPI bus.
- *****************************************************************************/
-bool WDRV_WINC_SPIReceive(unsigned char *const buf, uint32_t size)
-{
-    bool ret = true;
-    unsigned char *pData;
-
-    pData = buf;
-
-#ifdef DRV_SPI_DMA_MODE
-    while ((true == ret) && (size > SPI_DMA_MAX_RX_SIZE))
-    {
-        ret = _SPI_Rx(pData, SPI_DMA_MAX_RX_SIZE);
-        size -= SPI_DMA_MAX_RX_SIZE;
-        pData += SPI_DMA_MAX_RX_SIZE;
-    }
-#endif
-
-    if ((true == ret) && (size > 0))
-    {
-        ret = _SPI_Rx(pData, size);
-    }
-
-    return ret;
-}
-
-/****************************************************************************
- * Function:        WDRV_WINC_SPIInitialize
- * Summary: Initializes the SPI object for the WiFi driver.
- *****************************************************************************/
-void WDRV_WINC_SPIInitialize(void)
-{
-    if (OSAL_RESULT_TRUE != OSAL_SEM_Create(&txSyncSem, OSAL_SEM_TYPE_COUNTING, 10, 0))
+    if (NULL == pInitData)
     {
         return;
     }
 
-    if (OSAL_RESULT_TRUE != OSAL_SEM_Create(&rxSyncSem, OSAL_SEM_TYPE_COUNTING, 10, 0))
-    {
-        return;
-    }
-
-    if (DRV_HANDLE_INVALID == spiHandle)
-    {
-        spiHandle = DRV_SPI_Open(WDRV_WINC_SPI_INDEX, DRV_IO_INTENT_READWRITE | DRV_IO_INTENT_BLOCKING);
-
-        if (DRV_HANDLE_INVALID == spiHandle)
-        {
-            WDRV_DBG_ERROR_PRINT("SPI init failed\r\n");
-        }
-    }
-
-    DRV_SPI_TransferEventHandlerSet( spiHandle, _WDRV_WINC_SPITransferEventHandler, 0);
+    memcpy(&spiDcpt.cfg, pInitData, sizeof(WDRV_WINC_SPI_CFG));
 }
 
-/****************************************************************************
- * Function:        WDRV_WINC_SPIDenitialize
- * Summary: Deinitializes the SPI object for the WiFi driver.
- *****************************************************************************/
+//*******************************************************************************
+/*
+  Function:
+    void WDRV_WINC_SPIDeinitialize(void)
+
+  Summary:
+    Deinitializes the SPI object for the WiFi driver.
+
+  Description:
+    This function deinitializes the SPI object for the WiFi driver.
+
+  Remarks:
+    See wdrv_winc_spi.h for usage information.
+ */
+
 void WDRV_WINC_SPIDeinitialize(void)
 {
-    OSAL_SEM_Post(&txSyncSem);
-    OSAL_SEM_Delete(&txSyncSem);
+    OSAL_SEM_Post(&spiDcpt.txSyncSem);
+    OSAL_SEM_Delete(&spiDcpt.txSyncSem);
 
-    OSAL_SEM_Post(&rxSyncSem);
-    OSAL_SEM_Delete(&rxSyncSem);
-
-    DRV_SPI_Close(spiHandle);
-
-    spiHandle = DRV_HANDLE_INVALID;
+    OSAL_SEM_Post(&spiDcpt.rxSyncSem);
+    OSAL_SEM_Delete(&spiDcpt.rxSyncSem);
 }
 
 //DOM-IGNORE-END

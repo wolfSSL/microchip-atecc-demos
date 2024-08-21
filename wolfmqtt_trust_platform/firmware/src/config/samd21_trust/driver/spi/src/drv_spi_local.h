@@ -62,6 +62,8 @@
 
 #define DRV_SPI_INSTANCE_MASK                   (0x0000FF00)
 
+#define DRV_SPI_INSTANCES_NUMBER                    0
+
 #define DRV_SPI_TOKEN_MAX                       (0xFFFF)
 
 

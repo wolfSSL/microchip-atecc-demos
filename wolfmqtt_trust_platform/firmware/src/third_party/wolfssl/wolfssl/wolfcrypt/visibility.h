@@ -1,6 +1,6 @@
 /* visibility.h
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2023 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -25,17 +25,6 @@
 #ifndef WOLF_CRYPT_VISIBILITY_H
 #define WOLF_CRYPT_VISIBILITY_H
 
-
-/* for compatibility and so that fips is using same name of macro @wc_fips */
-/* The following visibility wrappers are for old FIPS. New FIPS should use
- * the same as a non-FIPS build. */
-#if defined(HAVE_FIPS) && \
-    (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-    #include <cyassl/ctaocrypt/visibility.h>
-    #define WOLFSSL_API   CYASSL_API
-	#define WOLFSSL_LOCAL CYASSL_LOCAL
-#else
-
 /* WOLFSSL_API is used for the public API symbols.
         It either imports or exports (or does nothing for static builds)
 
@@ -43,7 +32,8 @@
 */
 
 #if defined(BUILDING_WOLFSSL)
-    #if defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__)
+    #if defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__) || \
+        defined(_WIN32_WCE)
         #if defined(WOLFSSL_DLL)
             #define WOLFSSL_API __declspec(dllexport)
         #else
@@ -61,7 +51,8 @@
         #define WOLFSSL_LOCAL
     #endif /* HAVE_VISIBILITY */
 #else /* BUILDING_WOLFSSL */
-    #if defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__)
+    #if defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__) || \
+        defined(_WIN32_WCE)
         #if defined(WOLFSSL_DLL)
             #define WOLFSSL_API __declspec(dllimport)
         #else
@@ -74,6 +65,10 @@
     #endif
 #endif /* BUILDING_WOLFSSL */
 
-#endif /* HAVE_FIPS */
-#endif /* WOLF_CRYPT_VISIBILITY_H */
+/* WOLFSSL_ABI is used for public API symbols that must not change
+ * their signature. This tag is used for all APIs that are a
+ * part of the fixed ABI.
+ */
+#define WOLFSSL_ABI
 
+#endif /* WOLF_CRYPT_VISIBILITY_H */

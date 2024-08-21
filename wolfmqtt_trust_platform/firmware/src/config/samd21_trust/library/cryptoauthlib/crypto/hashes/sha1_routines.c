@@ -28,7 +28,9 @@
 #include "sha1_routines.h"
 #include <string.h>
 #include "atca_compiler.h"
+#include "cryptoauthlib.h"
 
+#if ATCA_CRYPTO_SHA1_EN
 /**
  * \brief Initialize context for performing SHA1 hash in software.
  *
@@ -45,8 +47,8 @@ void CL_hashInit(CL_HashContext *ctx)
     };
 
     // Initialize context
-    memset(ctx, 0, sizeof(*ctx));
-    memcpy_P(ctx->h, hashContext_h_init, sizeof(ctx->h));
+    (void)memset(ctx, 0, sizeof(*ctx));
+    (void)memcpy_P(ctx->h, hashContext_h_init, sizeof(ctx->h));
 }
 
 
@@ -87,12 +89,12 @@ void CL_hashUpdate(CL_HashContext *ctx, const U8 *src, int nbytes)
         // Copy src bytes to buf
         if (i == 64)
         {
-            memcpy(((U8*)ctx->buf), src, i);
+            (void)memcpy(((U8*)ctx->buf), src, i);
         }
         else
         {
             // Have to use memcpy, size is other than 64 bytes.
-            memcpy(((U8*)ctx->buf) + 64 - freeBytes, src, i);
+            (void)memcpy(((U8*)ctx->buf) + 64 - freeBytes, src, i);
         }
 
         // Adjust for transferred bytes
@@ -151,7 +153,7 @@ void CL_hashFinal(CL_HashContext *ctx, U8 *dest)
     if (nbytes > (64 - 9))
     {
         shaEngine(ctx->buf, ctx->h);
-        memset(ctx->buf, 0, 64);
+        (void)memset(ctx->buf, 0, 64);
     }
 
     /*
@@ -183,7 +185,7 @@ void CL_hashFinal(CL_HashContext *ctx, U8 *dest)
     for (i = 0; i < 5; i++)
     {
         temp = ATCA_UINT32_BE_TO_HOST(ctx->h[i]);
-        memcpy(dest, &temp, sizeof(temp));
+        (void)memcpy(dest, &temp, sizeof(temp));
         dest += sizeof(temp);
     }
 }
@@ -322,3 +324,4 @@ void shaEngine(U32 *buf, U32 *h)
     //}
 
 }
+#endif /* ATCA_CRYPTO_SHA1_EN */

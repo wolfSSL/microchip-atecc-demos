@@ -36,28 +36,28 @@
  *******************************************************************************/
 
 // DOM-IGNORE-BEGIN
-/*******************************************************************************
-* Copyright (C) 2019 Microchip Technology Inc. and its subsidiaries.
-*
-* Subject to your compliance with these terms, you may use Microchip software
-* and any derivatives exclusively with Microchip products. It is your
-* responsibility to comply with third party license terms applicable to your
-* use of third party software (including open source software) that may
-* accompany Microchip software.
-*
-* THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
-* EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
-* WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
-* PARTICULAR PURPOSE.
-*
-* IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
-* INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
-* WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
-* BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
-* FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
-* ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
-* THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
-*******************************************************************************/
+/*
+Copyright (C) 2019-22, Microchip Technology Inc., and its subsidiaries. All rights reserved.
+
+The software and documentation is provided by microchip and its contributors
+"as is" and any express, implied or statutory warranties, including, but not
+limited to, the implied warranties of merchantability, fitness for a particular
+purpose and non-infringement of third party intellectual property rights are
+disclaimed to the fullest extent permitted by law. In no event shall microchip
+or its contributors be liable for any direct, indirect, incidental, special,
+exemplary, or consequential damages (including, but not limited to, procurement
+of substitute goods or services; loss of use, data, or profits; or business
+interruption) however caused and on any theory of liability, whether in contract,
+strict liability, or tort (including negligence or otherwise) arising in any way
+out of the use of the software and documentation, even if advised of the
+possibility of such damage.
+
+Except as expressly permitted hereunder and subject to the applicable license terms
+for any third-party software incorporated in the software and any applicable open
+source software license terms, no license or other rights, whether express or
+implied, are granted under any patent or other intellectual property rights of
+Microchip or any third party.
+*/
 // DOM-IGNORE-END
 
 #ifndef _WDRV_WINC_H
@@ -87,10 +87,6 @@
 #ifdef WDRV_WINC_NETWORK_MODE_SOCKET
 #include "wdrv_winc_socket.h"
 #include "wdrv_winc_ssl.h"
-#else
-#ifdef WDRV_WINC_NETWORK_USE_HARMONY_TCPIP
-#include "tcpip/src/link_list.h"
-#endif
 #endif
 #ifdef WDRV_WINC_DEVICE_HOST_FILE_DOWNLOAD
 #include "wdrv_winc_host_file.h"
@@ -109,7 +105,41 @@
 // *****************************************************************************
 
 #define WDRV_WINC_NUM_ASSOCS    1
-        
+
+#ifdef WDRV_WINC_NETWORK_USE_HARMONY_TCPIP
+// *****************************************************************************
+/*  Protected Singly Linked List Packet Queue
+
+  Summary:
+    Defines the linked list packet queue.
+
+  Description:
+    This data type defines a linked list packet queue management structure.
+
+  Remarks:
+    None.
+*/
+
+typedef struct
+{
+    /* Reference to the head end of the linked list */
+    TCPIP_MAC_PACKET* pHead;
+
+    /* Reference to the tail end of the linked list */
+    TCPIP_MAC_PACKET* pTail;
+
+    /* Number of nodes in the list */
+    int nNodes;
+
+    /* Semaphore used to protect access to the linked list */
+    OSAL_SEM_HANDLE_TYPE semaphore;
+
+    /* Variable to indicate semaphore creation status */
+    bool semValid;
+} WDRV_WINC_PACKET_QUEUE;
+
+#endif
+
 // *****************************************************************************
 /*  Firmware Version Information
 
@@ -316,6 +346,12 @@ typedef struct
     /* Intent used to open driver. */
     DRV_IO_INTENT intent;
 
+    /* Extended system status which can be queried via WDRV_WINC_StatusExt. */
+    WDRV_WINC_SYS_STATUS extSysStat;
+
+    /* Interrupt source. */
+    int intSrc;
+
     /* Flag indicating if this instance is operating as s station or soft-AP. */
     bool isAP;
 
@@ -473,6 +509,9 @@ typedef struct
 #endif
     /* Semaphore for driver events. */
     OSAL_SEM_HANDLE_TYPE drvEventSemaphore;
+
+    /* Flag indicating if driver semaphores have been created. */
+    bool drvSemaphoresCreated;
 } WDRV_WINC_CTRLDCPT;
 
 #ifdef WDRV_WINC_NETWORK_USE_HARMONY_TCPIP
@@ -496,7 +535,7 @@ typedef struct
     DRV_HANDLE handle;
 
     /* Linked list of receive Ethernet packets. */
-    PROTECTED_SINGLE_LIST ethRxPktList;
+    WDRV_WINC_PACKET_QUEUE ethRxPktList;
 
     /* Multicast filter list. */
     TCPIP_MAC_ADDR multicastFilterList[MULTICAST_FILTER_SIZE];
@@ -533,18 +572,24 @@ typedef struct
 
     /* Access semaphore to protect updates to current receive Ethernet packet. */
     OSAL_SEM_HANDLE_TYPE curRxPacketSemaphore;
+
+    /* This provides a managed list of free packets. */
+    WDRV_WINC_PACKET_QUEUE packetPoolFreeList;
+
+    /* Value corresponding to TCPIP_MAC_CONTROL_FLAGS. */
+    uint16_t controlFlags;
 } WDRV_WINC_MACDCPT;
 #endif
 
 // *****************************************************************************
-/*  PIC32MZW Driver Descriptor
+/*  WINC Driver Descriptor
 
   Summary:
-    The defines the PIC32MZW driver descriptor.
+    The defines the WINC driver descriptor.
 
   Description:
-    This data type defines the system level descriptor for the PIC32MZW driver.
-    This structure is initialized by a call to WDRV_PIC32MZW_Initialize.
+    This data type defines the system level descriptor for the WINC driver.
+    This structure is initialized by a call to WDRV_WINC_Initialize.
 
   Remarks:
     None.
@@ -682,6 +727,33 @@ DRV_HANDLE WDRV_WINC_Open(const SYS_MODULE_INDEX index, const DRV_IO_INTENT inte
 */
 
 void WDRV_WINC_Close(DRV_HANDLE handle);
+
+//*******************************************************************************
+/*
+  Function:
+    WDRV_WINC_SYS_STATUS WDRV_WINC_StatusExt(SYS_MODULE_OBJ object)
+
+  Summary:
+    Provides the extended system status of the PIC32MZW driver module.
+
+  Description:
+    This function provides the extended system status of the PIC32MZW driver
+    module.
+
+  Precondition:
+    WDRV_WINC_Initialize must have been called before calling this function.
+
+  Parameters:
+    object  - Driver object handle, returned from WDRV_WINC_Initialize
+
+  Returns:
+
+  Remarks:
+    None.
+
+*/
+
+WDRV_WINC_SYS_STATUS WDRV_WINC_StatusExt(SYS_MODULE_OBJ object);
 
 // *****************************************************************************
 // *****************************************************************************

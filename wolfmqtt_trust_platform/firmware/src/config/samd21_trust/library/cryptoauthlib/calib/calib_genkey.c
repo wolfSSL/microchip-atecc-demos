@@ -34,6 +34,11 @@
 
 #include "cryptoauthlib.h"
 
+#if (CA_MAX_PACKET_SIZE < (ATCA_PUB_KEY_SIZE + ATCA_PACKET_OVERHEAD))
+#error "CA_MAX_PACKET_SIZE cannot hold response packet with public key"
+#endif
+
+#if CALIB_GENKEY_EN
 /** \brief Issues GenKey command, which can generate a private key, compute a
  *          public key, nd/or compute a digest of a public key.
  *
@@ -54,7 +59,7 @@
 ATCA_STATUS calib_genkey_base(ATCADevice device, uint8_t mode, uint16_t key_id, const uint8_t* other_data, uint8_t* public_key)
 {
     ATCAPacket packet;
-    ATCA_STATUS status = ATCA_GEN_FAIL;
+    ATCA_STATUS status;
 
     do
     {
@@ -64,23 +69,25 @@ ATCA_STATUS calib_genkey_base(ATCADevice device, uint8_t mode, uint16_t key_id, 
             break;
         }
 
+        (void)memset(&packet, 0x00, sizeof(ATCAPacket));
+
         // Build GenKey command
         packet.param1 = mode;
         packet.param2 = key_id;
-        if (other_data)
+        if (NULL != other_data)
         {
-            memcpy(packet.data, other_data, GENKEY_OTHER_DATA_SIZE);
+            (void)memcpy(packet.data, other_data, GENKEY_OTHER_DATA_SIZE);
         }
 
         if ((status = atGenKey(atcab_get_device_type_ext(device), &packet)) != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "atGenKey - failed");
+            (void)ATCA_TRACE(status, "atGenKey - failed");
             break;
         }
 
         if ((status = atca_execute_command(&packet, device)) != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "calib_genkey_base - execution failed");
+            (void)ATCA_TRACE(status, "calib_genkey_base - execution failed");
             break;
         }
 
@@ -88,15 +95,14 @@ ATCA_STATUS calib_genkey_base(ATCADevice device, uint8_t mode, uint16_t key_id, 
         {
             if (packet.data[ATCA_COUNT_IDX] == (ATCA_PUB_KEY_SIZE + ATCA_PACKET_OVERHEAD))
             {
-                memcpy(public_key, &packet.data[ATCA_RSP_DATA_IDX], ATCA_PUB_KEY_SIZE);
+                (void)memcpy(public_key, &packet.data[ATCA_RSP_DATA_IDX], ATCA_PUB_KEY_SIZE);
             }
             else
             {
                 status = ATCA_TRACE(ATCA_RX_FAIL, "Received response failure");
             }
         }
-    }
-    while (0);
+    } while (false);
 
     return status;
 }
@@ -136,6 +142,7 @@ ATCA_STATUS calib_get_pubkey(ATCADevice device, uint16_t key_id, uint8_t *public
 {
     return calib_genkey_base(device, GENKEY_MODE_PUBLIC, key_id, NULL, public_key);
 }
+#endif /* CALIB_GENKEY_EN */
 
 /** \brief Uses Genkey command to calculate SHA256 digest MAC of combining public key
  *         and session key
@@ -149,13 +156,21 @@ ATCA_STATUS calib_get_pubkey(ATCADevice device, uint16_t key_id, uint8_t *public
  *
  *  \return ATCA_SUCCESS on success, otherwise an error code.
  */
+
+#if CALIB_GENKEY_MAC_EN
 ATCA_STATUS calib_genkey_mac(ATCADevice device, uint8_t* public_key, uint8_t* mac)
 {
     ATCAPacket packet;
     ATCA_STATUS status = ATCA_BAD_PARAM;
 
-    if (device)
+    if (NULL != device)
     {
+        #if (CA_MAX_PACKET_SIZE < (ATCA_PUB_KEY_SIZE + ATCA_PACKET_OVERHEAD + MAC_SIZE))
+        #error "CA_MAX_PACKET_SIZE cannot hold response packet with public key and mac"
+        #endif
+
+        (void)memset(&packet, 0x00, sizeof(ATCAPacket));
+
         packet.param1 = GENKEY_MODE_MAC;
         packet.param2 = (uint16_t)0x00;
 
@@ -169,13 +184,13 @@ ATCA_STATUS calib_genkey_mac(ATCADevice device, uint8_t* public_key, uint8_t* ma
         {
             if ((ATCA_PUB_KEY_SIZE + ATCA_PACKET_OVERHEAD + MAC_SIZE) == packet.data[ATCA_COUNT_IDX])
             {
-                if (public_key)
+                if (NULL != public_key)
                 {
-                    memcpy(public_key, &packet.data[ATCA_RSP_DATA_IDX], ATCA_PUB_KEY_SIZE);
+                    (void)memcpy(public_key, &packet.data[ATCA_RSP_DATA_IDX], ATCA_PUB_KEY_SIZE);
                 }
-                if (mac)
+                if (NULL != mac)
                 {
-                    memcpy(mac, &packet.data[ATCA_RSP_DATA_IDX + ATCA_PUB_KEY_SIZE], MAC_SIZE);
+                    (void)memcpy(mac, &packet.data[ATCA_RSP_DATA_IDX + ATCA_PUB_KEY_SIZE], MAC_SIZE);
                 }
             }
             else
@@ -186,14 +201,15 @@ ATCA_STATUS calib_genkey_mac(ATCADevice device, uint8_t* public_key, uint8_t* ma
         }
         else
         {
-            ATCA_TRACE(status, "calib_genkey_mac - failed");
+            (void)ATCA_TRACE(status, "calib_genkey_mac - failed");
         }
 
     }
     else
     {
-        ATCA_TRACE(status, "NULL pointer encountered");
+        (void)ATCA_TRACE(status, "NULL pointer encountered");
     }
 
     return status;
 }
+#endif  /* CALIB_GENKEY_MAC_EN */

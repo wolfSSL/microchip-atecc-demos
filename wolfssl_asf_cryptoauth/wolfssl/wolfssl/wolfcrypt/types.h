@@ -139,6 +139,16 @@
 
     #define WOLFSSL_MAX_16BIT 0xffffU
 
+    #ifndef WC_DO_NOTHING
+        #define WC_DO_NOTHING do {} while (0)
+        #ifdef _MSC_VER
+            /* disable buggy MSC warning around while(0),
+             *"warning C4127: conditional expression is constant"
+             */
+            #pragma warning(disable: 4127)
+        #endif
+    #endif
+
     /* use inlining if compiler allows */
     #ifndef WC_INLINE
     #ifndef NO_INLINE

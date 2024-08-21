@@ -13,28 +13,28 @@
  *******************************************************************************/
 
 //DOM-IGNORE-BEGIN
-/*******************************************************************************
-* Copyright (C) 2019 Microchip Technology Inc. and its subsidiaries.
-*
-* Subject to your compliance with these terms, you may use Microchip software
-* and any derivatives exclusively with Microchip products. It is your
-* responsibility to comply with third party license terms applicable to your
-* use of third party software (including open source software) that may
-* accompany Microchip software.
-*
-* THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
-* EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
-* WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
-* PARTICULAR PURPOSE.
-*
-* IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
-* INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
-* WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
-* BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
-* FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
-* ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
-* THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
-*******************************************************************************/
+/*
+Copyright (C) 2019-22, Microchip Technology Inc., and its subsidiaries. All rights reserved.
+
+The software and documentation is provided by microchip and its contributors
+"as is" and any express, implied or statutory warranties, including, but not
+limited to, the implied warranties of merchantability, fitness for a particular
+purpose and non-infringement of third party intellectual property rights are
+disclaimed to the fullest extent permitted by law. In no event shall microchip
+or its contributors be liable for any direct, indirect, incidental, special,
+exemplary, or consequential damages (including, but not limited to, procurement
+of substitute goods or services; loss of use, data, or profits; or business
+interruption) however caused and on any theory of liability, whether in contract,
+strict liability, or tort (including negligence or otherwise) arising in any way
+out of the use of the software and documentation, even if advised of the
+possibility of such damage.
+
+Except as expressly permitted hereunder and subject to the applicable license terms
+for any third-party software incorporated in the software and any applicable open
+source software license terms, no license or other rights, whether express or
+implied, are granted under any patent or other intellectual property rights of
+Microchip or any third party.
+*/
 //DOM-IGNORE-END
 
 // *****************************************************************************
@@ -139,7 +139,7 @@ WDRV_WINC_STATUS WDRV_WINC_AssocSSIDGet
   Function:
     WDRV_WINC_STATUS WDRV_WINC_AssocPeerAddressGet
     (
-        DRV_HANDLE handle,
+        WDRV_WINC_ASSOC_HANDLE assocHandle,
         WDRV_WINC_NETWORK_ADDRESS *const pPeerAddress,
         WDRV_WINC_ASSOC_CALLBACK const pfAssociationInfoCB
     )
@@ -159,7 +159,7 @@ WDRV_WINC_STATUS WDRV_WINC_AssocSSIDGet
 WDRV_WINC_STATUS WDRV_WINC_AssocPeerAddressGet
 (
     WDRV_WINC_ASSOC_HANDLE assocHandle,
-    WDRV_WINC_NETWORK_ADDRESS *const pPeerAddress,
+    WDRV_WINC_MAC_ADDR *const pPeerAddress,
     WDRV_WINC_ASSOC_CALLBACK const pfAssociationInfoCB
 )
 {
@@ -185,7 +185,7 @@ WDRV_WINC_STATUS WDRV_WINC_AssocPeerAddressGet
         /* If association information store in driver and user application
            supplied a buffer, copy the peer address to the buffer. */
 
-        memcpy(pPeerAddress, &pDcpt->pCtrl->assocPeerAddress, sizeof(WDRV_WINC_NETWORK_ADDRESS));
+        memcpy(pPeerAddress, &pDcpt->pCtrl->assocPeerAddress.macAddress, sizeof(WDRV_WINC_MAC_ADDR));
 
         return WDRV_WINC_STATUS_OK;
     }
@@ -344,14 +344,7 @@ WDRV_WINC_STATUS WDRV_WINC_AssocRSSIGet
         {
             /* No callback has been provided. */
 
-            if ((0 == pDcpt->pCtrl->rssi) && (NULL == pRSSI))
-            {
-                /* No previous RSSI information and no callback or
-                   user application buffer to receive the information. */
-
-                return WDRV_WINC_STATUS_REQUEST_ERROR;
-            }
-            else if (NULL != pRSSI)
+            if ((0 != pDcpt->pCtrl->rssi) && (NULL != pRSSI))
             {
                 /* A current RSSI value exists and the user application provided
                    a buffer to receive it, copy the information. */
@@ -359,10 +352,6 @@ WDRV_WINC_STATUS WDRV_WINC_AssocRSSIGet
                 *pRSSI = pDcpt->pCtrl->rssi;
 
                 return WDRV_WINC_STATUS_OK;
-            }
-            else
-            {
-                /* No user application buffer and no callback. */
             }
         }
         else
@@ -387,4 +376,41 @@ WDRV_WINC_STATUS WDRV_WINC_AssocRSSIGet
     }
 
     return WDRV_WINC_STATUS_REQUEST_ERROR;
+}
+
+//*******************************************************************************
+/*
+  Function:
+    WDRV_WINC_STATUS WDRV_WINC_AssocDisconnect(WDRV_WINC_ASSOC_HANDLE assocHandle)
+
+  Summary:
+    Disconnects an association.
+
+  Description:
+    Disconnects the STA associated with AP referred by the input association handle.
+
+  Remarks:
+    See wdrv_winc_softap.h for usage information.
+*/
+
+WDRV_WINC_STATUS WDRV_WINC_AssocDisconnect(WDRV_WINC_ASSOC_HANDLE assocHandle)
+{
+    WDRV_WINC_DCPT *const pDcpt = (WDRV_WINC_DCPT *const)assocHandle;
+
+    if ((WDRV_WINC_ASSOC_HANDLE_INVALID == assocHandle) || (NULL == pDcpt) || (NULL == pDcpt->pCtrl))
+    {
+        return WDRV_WINC_STATUS_NOT_CONNECTED;
+    }
+
+    /* Check operation mode is Soft-AP or STA. */
+    if (true == pDcpt->pCtrl->isAP)
+    {
+        return WDRV_WINC_STATUS_OPERATION_NOT_SUPPORTED;
+    }
+    else
+    {
+        return WDRV_WINC_BSSDisconnect((DRV_HANDLE)pDcpt);
+    }
+
+    return WDRV_WINC_STATUS_OK;
 }

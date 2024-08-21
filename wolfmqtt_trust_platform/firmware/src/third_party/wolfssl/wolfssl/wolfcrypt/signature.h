@@ -1,6 +1,6 @@
 /* signature.h
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2023 wolfSSL Inc.
  *
  * This file is part of wolfSSL.
  *
@@ -39,7 +39,7 @@ enum wc_SignatureType {
     WC_SIGNATURE_TYPE_NONE = 0,
     WC_SIGNATURE_TYPE_ECC = 1,
     WC_SIGNATURE_TYPE_RSA = 2,
-    WC_SIGNATURE_TYPE_RSA_W_ENC = 3, /* Adds DER header via wc_EncodeSignature */
+    WC_SIGNATURE_TYPE_RSA_W_ENC = 3 /* Adds DER header via wc_EncodeSignature */
 };
 
 WOLFSSL_API int wc_SignatureGetSize(enum wc_SignatureType sig_type,

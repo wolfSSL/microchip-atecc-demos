@@ -16,28 +16,28 @@
  *******************************************************************************/
 
 // DOM-IGNORE-BEGIN
-/*******************************************************************************
-* Copyright (C) 2019 Microchip Technology Inc. and its subsidiaries.
-*
-* Subject to your compliance with these terms, you may use Microchip software
-* and any derivatives exclusively with Microchip products. It is your
-* responsibility to comply with third party license terms applicable to your
-* use of third party software (including open source software) that may
-* accompany Microchip software.
-*
-* THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
-* EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
-* WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
-* PARTICULAR PURPOSE.
-*
-* IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
-* INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
-* WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
-* BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
-* FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
-* ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
-* THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
-*******************************************************************************/
+/*
+Copyright (C) 2019-22, Microchip Technology Inc., and its subsidiaries. All rights reserved.
+
+The software and documentation is provided by microchip and its contributors
+"as is" and any express, implied or statutory warranties, including, but not
+limited to, the implied warranties of merchantability, fitness for a particular
+purpose and non-infringement of third party intellectual property rights are
+disclaimed to the fullest extent permitted by law. In no event shall microchip
+or its contributors be liable for any direct, indirect, incidental, special,
+exemplary, or consequential damages (including, but not limited to, procurement
+of substitute goods or services; loss of use, data, or profits; or business
+interruption) however caused and on any theory of liability, whether in contract,
+strict liability, or tort (including negligence or otherwise) arising in any way
+out of the use of the software and documentation, even if advised of the
+possibility of such damage.
+
+Except as expressly permitted hereunder and subject to the applicable license terms
+for any third-party software incorporated in the software and any applicable open
+source software license terms, no license or other rights, whether express or
+implied, are granted under any patent or other intellectual property rights of
+Microchip or any third party.
+*/
 // DOM-IGNORE-END
 
 #ifndef _WDRV_WINC_API_H
@@ -54,6 +54,7 @@
 #include <stdbool.h>
 
 #include "system/system_module.h"
+#include "wdrv_winc_spi.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus // Provide C++ Compatibility
@@ -63,7 +64,7 @@
 
 // *****************************************************************************
 // *****************************************************************************
-// Section: PIC32MZW Driver System Data Types
+// Section: WINC Driver System Data Types
 // *****************************************************************************
 // *****************************************************************************
 
@@ -81,6 +82,11 @@
 
 typedef struct
 {
+    /* SPI configuration. */
+    const WDRV_WINC_SPI_CFG* const pSPICfg;
+
+    /* Interrupt source. */
+    int intSrc;
 } WDRV_WINC_SYS_INIT;
 
 /*  WiFi MAC Initialization Data
@@ -340,7 +346,7 @@ void WDRV_WINC_Tasks(SYS_MODULE_OBJ object);
 //*******************************************************************************
 /*
   Function:
-    void WDRV_WINC_ISR(void);
+    void WDRV_WINC_ISR(SYS_MODULE_OBJ object);
 
   Summary:
     WINC interrupt handler.
@@ -350,10 +356,10 @@ void WDRV_WINC_Tasks(SYS_MODULE_OBJ object);
       from the WINC.
 
   Precondition:
-    None.
+    WDRV_WINC_Initialize must have been called before calling this function.
 
   Parameters:
-    None.
+    object  - Driver object handle, returned from WDRV_WINC_Initialize
 
   Returns:
     None.
@@ -363,7 +369,7 @@ void WDRV_WINC_Tasks(SYS_MODULE_OBJ object);
 
 */
 
-void WDRV_WINC_ISR(void);
+void WDRV_WINC_ISR(SYS_MODULE_OBJ object);
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus

@@ -48,7 +48,6 @@
 #include "device.h"
 
 
-
 // ****************************************************************************
 // ****************************************************************************
 // Section: Configuration Bits
@@ -56,19 +55,19 @@
 // ****************************************************************************
 #pragma config NVMCTRL_BOOTPROT = SIZE_0BYTES
 #pragma config NVMCTRL_EEPROM_SIZE = SIZE_0BYTES
-#pragma config BOD33USERLEVEL = 0x7 // Enter Hexadecimal value
+#pragma config BOD33USERLEVEL = 0x7U // Enter Hexadecimal value
 #pragma config BOD33_EN = ENABLED
 #pragma config BOD33_ACTION = RESET
 
 #pragma config BOD33_HYST = DISABLED
-#pragma config NVMCTRL_REGION_LOCKS = 0xffff // Enter Hexadecimal value
+#pragma config NVMCTRL_REGION_LOCKS = 0xffffU // Enter Hexadecimal value
 
 #pragma config WDT_ENABLE = DISABLED
 #pragma config WDT_ALWAYSON = DISABLED
 #pragma config WDT_PER = CYC16384
 
 #pragma config WDT_WINDOW_0 = SET
-#pragma config WDT_WINDOW_1 = 0x4 // Enter Hexadecimal value
+#pragma config WDT_WINDOW_1 = 0x4U // Enter Hexadecimal value
 #pragma config WDT_EWOFFSET = CYC16384
 #pragma config WDT_WEN = DISABLED
 
@@ -80,87 +79,22 @@
 // Section: Driver Initialization Data
 // *****************************************************************************
 // *****************************************************************************
-
-// <editor-fold defaultstate="collapsed" desc="DRV_SPI Instance 0 Initialization Data">
-
-/* SPI Client Objects Pool */
-static DRV_SPI_CLIENT_OBJ drvSPI0ClientObjPool[DRV_SPI_CLIENTS_NUMBER_IDX0];
-
-/* SPI Transfer Objects Pool */
-static DRV_SPI_TRANSFER_OBJ drvSPI0TransferObjPool[DRV_SPI_QUEUE_SIZE_IDX0];
-
-/* SPI PLIB Interface Initialization */
-const DRV_SPI_PLIB_INTERFACE drvSPI0PlibAPI = {
-
-    /* SPI PLIB Setup */
-    .setup = (DRV_SPI_PLIB_SETUP)SERCOM1_SPI_TransferSetup,
-
-    /* SPI PLIB WriteRead function */
-    .writeRead = (DRV_SPI_PLIB_WRITE_READ)SERCOM1_SPI_WriteRead,
-
-    /* SPI PLIB Transfer Status function */
-    .isBusy = (DRV_SPI_PLIB_IS_BUSY)SERCOM1_SPI_IsBusy,
-
-    /* SPI PLIB Callback Register */
-    .callbackRegister = (DRV_SPI_PLIB_CALLBACK_REGISTER)SERCOM1_SPI_CallbackRegister,
-};
-
-const uint32_t drvSPI0remapDataBits[]= { 0x0, 0x1, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
-const uint32_t drvSPI0remapClockPolarity[] = { 0x0, 0x20000000 };
-const uint32_t drvSPI0remapClockPhase[] = { 0x10000000, 0x0 };
-
-const DRV_SPI_INTERRUPT_SOURCES drvSPI0InterruptSources =
+/* Following MISRA-C rules are deviated in the below code block */
+/* MISRA C-2012 Rule 11.1 */
+/* MISRA C-2012 Rule 11.3 */
+/* MISRA C-2012 Rule 11.8 */
+static const WDRV_WINC_SPI_CFG wdrvWincSpiInitData =
 {
-    /* Peripheral has single interrupt vector */
-    .isSingleIntSrc                        = true,
-
-    /* Peripheral interrupt line */
-    .intSources.spiInterrupt             = SERCOM1_IRQn,
-    /* DMA interrupt line */
-    .intSources.dmaInterrupt               = DMAC_IRQn,
+    .writeRead          = (WDRV_WINC_SPI_PLIB_WRITE_READ)SERCOM1_SPI_WriteRead,
+    .callbackRegister   = (WDRV_WINC_SPI_PLIB_CALLBACK_REGISTER)SERCOM1_SPI_CallbackRegister,
 };
 
-/* SPI Driver Initialization Data */
-const DRV_SPI_INIT drvSPI0InitData =
-{
-    /* SPI PLIB API */
-    .spiPlib = &drvSPI0PlibAPI,
-
-    .remapDataBits = drvSPI0remapDataBits,
-
-    .remapClockPolarity = drvSPI0remapClockPolarity,
-
-    .remapClockPhase = drvSPI0remapClockPhase,
-
-    /* SPI Number of clients */
-    .numClients = DRV_SPI_CLIENTS_NUMBER_IDX0,
-
-    /* SPI Client Objects Pool */
-    .clientObjPool = (uintptr_t)&drvSPI0ClientObjPool[0],
-
-    /* DMA Channel for Transmit */
-    .dmaChannelTransmit = DRV_SPI_XMIT_DMA_CH_IDX0,
-
-    /* DMA Channel for Receive */
-    .dmaChannelReceive  = DRV_SPI_RCV_DMA_CH_IDX0,
-
-    /* SPI Transmit Register */
-    .spiTransmitAddress =  (void *)&(SERCOM1_REGS->SPIM.SERCOM_DATA),
-
-    /* SPI Receive Register */
-    .spiReceiveAddress  = (void *)&(SERCOM1_REGS->SPIM.SERCOM_DATA),
-
-    /* SPI Queue Size */
-    .transferObjPoolSize = DRV_SPI_QUEUE_SIZE_IDX0,
-
-    /* SPI Transfer Objects Pool */
-    .transferObjPool = (uintptr_t)&drvSPI0TransferObjPool[0],
-
-    /* SPI interrupt sources (SPI peripheral and DMA) */
-    .interruptSources = &drvSPI0InterruptSources,
+static const WDRV_WINC_SYS_INIT wdrvWincInitData = {
+    .pSPICfg    = &wdrvWincSpiInitData,
+    .intSrc     = EIC_PIN_5
 };
 
-// </editor-fold>
+
 
 
 // *****************************************************************************
@@ -171,11 +105,35 @@ const DRV_SPI_INIT drvSPI0InitData =
 /* Structure to hold the object handles for the modules in the system. */
 SYSTEM_OBJECTS sysObj;
 
+#if 0
 // *****************************************************************************
 // *****************************************************************************
 // Section: Library/Stack Initialization Data
 // *****************************************************************************
 // *****************************************************************************
+/* Net Presentation Layer Data Definitions */
+#include "net_pres/pres/net_pres_enc_glue.h"
+
+
+static const NET_PRES_INST_DATA netPresCfgs[] =
+{
+
+    {
+        .pProvObject_ss = NULL,
+        .pProvObject_sc = NULL,
+        .pProvObject_ds = NULL,
+        .pProvObject_dc = NULL,
+    },
+
+};
+
+static const NET_PRES_INIT_DATA netPresInitData =
+{
+    .numLayers = sizeof(netPresCfgs) / sizeof(NET_PRES_INST_DATA),
+    .pInitData = netPresCfgs
+};
+#endif
+
 
 
 // *****************************************************************************
@@ -185,7 +143,7 @@ SYSTEM_OBJECTS sysObj;
 // *****************************************************************************
 // <editor-fold defaultstate="collapsed" desc="SYS_TIME Initialization Data">
 
-const SYS_TIME_PLIB_INTERFACE sysTimePlibAPI = {
+static const SYS_TIME_PLIB_INTERFACE sysTimePlibAPI = {
     .timerCallbackSet = (SYS_TIME_PLIB_CALLBACK_REGISTER)TC3_TimerCallbackRegister,
     .timerStart = (SYS_TIME_PLIB_START)TC3_TimerStart,
     .timerStop = (SYS_TIME_PLIB_STOP)TC3_TimerStop,
@@ -195,7 +153,7 @@ const SYS_TIME_PLIB_INTERFACE sysTimePlibAPI = {
     .timerCounterGet = (SYS_TIME_PLIB_COUNTER_GET)TC3_Timer16bitCounterGet,
 };
 
-const SYS_TIME_INIT sysTimeInitData =
+static const SYS_TIME_INIT sysTimeInitData =
 {
     .timePlib = &sysTimePlibAPI,
     .hwTimerIntNum = TC3_IRQn,
@@ -222,6 +180,8 @@ const SYS_TIME_INIT sysTimeInitData =
  ********************************************************************************/
 static void STDIO_BufferModeSet(void)
 {
+    /* MISRAC 2012 deviation block start */
+    /* MISRA C-2012 Rule 21.6 deviated 2 times in this file.  Deviation record ID -  H3_MISRAC_2012_R_21_6_DR_3 */
 
     /* Make stdin unbuffered */
     setbuf(stdin, NULL);
@@ -231,7 +191,7 @@ static void STDIO_BufferModeSet(void)
 }
 
 
-
+/* MISRAC 2012 deviation block end */
 
 /*******************************************************************************
   Function:
@@ -246,12 +206,15 @@ static void STDIO_BufferModeSet(void)
 void SYS_Initialize ( void* data )
 {
 
-    NVMCTRL_REGS->NVMCTRL_CTRLB = NVMCTRL_CTRLB_RWS(3);
+    /* MISRAC 2012 deviation block start */
+    /* MISRA C-2012 Rule 2.2 deviated in this file.  Deviation record ID -  H3_MISRAC_2012_R_2_2_DR_1 */
+
+    NVMCTRL_REGS->NVMCTRL_CTRLB = NVMCTRL_CTRLB_RWS(3UL);
 
     STDIO_BufferModeSet();
 
 
-  
+
     PORT_Initialize();
 
     CLOCK_Initialize();
@@ -261,13 +224,12 @@ void SYS_Initialize ( void* data )
 
     SERCOM3_USART_Initialize();
 
-    NVMCTRL_Initialize( );
-
     SERCOM2_I2C_Initialize();
+
+    NVMCTRL_Initialize( );
 
     SERCOM1_SPI_Initialize();
 
-    EVSYS_Initialize();
 
     DMAC_Initialize();
 
@@ -278,23 +240,34 @@ void SYS_Initialize ( void* data )
     TC3_TimerInitialize();
 
 
-    /* Initialize the WINC Driver */
-    sysObj.drvWifiWinc = WDRV_WINC_Initialize(0, NULL);
 
-    /* Initialize SPI0 Driver Instance */
-    sysObj.drvSPI0 = DRV_SPI_Initialize(DRV_SPI_INDEX_0, (SYS_MODULE_INIT *)&drvSPI0InitData);
+    /* MISRAC 2012 deviation block start */
+    /* Following MISRA-C rules deviated in this block  */
+    /* MISRA C-2012 Rule 11.3 - Deviation record ID - H3_MISRAC_2012_R_11_3_DR_1 */
+    /* MISRA C-2012 Rule 11.8 - Deviation record ID - H3_MISRAC_2012_R_11_8_DR_1 */
+
+    /* Initialize the WINC Driver */
+    sysObj.drvWifiWinc = WDRV_WINC_Initialize(0, (SYS_MODULE_INIT*)&wdrvWincInitData);
+
+
+    /* MISRA C-2012 Rule 11.3, 11.8 deviated below. Deviation record ID -
+    H3_MISRAC_2012_R_11_3_DR_1 & H3_MISRAC_2012_R_11_8_DR_1*/
 
     sysObj.sysTime = SYS_TIME_Initialize(SYS_TIME_INDEX_0, (SYS_MODULE_INIT *)&sysTimeInitData);
 
+    /* MISRAC 2012 deviation block end */
+
     CRYPT_WCCB_Initialize();
 
+    /* MISRAC 2012 deviation block end */
     APP_Initialize();
 
 
     NVIC_Initialize();
 
-}
 
+    /* MISRAC 2012 deviation block end */
+}
 
 /*******************************************************************************
  End of File

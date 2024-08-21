@@ -25,8 +25,8 @@
  * THIS SOFTWARE.
  */
 
-#ifndef _ATCA_LIB_H
-#define _ATCA_LIB_H
+#ifndef CRYPTOAUTHLIB_H
+#define CRYPTOAUTHLIB_H
 
 #include <stdio.h>
 #include <stdint.h>
@@ -37,63 +37,61 @@
 
 /** Library Configuration File - All build attributes should be included in
     atca_config.h */
-#include "atca_config.h"
+#include "atca_config_check.h"
 #include "atca_compiler.h"
 #include "atca_version.h"
-
-/* Configuration Macros to detect device classes */
-#if defined(ATCA_ATSHA204A_SUPPORT) || defined(ATCA_ATSHA206A_SUPPORT)
-#define ATCA_SHA_SUPPORT    1
-#endif
-
-/* Make sure all configuration options work */
-#if defined(ATCA_ATECC608A_SUPPORT) && !defined(ATCA_ATECC608_SUPPORT)
-#define ATCA_ATECC608_SUPPORT
-#endif
-
-#if defined(ATCA_ATECC108A_SUPPORT) || defined(ATCA_ATECC508A_SUPPORT) \
-    || defined(ATCA_ATECC608_SUPPORT)
-#define ATCA_ECC_SUPPORT    1
-#endif
-
-/* Classic Cryptoauth Devices */
-#if defined(ATCA_SHA_SUPPORT) || defined(ATCA_ECC_SUPPORT) || defined(ATCA_ECC204_SUPPORT)
-#define ATCA_CA_SUPPORT     1
-#else
-#define ATCA_CA_SUPPORT     0
-#endif
-
-/* New Trust Anchor Devices */
-#if defined(ATCA_TA100_SUPPORT)
-#define ATCA_TA_SUPPORT     1
-#else
-#define ATCA_TA_SUPPORT     0
-#endif
-
+#include "atca_platform.h"
 #include "atca_status.h"
 #include "atca_debug.h"
+#include "cal_buffer.h"
 #include "atca_iface.h"
+#include "atca_device.h"
 #include "atca_helpers.h"
 #include "hal/atca_hal.h"
 
 /* Common Cryptographic Definitions */
-#define ATCA_SHA256_BLOCK_SIZE              (64)
-#define ATCA_SHA256_DIGEST_SIZE             (32)
+#define ATCA_SHA256_BLOCK_SIZE              (64u)
+#define ATCA_SHA256_DIGEST_SIZE             (32u)
 
-#define ATCA_AES128_BLOCK_SIZE              (16)
+#define ATCA_SHA384_BLOCK_SIZE              (128u)
+#define ATCA_SHA384_DIGEST_SIZE             (48u)
+
+#define ATCA_SHA512_BLOCK_SIZE              (128u)
+#define ATCA_SHA512_DIGEST_SIZE             (64u)
+
+#define ATCA_AES128_BLOCK_SIZE              (16u)
 #define ATCA_AES128_KEY_SIZE                (16)
 
-#define ATCA_ECCP256_KEY_SIZE               (32)
-#define ATCA_ECCP256_PUBKEY_SIZE            (64)
-#define ATCA_ECCP256_SIG_SIZE               (64)
+#define ATCA_AES256_BLOCK_SIZE              (16u)
+#define ATCA_AES256_KEY_SIZE                (32u)
+
+#define ATCA_ECCP256_MSG_SIZE               (32u)
+#define ATCA_KEY_TYPE_ECCP256               (0u)
+#define ATCA_ECCP256_KEY_SIZE               (32u)
+#define ATCA_ECCP256_PUBKEY_SIZE            (64u)
+#define ATCA_ECCP256_SIG_SIZE               (64u)
+#define ATCA_ECCP256_OID_SIZE               (10u)
+#define ATCA_ECCP256_ASN1_HDR_SIZE          (27u)
+
+#define ATCA_ECC_UNCOMPRESSED_TYPE          ((uint8_t)0x04)
+#define ATCA_ECC_UNCOMPRESSED_TYPE_OFFSET   (1u)
 
 #define ATCA_ZONE_CONFIG                    ((uint8_t)0x00)
 #define ATCA_ZONE_OTP                       ((uint8_t)0x01)
 #define ATCA_ZONE_DATA                      ((uint8_t)0x02)
 
-#if defined(ATCA_ECC204_SUPPORT)
-#define ATCA_ECC204_ZONE_DATA               ((uint8_t)0x00)
-#define ATCA_ECC204_ZONE_CONFIG             ((uint8_t)0x01)
+#define DEVICE_PRODUCT_ID_LOCATION  0
+#define DEVICE_IDENTIFIER_LOCATION  1
+#define DEVICE_PART_LOCATION        2
+#define DEVICE_REVISION_LOCATION    3
+
+#if ATCA_CA2_SUPPORT
+#define ATCA_ZONE_CA2_DATA                  ((uint8_t)0x00)
+#define ATCA_ZONE_CA2_CONFIG                ((uint8_t)0x01)
+#define ATCA_ECC204_DEVICE_ID               ((uint8_t)0x5A)
+#define ATCA_TA010_DEVICE_ID                ((uint8_t)0x6A)
+#define ATCA_SHA104_DEVICE_ID               ((uint8_t)0x35)
+#define ATCA_SHA105_DEVICE_ID               ((uint8_t)0x3B)
 #endif
 
 /** Place resulting digest both in Output buffer and TempKey */
@@ -105,7 +103,6 @@
 
 #if ATCA_CA_SUPPORT || defined(ATCA_USE_ATCAB_FUNCTIONS)
 #include "atca_cfgs.h"
-#include "atca_device.h"
 #include "calib/calib_basic.h"
 #include "calib/calib_command.h"
 #include "calib/calib_aes_gcm.h"
@@ -116,6 +113,7 @@
 #include "talib/talib_basic.h"
 #endif
 
+/* Common Library Functions */
 #include "atca_basic.h"
 
 #define ATCA_STRINGIFY(x) #x
@@ -127,4 +125,4 @@
     #define ATCA_TRACE(s, m)         atca_trace(s)
 #endif
 
-#endif
+#endif /* CRYPTOAUTHLIB_H */

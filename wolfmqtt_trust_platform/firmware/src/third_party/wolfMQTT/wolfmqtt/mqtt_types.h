@@ -1,6 +1,6 @@
 /* mqtt_types.h
  *
- * Copyright (C) 2006-2020 wolfSSL Inc.
+ * Copyright (C) 2006-2022 wolfSSL Inc.
  *
  * This file is part of wolfMQTT.
  *
@@ -29,9 +29,7 @@
 
 /* configuration for Arduino */
 #ifdef ARDUINO
-/* Uncomment this to enable TLS support */
-/* Make sure and include the wolfSSL library */
-    //#define ENABLE_MQTT_TLS
+    #include "wolfmqtt/options.h"
 
     /* make sure arduino can see the wolfssl library directory */
     #ifdef ENABLE_MQTT_TLS
@@ -86,21 +84,30 @@
 
 #ifdef WOLFMQTT_MULTITHREAD
     /* Multi-threading uses binary semaphores */
-    #if defined(__MACH__)
+    #if defined(WOLFMQTT_USER_THREADING)
+        /* User provides API's and wm_Sem type.
+         * Add your wc_Sem into user_settings.h */
+
+    #elif defined(__MACH__)
         /* Apple Style Dispatch Semaphore */
         #include <dispatch/dispatch.h>
-        typedef dispatch_semaphore_t wm_Sem;
+        typedef struct {
+            dispatch_semaphore_t sem;
+        } wm_Sem;
 
-    #elif defined(__FreeBSD__) || defined(__linux__)
-        /* Posix Style Semaphore */
+    #elif defined(__FreeBSD__) || defined(__linux__) || defined(__QNX__)
+        /* Posix Style Pthread Mutex and Conditional */
         #define WOLFMQTT_POSIX_SEMAPHORES
-        #include <semaphore.h>
-        typedef sem_t wm_Sem;
+        #include <pthread.h>
+        typedef struct {
+            volatile int lockCount;
+            pthread_mutex_t mutex;
+            pthread_cond_t cond;
+        } wm_Sem;
 
     #elif defined(FREERTOS)
         /* FreeRTOS binary semaphore */
         #include <FreeRTOS.h>
-        
         #include <semphr.h>
         typedef SemaphoreHandle_t wm_Sem;
 
@@ -110,9 +117,6 @@
         #include <ws2tcpip.h>
         #include <windows.h>
         typedef HANDLE wm_Sem;
-    
-    #elif defined(WOLFMQTT_USER_THREADING)
-        /* User provides API's and wm_Sem type */
 
     #else
         #error "Multithreading requires binary semaphore implementation!"
@@ -179,9 +183,11 @@ enum MqttPacketResponseCodes {
     MQTT_CODE_ERROR_PROPERTY = -11,
     MQTT_CODE_ERROR_SERVER_PROP = -12,
     MQTT_CODE_ERROR_CALLBACK = -13,
+    MQTT_CODE_ERROR_SYSTEM = -14,
 
     MQTT_CODE_CONTINUE = -101,
     MQTT_CODE_STDIN_WAKE = -102,
+    MQTT_CODE_PUB_CONTINUE = -103,
 };
 
 
@@ -269,6 +275,9 @@ enum MqttPacketResponseCodes {
         #if defined(WOLFMQTT_MULTITHREAD) && defined(WOLFMQTT_DEBUG_THREAD)
             #ifdef USE_WINDOWS_API
                 #define PRINTF(_f_, ...)  printf( ("%lx: "_f_ LINE_END), GetCurrentThreadId(), ##__VA_ARGS__)
+            #elif defined(__MACH__)
+                #include <pthread.h>
+                #define PRINTF(_f_, ...)  printf( ("%p: "_f_ LINE_END), (void*)pthread_self(), ##__VA_ARGS__)
             #else
                 #include <pthread.h>
                 #define PRINTF(_f_, ...)  printf( ("%lx: "_f_ LINE_END), pthread_self(), ##__VA_ARGS__)
@@ -288,18 +297,45 @@ enum MqttPacketResponseCodes {
     #endif
 #endif
 
-/* GCC 7 has new switch() fall-through detection */
-/* default to FALL_THROUGH stub */
 #ifndef FALL_THROUGH
-#define FALL_THROUGH
-
-#if defined(__GNUC__)
-    #if ((__GNUC__ > 7) || ((__GNUC__ == 7) && (__GNUC_MINOR__ >= 1)))
-        #undef  FALL_THROUGH
-        #define FALL_THROUGH __attribute__ ((fallthrough));
+    /* GCC 7 has new switch() fall-through detection */
+    #if defined(__GNUC__)
+        #if ((__GNUC__ > 7) || ((__GNUC__ == 7) && (__GNUC_MINOR__ >= 1)))
+            #undef  FALL_THROUGH
+            #if defined(WOLFSSL_LINUXKM) && defined(fallthrough)
+                #define FALL_THROUGH fallthrough
+            #else
+                #define FALL_THROUGH __attribute__ ((fallthrough));
+            #endif
+        #endif
     #endif
+#endif /* FALL_THROUGH */
+#if !defined(FALL_THROUGH) || defined(__XC32)
+    /* use stub for fall through by default or for Microchip compiler */
+    #undef  FALL_THROUGH
+    #define FALL_THROUGH
 #endif
+
+/* No return macro */
+#if defined(__IAR_SYSTEMS_ICC__) || defined(__GNUC__)
+    #define WOLFMQTT_NORETURN __attribute__((noreturn))
+#else
+    #define WOLFMQTT_NORETURN
 #endif
+
+/* Logging / Tracing */
+#ifdef WOLFMQTT_NO_STDIO
+    #undef WOLFMQTT_DEBUG_CLIENT
+    #undef WOLFMQTT_DEBUG_SOCKET
+#endif
+
+#ifdef WOLFMQTT_DEBUG_TRACE
+#define MQTT_TRACE_ERROR(err) ({ PRINTF("ERROR: %d (%s:%d)", err, __FUNCTION__, __LINE__); err; })
+#define MQTT_TRACE_MSG(msg)      PRINTF("%s: (%s:%d)", msg, __FUNCTION__, __LINE__);
+#else
+#define MQTT_TRACE_ERROR(err) err
+#define MQTT_TRACE_MSG(msg)
+#endif /* WOLFMQTT_DEBUG_TRACE */
 
 #ifdef __cplusplus
     } /* extern "C" */

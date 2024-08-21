@@ -49,9 +49,10 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "crypto/crypto.h"
 #include "peripheral/sercom/usart/plib_sercom3_usart.h"
-#include "peripheral/nvmctrl/plib_nvmctrl.h"
 #include "peripheral/sercom/i2c_master/plib_sercom2_i2c_master.h"
+#include "peripheral/nvmctrl/plib_nvmctrl.h"
 #include "peripheral/sercom/spi_master/plib_sercom1_spi_master.h"
 #include "peripheral/evsys/plib_evsys.h"
 #include "driver/winc/include/wdrv_winc_api.h"
@@ -64,10 +65,13 @@
 #include "peripheral/tc/plib_tc3.h"
 #include "system/time/sys_time.h"
 #include "wolfssl/wolfcrypt/port/pic32/crypt_wolfcryptcb.h"
-#include "driver/spi/drv_spi.h"
+#include "net_pres/pres/net_pres.h"
+#include "net_pres/pres/net_pres_encryptionproviderapi.h"
+#include "net_pres/pres/net_pres_transportapi.h"
+#include "net_pres/pres/net_pres_socketapi.h"
+#include "FreeRTOS.h"
+#include "task.h"
 #include "system/int/sys_int.h"
-#include "system/ports/sys_ports.h"
-#include "system/dma/sys_dma.h"
 #include "osal/osal.h"
 #include "system/debug/sys_debug.h"
 #include "app.h"
@@ -81,6 +85,12 @@ extern "C" {
 
 #endif
 // DOM-IGNORE-END
+
+/* Device Information */
+#define DEVICE_NAME			 "ATSAMD21E18A"
+#define DEVICE_ARCH			 "CORTEX-M0PLUS"
+#define DEVICE_FAMILY		 "SAMD"
+#define DEVICE_SERIES		 "SAMD21"
 
 /* CPU clock frequency */
 #define CPU_CLOCK_FREQUENCY 48000000
@@ -196,10 +206,9 @@ Remarks:
 typedef struct
 {
     SYS_MODULE_OBJ  drvWifiWinc;
-    /* SPI0 Driver Object */
-    SYS_MODULE_OBJ drvSPI0;
-
     SYS_MODULE_OBJ  sysTime;
+    SYS_MODULE_OBJ  netPres;
+
 
 } SYSTEM_OBJECTS;
 

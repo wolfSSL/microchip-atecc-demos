@@ -134,7 +134,7 @@ int  atmel_ecc_verify(const byte* message, const byte* signature,
     int atcatls_verify_signature_cb(struct WOLFSSL* ssl, const byte* sig, unsigned int sigSz,
         const byte* hash, unsigned int hashSz, const byte* key, unsigned int keySz,
         int* result, void* ctx);
-
+    
     int atcatls_set_callbacks(struct WOLFSSL_CTX* ctx);
     int atcatls_set_callback_ctx(struct WOLFSSL* ssl, void* user_ctx);
 #endif

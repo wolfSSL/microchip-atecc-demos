@@ -35,6 +35,7 @@
 
 #include "cryptoauthlib.h"
 
+#if CALIB_GENDIG_EN
 /** \brief Issues a GenDig command, which performs a SHA256 hash on the source data indicated by zone with the
  *  contents of TempKey.  See the CryptoAuth datasheet for your chip to see what the values of zone
  *  correspond to.
@@ -49,44 +50,65 @@
 ATCA_STATUS calib_gendig(ATCADevice device, uint8_t zone, uint16_t key_id, const uint8_t *other_data, uint8_t other_data_size)
 {
     ATCAPacket packet;
-    ATCA_STATUS status = ATCA_GEN_FAIL;
+    ATCA_STATUS status;
     bool is_no_mac_key = false;
 
-    if ((device == NULL) || (other_data_size > 0 && other_data == NULL))
+    if ((device == NULL) || (other_data_size > 0u && other_data == NULL))
     {
         return ATCA_TRACE(ATCA_BAD_PARAM, "NULL pointer received");
     }
 
+    if (CA_MAX_PACKET_SIZE < (ATCA_CMD_SIZE_MIN + other_data_size))
+    {
+        status = ATCA_TRACE(ATCA_INVALID_SIZE, "Invalid packet size received");
+    }
+
     do
     {
+        (void)memset(&packet, 0x00, sizeof(ATCAPacket));
+
         // build gendig command
         packet.param1 = zone;
         packet.param2 = key_id;
 
         if (packet.param1 == GENDIG_ZONE_SHARED_NONCE && other_data_size >= ATCA_BLOCK_SIZE)
         {
-            memcpy(&packet.data[0], &other_data[0], ATCA_BLOCK_SIZE);
+            (void)memcpy(&packet.data[0], &other_data[0], ATCA_BLOCK_SIZE);
         }
-        else if (packet.param1 == GENDIG_ZONE_DATA && other_data_size >= ATCA_WORD_SIZE)
+
+        if (packet.param1 == GENDIG_ZONE_DATA && other_data_size >= ATCA_WORD_SIZE)
         {
-            memcpy(&packet.data[0], &other_data[0], ATCA_WORD_SIZE);
+            (void)memcpy(&packet.data[0], &other_data[0], ATCA_WORD_SIZE);
             is_no_mac_key = true;
         }
 
         if ((status = atGenDig(atcab_get_device_type_ext(device), &packet, is_no_mac_key)) != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "atGenDig - failed");
+            (void)ATCA_TRACE(status, "atGenDig - failed");
             break;
         }
 
         if ((status = atca_execute_command(&packet, device)) != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "calib_gendig - execution failed");
+            (void)ATCA_TRACE(status, "calib_gendig - execution failed");
             break;
         }
 
-    }
-    while (0);
+    } while (false);
 
     return status;
 }
+#endif /* CALIB_GENDIG_EN */
+
+#if CALIB_GENDIVKEY_EN
+/** \brief Issues a GenDivKey command to generate the equivalent diversified key as that programmed into the SHA104 or
+ *         other client side device
+ *  \param[in] device           Device context pointer
+ *  \param[in] other_data       Must match data used when generating the diversified key in the client device
+ *  \return ATCA_SUCCESS on success, otherwise an error code.
+ */
+ATCA_STATUS calib_sha105_gendivkey(ATCADevice device, const uint8_t *other_data)
+{
+    return calib_gendig(device, GENDIVKEY_MODE, GENDIVKEY_DEFAULT_KEYID, other_data, GENDIVKEY_OTHER_DATA_SIZE);
+}
+#endif

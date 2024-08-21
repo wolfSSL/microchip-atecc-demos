@@ -27,28 +27,57 @@
  * THIS SOFTWARE.
  */
 
-
+#include <limits.h>
 #include <stdlib.h>
 #include "atcacert_client.h"
 #include "atcacert_der.h"
 #include "atcacert_pem.h"
 #include "cryptoauthlib.h"
-#include "calib/calib_basic.h"
 
+#if ATCA_CA_SUPPORT
+#include "calib/calib_basic.h"
+#endif
+
+#if ATCA_TA_SUPPORT
+#include "talib/talib_basic.h"
+#include "talib/talib_internal.h"
+#endif
+
+#if ATCACERT_COMPCERT_EN
+
+#define DEVZONE_TO_BYTEVAL(zone)    (((int)(zone) < UCHAR_MAX) ? ((uint8_t)(zone) & 0xFFu) : 0x07u)
+
+#if ATCAB_WRITE_EN
 // Perform floor integer division (-1 / 2 == -1) instead of truncate towards zero (-1 / 2 == 0)
 static int floor_div(int a, int b)
 {
-    int d = a / b;
-    int r = a % b;
+    int d = 0;
 
-    return r ? (d - ((a < 0) ^ (b < 0))) : d;
+    bool t1 = (a < 0);
+    bool t2 = (b < 0);
+
+    if (b != 0)
+    {
+        d = a / b;
+
+        if ((a % b) != 0)
+        {
+            if (t1 != t2)
+            {
+                d -= 1;
+            }
+        }
+    }
+    return d;
 }
+#endif
 
-int atcacert_get_response(uint8_t       device_private_key_slot,
-                          const uint8_t challenge[32],
-                          uint8_t       response[64])
+
+ATCA_STATUS atcacert_get_response(uint8_t       device_private_key_slot,
+                                  const uint8_t challenge[32],
+                                  uint8_t       response[64])
 {
-    if (device_private_key_slot > 15 || challenge == NULL || response == NULL)
+    if ((device_private_key_slot > 15U) || (challenge == NULL) || (response == NULL))
     {
         return ATCACERT_E_BAD_PARAMS;
     }
@@ -56,36 +85,37 @@ int atcacert_get_response(uint8_t       device_private_key_slot,
     return atcab_sign(device_private_key_slot, challenge, response);
 }
 
-int atcacert_read_device_loc(const atcacert_device_loc_t* device_loc,
-                             uint8_t*                     data)
+ATCA_STATUS atcacert_read_device_loc_ext(ATCADevice                     device,
+                                         const atcacert_device_loc_t*   device_loc,
+                                         uint8_t*                       data)
 {
-    int ret = 0;
+    ATCA_STATUS ret = 0;
 
-    if (device_loc->zone == DEVZONE_DATA && device_loc->is_genkey)
+    if (device_loc->zone == DEVZONE_DATA && (0U != device_loc->is_genkey))
     {
         uint8_t public_key[ATCA_PUB_KEY_SIZE];
-        if (device_loc->offset + device_loc->count > sizeof(public_key))
+        if (device_loc->offset + device_loc->count > ATCA_PUB_KEY_SIZE) // sizeof public_key, in bytes
         {
             return ATCACERT_E_BAD_PARAMS;
         }
 
-        ret = atcab_get_pubkey(device_loc->slot, public_key);
+        ret = atcab_get_pubkey_ext(device, device_loc->slot, public_key);
         if (ret != ATCA_SUCCESS)
         {
             return ret;
         }
-        memcpy(data, &public_key[device_loc->offset], device_loc->count);
+        (void)memcpy(data, &public_key[device_loc->offset], device_loc->count);
     }
     else
     {
         size_t count = device_loc->count;
-        size_t zone_size;
-        ret = atcab_get_zone_size(device_loc->zone, device_loc->slot, &zone_size);
+        size_t zone_size = 0u;
+        ret = atcab_get_zone_size_ext(device, (uint8_t)device_loc->zone, device_loc->slot, &zone_size);
         if (ret != ATCA_SUCCESS)
         {
             return ret;
         }
-        if (device_loc->offset + device_loc->count > (uint16_t)zone_size)
+        if ((size_t)device_loc->offset + (size_t)device_loc->count > zone_size)
         {
             if (device_loc->offset > zone_size)
             {
@@ -94,8 +124,9 @@ int atcacert_read_device_loc(const atcacert_device_loc_t* device_loc,
             count = zone_size - device_loc->offset;
         }
 
-        ret = atcab_read_bytes_zone(
-            device_loc->zone,
+        ret = atcab_read_bytes_zone_ext(
+            device,
+            (uint8_t)device_loc->zone,
             device_loc->slot,
             device_loc->offset,
             data,
@@ -109,16 +140,29 @@ int atcacert_read_device_loc(const atcacert_device_loc_t* device_loc,
     return ATCACERT_E_SUCCESS;
 }
 
-int atcacert_read_cert(const atcacert_def_t* cert_def,
-                       const uint8_t         ca_public_key[64],
-                       uint8_t*              cert,
-                       size_t*               cert_size)
+ATCA_STATUS atcacert_read_device_loc(const atcacert_device_loc_t*   device_loc,
+                                     uint8_t*                       data)
 {
-    int ret = 0;
+    return atcacert_read_device_loc_ext(atcab_get_device(), device_loc, data);
+}
+#endif
+
+ATCA_STATUS atcacert_read_cert_ext(ATCADevice               device,
+                                   const atcacert_def_t*    cert_def,
+                                   const uint8_t            ca_public_key[64],
+                                   uint8_t*                 cert,
+                                   size_t*                  cert_size)
+{
+    ATCA_STATUS ret = ATCACERT_E_BAD_PARAMS;
+
+#if ATCACERT_COMPCERT_EN
     atcacert_device_loc_t device_locs[16];
     size_t device_locs_count = 0;
     size_t i = 0;
     atcacert_build_state_t build_state;
+#endif
+
+    UNUSED_VAR(ca_public_key[0]);
 
     if (cert_def == NULL || cert_size == NULL)
     {
@@ -127,120 +171,215 @@ int atcacert_read_cert(const atcacert_def_t* cert_def,
 
     if (cert == NULL)
     {
-        return atcacert_read_cert_size(cert_def, cert_size);
+        return atcacert_read_cert_size_ext(device, cert_def, cert_size);
     }
 
-    ret = atcacert_get_device_locs(
-        cert_def,
-        device_locs,
-        &device_locs_count,
-        sizeof(device_locs) / sizeof(device_locs[0]),
-        ATCA_BLOCK_SIZE);
-    if (ret != ATCACERT_E_SUCCESS)
+    if (CERTTYPE_X509_FULL_STORED == cert_def->type)
     {
-        return ret;
+        if (ATCACERT_E_SUCCESS == (ret = atcab_read_bytes_zone_ext(device, (uint8_t)cert_def->comp_cert_dev_loc.zone,
+                                                                   cert_def->comp_cert_dev_loc.slot, 0u, cert, *cert_size)))
+        {   
+            ATCADeviceType dev_type = atcab_get_device_type_ext(device);
+            if (atcab_is_ta_device(dev_type))
+            {
+#if ATCA_TA_SUPPORT
+                size_t actual_cert_len = 0x00;
+                if (ATCACERT_E_SUCCESS == (ret = talib_get_x509_cert_size(device, cert_def->comp_cert_dev_loc.slot, cert, &actual_cert_len)))
+                {
+                    if (*cert_size > actual_cert_len)
+                    {
+                        *cert_size = actual_cert_len;
+                    }
+                }
+                else
+                {
+                    return ret;
+                }
+#endif
+            }
+            #if ATCACERT_INTEGRATION_EN
+            cal_buffer buf = CAL_BUF_INIT(*cert_size, cert);
+            /* Load parsed certificate if not already done */
+            if (NULL == *cert_def->parsed)
+            {
+                if (ATCACERT_E_SUCCESS != (ret = atcac_parse_der(cert_def->parsed, &buf)))
+                {
+                    return ret;
+                }
+            }
+            #endif
+        }
+        else
+        {
+            return ret;
+        }
     }
-
-    ret = atcacert_cert_build_start(&build_state, cert_def, cert, cert_size, ca_public_key);
-    if (ret != ATCACERT_E_SUCCESS)
+    else
     {
-        return ret;
-    }
-
-    for (i = 0; i < device_locs_count; i++)
-    {
-        static uint8_t data[416];
-        ret = atcacert_read_device_loc(&device_locs[i], data);
+#if ATCACERT_COMPCERT_EN
+        ret = atcacert_get_device_locs(
+            device,
+            cert_def,
+            device_locs,
+            &device_locs_count,
+            sizeof(device_locs) / sizeof(device_locs[0]),
+            ATCA_BLOCK_SIZE);
         if (ret != ATCACERT_E_SUCCESS)
         {
             return ret;
         }
 
-        ret = atcacert_cert_build_process(&build_state, &device_locs[i], data);
+        ret = atcacert_cert_build_start(device, &build_state, cert_def, cert, cert_size, ca_public_key);
         if (ret != ATCACERT_E_SUCCESS)
         {
             return ret;
         }
-    }
 
-    ret = atcacert_cert_build_finish(&build_state);
-    if (ret != ATCACERT_E_SUCCESS)
-    {
-        return ret;
+        for (i = 0; i < device_locs_count; i++)
+        {
+            static uint8_t data[416];
+            ret = atcacert_read_device_loc_ext(device, &device_locs[i], data);
+            if (ret != ATCACERT_E_SUCCESS)
+            {
+                return ret;
+            }
+
+            ret = atcacert_cert_build_process(&build_state, &device_locs[i], data);
+            if (ret != ATCACERT_E_SUCCESS)
+            {
+                return ret;
+            }
+        }
+
+        ret = atcacert_cert_build_finish(&build_state);
+        if (ret != ATCACERT_E_SUCCESS)
+        {
+            return ret;
+        }
+#endif
     }
 
     return ATCACERT_E_SUCCESS;
 }
 
-int atcacert_write_cert(const atcacert_def_t* cert_def,
-                        const uint8_t*        cert,
-                        size_t                cert_size)
+ATCA_STATUS atcacert_read_cert(const atcacert_def_t*    cert_def,
+                               const uint8_t            ca_public_key[64],
+                               uint8_t*                 cert,
+                               size_t*                  cert_size)
 {
-    int ret = 0;
+    return atcacert_read_cert_ext(atcab_get_device(), cert_def, ca_public_key, cert, cert_size);
+}
+
+#if ATCAB_WRITE_EN
+ATCA_STATUS atcacert_write_cert_ext(ATCADevice              device,
+                                    const atcacert_def_t*   cert_def,
+                                    const uint8_t*          cert,
+                                    size_t                  cert_size)
+{
+    ATCA_STATUS ret = 0;
+
+#if ATCACERT_COMPCERT_EN
     atcacert_device_loc_t device_locs[16];
     size_t device_locs_count = 0;
     size_t i = 0;
+#endif
 
     if (cert_def == NULL || cert == NULL)
     {
         return ATCACERT_E_BAD_PARAMS;
     }
 
-    ret = atcacert_get_device_locs(
-        cert_def,
-        device_locs,
-        &device_locs_count,
-        sizeof(device_locs) / sizeof(device_locs[0]),
-        ATCA_BLOCK_SIZE);
-    if (ret != ATCACERT_E_SUCCESS)
+    if (CERTTYPE_X509_FULL_STORED == cert_def->type)
     {
-        return ret;
+        ATCADeviceType dev_type = atcab_get_device_type_ext(device);
+        if (atcab_is_ta_device(dev_type))
+        {
+#if ATCA_TA_SUPPORT
+            cal_buffer cert_data_buf = cal_buf_init_const_ptr(cert_size, cert);
+            ret = talib_write_X509_cert(device, cert_def->comp_cert_dev_loc.slot, &cert_data_buf);
+#endif
+        }
+        else
+        {
+            ret = atcab_write_bytes_zone_ext(device, (uint8_t)cert_def->comp_cert_dev_loc.zone,
+                                             cert_def->comp_cert_dev_loc.slot, 0, cert, cert_size);
+        }
+
+        if (ret != ATCACERT_E_SUCCESS)
+        {
+            return ret;
+        }
     }
-
-    for (i = 0; i < device_locs_count; i++)
+    else
     {
-        int end_block;
-        int start_block;
-        static uint8_t data[416];
-        int block;
-
-        if (device_locs[i].zone == DEVZONE_CONFIG)
-        {
-            continue;  // Cert data isn't written to the config zone, only read
-        }
-        if (device_locs[i].zone == DEVZONE_DATA && device_locs[i].is_genkey)
-        {
-            continue;  // Public key is generated not written
-
-        }
-        ret = atcacert_get_device_data(cert_def, cert, cert_size, &device_locs[i], data);
+#if ATCACERT_COMPCERT_EN
+        ret = atcacert_get_device_locs(
+            device,
+            cert_def,
+            device_locs,
+            &device_locs_count,
+            sizeof(device_locs) / sizeof(device_locs[0]),
+            ATCA_BLOCK_SIZE);
         if (ret != ATCACERT_E_SUCCESS)
         {
             return ret;
         }
 
-        start_block = device_locs[i].offset / ATCA_BLOCK_SIZE;
-        end_block = floor_div((int)(device_locs[i].offset + device_locs[i].count) - 1, ATCA_BLOCK_SIZE);
-        for (block = start_block; block <= end_block; block++)
+        for (i = 0; i < device_locs_count; i++)
         {
-            ret = atcab_write_zone(
-                device_locs[i].zone,
-                device_locs[i].slot,
-                (uint8_t)block,
-                0,
-                &data[(block - start_block) * ATCA_BLOCK_SIZE],
-                ATCA_BLOCK_SIZE);
-            if (ret != ATCA_SUCCESS)
+            int end_block;
+            int start_block;
+            static uint8_t data[416];
+            int block;
+
+            if (device_locs[i].zone == DEVZONE_CONFIG)
+            {
+                continue;   // Cert data isn't written to the config zone, only read
+            }
+            if (device_locs[i].zone == DEVZONE_DATA && (0U != device_locs[i].is_genkey))
+            {
+                continue;   // Public key is generated not written
+
+            }
+            ret = atcacert_get_device_data(cert_def, cert, cert_size, &device_locs[i], data);
+            if (ret != ATCACERT_E_SUCCESS)
             {
                 return ret;
             }
-        }
-    }
 
+            start_block = (int)device_locs[i].offset / (int)ATCA_BLOCK_SIZE;
+            end_block = floor_div(((int)device_locs[i].offset + (int)device_locs[i].count) - 1, (int)ATCA_BLOCK_SIZE);
+            for (block = start_block; block <= end_block; block++)
+            {
+                ret = atcab_write_zone_ext(
+                    device,
+                    (uint8_t)device_locs[i].zone,
+                    device_locs[i].slot,
+                    (uint8_t)block,
+                    0,
+                    &data[(block - start_block) * (int)ATCA_BLOCK_SIZE],
+                    ATCA_BLOCK_SIZE);
+                if (ret != ATCA_SUCCESS)
+                {
+                    return ret;
+                }
+            }
+        }
+#endif
+    }
     return ATCACERT_E_SUCCESS;
 }
 
-int atcacert_create_csr_pem(const atcacert_def_t* csr_def, char* csr, size_t* csr_size)
+ATCA_STATUS atcacert_write_cert(const atcacert_def_t*   cert_def,
+                                const uint8_t*          cert,
+                                size_t                  cert_size)
+{
+    return atcacert_write_cert_ext(atcab_get_device(), cert_def, cert, cert_size);
+}
+#endif
+
+#if ATCACERT_COMPCERT_EN
+ATCA_STATUS atcacert_create_csr_pem(const atcacert_def_t* csr_def, char* csr, size_t* csr_size)
 {
     ATCA_STATUS status = ATCA_SUCCESS;
     size_t csr_max_size;
@@ -256,7 +395,7 @@ int atcacert_create_csr_pem(const atcacert_def_t* csr_def, char* csr, size_t* cs
 
     // Create DER CSR
     csr_der_size = csr_max_size;
-    status = (ATCA_STATUS)atcacert_create_csr(csr_def, (uint8_t*)csr, &csr_der_size);
+    status = atcacert_create_csr(csr_def, (uint8_t*)csr, &csr_der_size);
     if (status != ATCACERT_E_SUCCESS)
     {
         return status;
@@ -264,10 +403,11 @@ int atcacert_create_csr_pem(const atcacert_def_t* csr_def, char* csr, size_t* cs
 
     // Move the DER CSR to the end of the buffer, so we can encode it into
     // PEM in place.
-    memmove(csr + (csr_max_size - csr_der_size), csr, csr_der_size);
+    /* coverity[cert_int30_c_violation:FALSE] csr_der_size will never be greater than csr_max_size */
+    (void)memmove(csr + (csr_max_size - csr_der_size), csr, csr_der_size);
 
     *csr_size = csr_max_size;
-    status = (ATCA_STATUS)atcacert_encode_pem_csr((uint8_t*)(csr + (csr_max_size - csr_der_size)), csr_der_size, csr, csr_size);
+    status = atcacert_encode_pem_csr((uint8_t*)(csr + (csr_max_size - csr_der_size)), csr_der_size, csr, csr_size);
     if (status != ATCACERT_E_SUCCESS)
     {
         return status;
@@ -276,7 +416,7 @@ int atcacert_create_csr_pem(const atcacert_def_t* csr_def, char* csr, size_t* cs
     return ATCACERT_E_SUCCESS;
 }
 
-int atcacert_create_csr(const atcacert_def_t* csr_def, uint8_t* csr, size_t* csr_size)
+ATCA_STATUS atcacert_create_csr(const atcacert_def_t* csr_def, uint8_t* csr, size_t* csr_size)
 {
     ATCA_STATUS status = ATCA_SUCCESS;
     uint8_t pub_key[ATCA_PUB_KEY_SIZE] = { 0 };
@@ -291,19 +431,19 @@ int atcacert_create_csr(const atcacert_def_t* csr_def, uint8_t* csr, size_t* csr
     do
     {
         // Check the pointers
-        if (csr_def == NULL || csr == NULL || csr == NULL || csr_size == NULL)
+        if ((csr_def == NULL) || (csr == NULL) || (csr_size == NULL))
         {
             status = (ATCA_STATUS)ATCACERT_E_BAD_PARAMS;
-            ATCA_TRACE(status, "Null input parameter"); break;
+            (void)ATCA_TRACE(status, "Null input parameter"); break;
         }
         // Check the csr buffer size
         if (*csr_size < csr_def->cert_template_size)
         {
             status = (ATCA_STATUS)ATCACERT_E_BUFFER_TOO_SMALL;
-            ATCA_TRACE(status, "CSR buffer size too small"); break;
+            (void)ATCA_TRACE(status, "CSR buffer size too small"); break;
         }
         // Copy the CSR template into the CSR that will be returned
-        memcpy(csr, csr_def->cert_template, csr_def->cert_template_size);
+        (void)memcpy(csr, csr_def->cert_template, csr_def->cert_template_size);
         csr_max_size = *csr_size;
         *csr_size = csr_def->cert_template_size;
 
@@ -314,13 +454,13 @@ int atcacert_create_csr(const atcacert_def_t* csr_def, uint8_t* csr, size_t* csr
         priv_key_slot = csr_def->private_key_slot;
 
         // Get the public key from the device
-        if (pub_dev_loc->is_genkey)
+        if (0U != pub_dev_loc->is_genkey)
         {
             // Calculate the public key from the private key
             status = atcab_get_pubkey(key_slot, pub_key);
             if (status != ATCA_SUCCESS)
             {
-                ATCA_TRACE(status, "Could not generate public key"); break;
+                (void)ATCA_TRACE(status, "Could not generate public key"); break;
             }
         }
         else
@@ -329,50 +469,49 @@ int atcacert_create_csr(const atcacert_def_t* csr_def, uint8_t* csr, size_t* csr
             status = atcab_read_pubkey(key_slot, pub_key);
             if (status != ATCA_SUCCESS)
             {
-                ATCA_TRACE(status, "Could not read public key"); break;
+                (void)ATCA_TRACE(status, "Could not read public key"); break;
             }
         }
         // Insert the public key into the CSR template
-        status = (ATCA_STATUS)atcacert_set_cert_element(csr_def, pub_loc, csr, *csr_size, pub_key, ATCA_PUB_KEY_SIZE);
+        status = atcacert_set_cert_element(csr_def, pub_loc, csr, *csr_size, pub_key, ATCA_PUB_KEY_SIZE);
         if (status != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "Setting CSR public key failed"); break;
+            (void)ATCA_TRACE(status, "Setting CSR public key failed"); break;
         }
 
         // Get the CSR TBS digest
-        status = (ATCA_STATUS)atcacert_get_tbs_digest(csr_def, csr, *csr_size, tbs_digest);
+        status = atcacert_get_tbs_digest(csr_def, csr, *csr_size, tbs_digest);
         if (status != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "Get TBS digest failed"); break;
+            (void)ATCA_TRACE(status, "Get TBS digest failed"); break;
         }
 
         // Sign the TBS digest
         status = atcab_sign(priv_key_slot, tbs_digest, sig);
         if (status != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "Signing CSR failed"); break;
+            (void)ATCA_TRACE(status, "Signing CSR failed"); break;
         }
 
         // Insert the signature into the CSR template
-        status = (ATCA_STATUS)atcacert_set_signature(csr_def, csr, csr_size, csr_max_size, sig);
+        status = atcacert_set_signature(csr_def, csr, csr_size, csr_max_size, sig);
         if (status != ATCA_SUCCESS)
         {
-            ATCA_TRACE(status, "Setting CSR signature failed"); break;
+            (void)ATCA_TRACE(status, "Setting CSR signature failed"); break;
         }
 
         // The exact size of the csr cannot be determined until after adding the signature
         // it is returned in the csr_size parameter.  (*csr_size = *csr_size;)
 
-    }
-    while (false);
+    } while (false);
 
     return status;
 }
 
-int atcacert_read_subj_key_id(const atcacert_def_t* cert_def, uint8_t subj_key_id[20])
+ATCA_STATUS atcacert_read_subj_key_id_ext(ATCADevice device, const atcacert_def_t* cert_def, uint8_t subj_key_id[20])
 {
-    int ret = ATCACERT_E_DECODING_ERROR;
-    uint8_t subj_public_key[72];
+    ATCA_STATUS ret = ATCACERT_E_DECODING_ERROR;
+    uint8_t subj_public_key[72] = { 0 };
 
     if (cert_def == NULL || subj_key_id == NULL)
     {
@@ -381,21 +520,21 @@ int atcacert_read_subj_key_id(const atcacert_def_t* cert_def, uint8_t subj_key_i
 
     if (DEVZONE_DATA == cert_def->public_key_dev_loc.zone)
     {
-        if (cert_def->public_key_dev_loc.is_genkey)
+        if (0U != cert_def->public_key_dev_loc.is_genkey)
         {
             /* generate the key */
-            ret = atcab_get_pubkey(cert_def->public_key_dev_loc.slot, subj_public_key);
+            ret = atcab_get_pubkey_ext(device, cert_def->public_key_dev_loc.slot, subj_public_key);
         }
         else
         {
             /* Load the public key from a slot */
-            ret = atcab_read_bytes_zone(cert_def->public_key_dev_loc.zone,
-                                        cert_def->public_key_dev_loc.slot,
-                                        cert_def->public_key_dev_loc.offset,
-                                        subj_public_key, cert_def->public_key_dev_loc.count);
+            ret = atcab_read_bytes_zone_ext(device, (uint8_t)cert_def->public_key_dev_loc.zone,
+                                            cert_def->public_key_dev_loc.slot,
+                                            cert_def->public_key_dev_loc.offset,
+                                            subj_public_key, cert_def->public_key_dev_loc.count);
 
             /* IF the public key is stored in device public key format */
-            if ((ATCA_SUCCESS == ret) && (72 == cert_def->public_key_dev_loc.count))
+            if ((ATCA_SUCCESS == ret) && (72U == cert_def->public_key_dev_loc.count))
             {
                 atcacert_public_key_remove_padding(subj_public_key, subj_public_key);
             }
@@ -410,32 +549,71 @@ int atcacert_read_subj_key_id(const atcacert_def_t* cert_def, uint8_t subj_key_i
     return ret;
 }
 
-int atcacert_read_cert_size(const atcacert_def_t* cert_def,
-                            size_t*               cert_size)
+ATCA_STATUS atcacert_read_subj_key_id(const atcacert_def_t* cert_def, uint8_t subj_key_id[20])
 {
+    return atcacert_read_subj_key_id_ext(atcab_get_device(), cert_def, subj_key_id);
+}
+#endif
+
+ATCA_STATUS atcacert_read_cert_size_ext(ATCADevice              device,
+                                        const atcacert_def_t*   cert_def,
+                                        size_t*                 cert_size)
+{
+    ATCA_STATUS ret = ATCACERT_E_SUCCESS;
+
+#if ATCACERT_COMPCERT_EN
     uint8_t buffer[75];
     size_t buflen = sizeof(buffer);
-    int ret = ATCACERT_E_SUCCESS;
+#endif
 
-    if (!cert_def || !cert_size)
+    if ((NULL == cert_def) || (NULL == cert_size))
     {
         return ATCACERT_E_BAD_PARAMS;
     }
 
-    if (ATCACERT_E_SUCCESS == ret)
-    {
-        ret = atcab_read_sig(cert_def->comp_cert_dev_loc.slot, &buffer[8]);
+    if (CERTTYPE_X509_FULL_STORED == cert_def->type)
+    {   
+        ATCADeviceType dev_type = atcab_get_device_type_ext(device);
+        if (atcab_is_ta_device(dev_type))
+        {
+            if (CERTTYPE_X509_FULL_STORED == cert_def->type)
+            {
+#if ATCA_TA_SUPPORT
+                ret = talib_get_x509_cert_size(device, cert_def->comp_cert_dev_loc.slot, NULL, cert_size);
+#endif
+            }
+        }
+        else
+        {
+            ret = atcab_get_zone_size_ext(device, (uint8_t)cert_def->comp_cert_dev_loc.zone,
+                                      cert_def->comp_cert_dev_loc.slot, cert_size);
+        }
     }
-
-    if (ATCACERT_E_SUCCESS == ret)
+    else
     {
-        ret = atcacert_der_enc_ecdsa_sig_value(&buffer[8], buffer, &buflen);
-    }
+#if ATCACERT_COMPCERT_EN
+        ret = atcab_read_bytes_zone_ext(device, (uint8_t)DEVZONE_TO_BYTEVAL(cert_def->comp_cert_dev_loc.zone),
+                                        cert_def->comp_cert_dev_loc.slot,
+                                        cert_def->comp_cert_dev_loc.offset,
+                                        &buffer[8], ATCA_ECCP256_SIG_SIZE);
 
-    if (ATCACERT_E_SUCCESS == ret)
-    {
-        *cert_size = cert_def->std_cert_elements[STDCERT_SIGNATURE].offset + buflen;
+        if (ATCACERT_E_SUCCESS == ret)
+        {
+            ret = atcacert_der_enc_ecdsa_sig_value(&buffer[8], buffer, &buflen);
+        }
+
+        if (ATCACERT_E_SUCCESS == ret)
+        {
+            *cert_size = cert_def->std_cert_elements[STDCERT_SIGNATURE].offset + buflen;
+        }
+#endif
     }
 
     return ret;
+}
+
+ATCA_STATUS atcacert_read_cert_size(const atcacert_def_t*   cert_def,
+                                    size_t*                 cert_size)
+{
+    return atcacert_read_cert_size_ext(atcab_get_device(), cert_def, cert_size);
 }
